@@ -1,4 +1,4 @@
-"""scraping_mundo.py
+"""scraping_boe.py
 
 Aplicación Flask que:
 - Raspa oposiciones del BOE usando requests + BeautifulSoup
@@ -15,7 +15,6 @@ from flask import Flask, request, g, redirect, url_for, render_template
 from bs4 import BeautifulSoup
 
 DB_PATH = 'oposiciones.db'
-MAX_ITEMS = 50
 app = Flask(__name__)  # Cambiar nombre
 
 # --------------------
@@ -49,7 +48,10 @@ def init_db():
                identificador TEXT NOT NULL,
                control TEXT,
                titulo TEXT,
-               url_html TEXT UNIQUE
+               url_html TEXT UNIQUE,
+               url_pdf TEXT,
+               departamento TEXT,
+               fecha TEXT
         )
     ''')
     db.commit()
@@ -59,8 +61,8 @@ def init_db():
 # Scraper BOE
 # --------------------
 
-def scrape_boe(max_items=MAX_ITEMS):
-    """"Raspa oposiciones del BOE y las guarda en SQLite"""
+def scrape_boe():
+    """"Raspa TODAS las oposiciones del BOE y las guarda en SQLite"""
     init_db()
     db = get_db()
     collected = 0
@@ -69,13 +71,14 @@ def scrape_boe(max_items=MAX_ITEMS):
     hoy = datetime.today().strftime("%Y%m%d")
     boe_url = f'https://www.boe.es/datosabiertos/api/boe/sumario/{hoy}'
 
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
+        'AppleWebKit/537.36 (KHTML, like Gecko) '
+        'Chrome/118.0.5993.118 Safari/537.3',
+        'Accept': 'application/xml, text/xml, */*; q=0.01',
+    }
+
     try:
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
-                          'AppleWebKit/537.36 (KHTML, like Gecko) '
-                          'Chrome/118.0.5993.118 Safari/537.3',
-            'Accept': 'application/xml, text/xml, */*; q=0.01',
-        }
         r = requests.get(boe_url, headers=headers, timeout=10)
         r.raise_for_status()
     except requests.RequestException as e:
@@ -85,27 +88,36 @@ def scrape_boe(max_items=MAX_ITEMS):
     soup = BeautifulSoup(r.content, 'xml')
 
     # Buscar las entradas de tipo <item>
-    items = list(soup.find_all(['item']))[:max_items]
+    seccion = soup.find("seccion", {"codigo": "2B"})
+    if not seccion:
+        print("No se encontró la sección 2B en el XML.")
+        return 0
+
+    items = seccion.find_all("item")
 
     for item in items:
-        identificador = item.find("identificador")
-        control = item.find("control")
-        titulo = item.find("titulo")
-        url_html = item.find("url_html")
+        identificador_tag = item.find("identificador")
+        control_tag = item.find("control")
+        titulo_tag = item.find("titulo")
+        url_html_tag = item.find("url_html")
+        url_pdf_tag = item.find("url_pdf")
 
-        identificador = identificador.text.strip() if identificador else None
-        control = control.text.strip() if control else None
-        titulo = titulo.text.strip() if titulo else None
-        url_html = url_html.text.strip() if url_html else None
+        identificador = identificador_tag.text.strip() if identificador_tag else None
+        control = control_tag.text.strip() if control_tag else None
+        titulo = titulo_tag.text.strip() if titulo_tag else None
+        url_html = url_html_tag.text.strip() if url_html_tag else None
+        url_pdf = url_pdf_tag.text.strip() if url_pdf_tag else None
 
-        if not identificador or not url_html:
-            continue
+        # Buscar el departamento padre
+        dept_parent = item.find_parent("departamento")
+        departamento = dept_parent.get(
+            'nombre') if dept_parent and dept_parent.has_attr('nombre') else None
 
         try:
             db.execute('''
-                INSERT INTO oposiciones (identificador, control, titulo, url_html)
-                VALUES (?, ?, ?, ?)
-            ''', (identificador, control, titulo, url_html))
+                INSERT INTO oposiciones (identificador, control, titulo, url_html, url_pdf, departamento, fecha)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            ''', (identificador, control, titulo, url_html, url_pdf, departamento, hoy))
             db.commit()
             collected += 1
         except sqlite3.IntegrityError:
@@ -121,31 +133,46 @@ def scrape_boe(max_items=MAX_ITEMS):
 def index():
     """Muestra la tabla de oposiciones, con búsqueda y filtro."""
     init_db()
-    q = request.args.get('q', '').strip()
-
     db = get_db()
+
+    q = request.args.get('q', '').strip()
+    departamento = request.args.get('departamento', '').strip()
+
     params = []
+    where = []
     sql = 'SELECT * FROM oposiciones'
 
     if q:
-        sql += ' WHERE (identificador LIKE ? OR control LIKE ? OR titulo LIKE ? OR url_html LIKE ?)'
         likeq = f'%{q}%'
-        params.extend([likeq, likeq, likeq, likeq])
+        where.append(
+            "(identificador LIKE ? OR control LIKE ? OR titulo LIKE ?)")
+        params.extend([likeq, likeq, likeq])
 
-    sql += ' ORDER BY id DESC LIMIT ?'
-    params.append(MAX_ITEMS)
+    if departamento:
+        where.append("departamento = ?")
+        params.append(departamento)
+
+    if where:
+        sql += ' WHERE ' + ' AND '.join(where)
+
+    sql += ' ORDER BY id DESC'
 
     cur = db.execute(sql, params)
     rows = cur.fetchall()
 
-    return render_template('index.html', rows=rows, q=q)
+    # Obtener lista de departamentos para el filtro
+    deps = db.execute(
+        'SELECT DISTINCT departamento FROM oposiciones WHERE departamento IS NOT NULL ORDER BY departamento'
+    ).fetchall()
+
+    return render_template('index.html', rows=rows, q=q, departamento=departamento, departamentos=deps)
 
 
 @app.route('/scrape')
 def do_scrape():
     """Ejecuta el scraper y redirige a la página principal."""
     init_db()
-    scrape_boe(MAX_ITEMS)
+    scrape_boe()
     return redirect(url_for('index'))
 
 
