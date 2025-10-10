@@ -8,7 +8,7 @@ Aplicación Flask que:
 """
 
 import sqlite3
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import requests
 from flask import Flask, request, g, redirect, url_for, render_template
@@ -68,8 +68,7 @@ def scrape_boe():
     collected = 0
 
     # Construir URL con la fecha actual
-    hoy = datetime.today().strftime("%Y%m%d")
-    boe_url = f'https://www.boe.es/datosabiertos/api/boe/sumario/{hoy}'
+    fecha = datetime.today()
 
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
@@ -78,11 +77,22 @@ def scrape_boe():
         'Accept': 'application/xml, text/xml, */*; q=0.01',
     }
 
-    try:
-        r = requests.get(boe_url, headers=headers, timeout=10)
-        r.raise_for_status()
-    except requests.RequestException as e:
-        print(f"Error al obtener el XML BOE: {e}")
+    # Buscar hasta encontrar resultado en BOE si error 4xx hasta 7 días atrás.
+    for _ in range(7):
+        hoy = fecha.strftime('%Y%m%d')
+        boe_url = f'https://www.boe.es/datosabiertos/api/boe/sumario/{hoy}'
+        try:
+            r = requests.get(boe_url, headers=headers, timeout=10)
+            if r.status_code == 200:
+                print(f"✅ BOE encontrado {boe_url}")
+                break
+            print(f"❌ No disponible para {hoy}. Probando día anterior.")
+        except requests.RequestException as e:
+            print(f"❌ Error al obtener {boe_url}: {e}")
+
+        fecha -= timedelta(days=1)  # Retroceder un día si falla.
+    else:
+        print("❌ No se encontró ningún BOE reciente.")
         return 0
 
     soup = BeautifulSoup(r.content, 'xml')
