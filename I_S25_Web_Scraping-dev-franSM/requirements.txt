@@ -1,0 +1,5 @@
+# Librerías necesarias para scraping BOE con Flask
+requests>=2.32.0
+Flask>=2.3.3
+beautifulsoup4>=4.12.2
+

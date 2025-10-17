@@ -1,0 +1,64 @@
+<!--
+    Plantilla de departamento - Vista detallada
+    
+    Muestra todas las oposiciones de un departamento específico
+    en formato de tabla con enlaces a los PDFs oficiales.
+    Incluye botón de retorno a la página principal.
+-->
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Oposiciones - {{ departamento }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body class="bg-light">
+    <!-- Barra de navegación (consistente con index.html) -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
+        <div class="container">
+            <a class="navbar-brand" href="/">📜 Oposiciones BOE</a>
+        </div>
+    </nav>
+
+    <div class="container py-4">
+        <a href="{{ url_for('index') }}" class="btn btn-secondary mb-3">&larr; Volver</a>
+        <h2 class="mb-4 text-center">Oposiciones - {{ departamento }}</h2>
+
+        <div class="table-responsive shadow-sm">
+            <table class="table table-striped table-bordered align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Identificador</th>
+                        <th>Título</th>
+                        <th>Control</th>
+                        <th>PDF</th>
+                        <th>Fecha</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in rows %}
+                    <tr>
+                        <td>{{ row['identificador'] }}</td>
+                        <td>{{ row['titulo'] }}</td>
+                        <td>{{ row['control'] }}</td>
+                        <td><a href="{{ row['url_pdf'] }}" target="_blank" class="btn btn-sm btn-primary">Ver PDF</a>
+                        </td>
+                        <td>{{ row['fecha']|format_date }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" class="text-center">No hay oposiciones registradas para este departamento.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</body>
+
+</html>
