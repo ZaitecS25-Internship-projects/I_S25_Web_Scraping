@@ -1,3 +1,10 @@
+<!--
+    Plantilla principal - Lista de departamentos
+    
+    Muestra todos los departamentos disponibles en formato de tarjetas.
+    Cada tarjeta enlaza a la vista detallada del departamento.
+    Incluye botón para actualizar datos del BOE.
+-->
 <!DOCTYPE html>
 <html lang="es">
 
@@ -6,116 +13,46 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Oposiciones y Concursos - BOE</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body {
-            background: linear-gradient(to right, #f8f9fa, #e9ecef);
-        }
-
-        .navbar-brand {
-            font-weight: bold;
-            font-size: 1.4rem;
-        }
-
-        .table-hover tbody tr:hover {
-            background-color: #f1f5f9;
-            transition: background-color 0.2s ease-in-out;
-        }
-
-        .card {
-            border-radius: 1rem;
-        }
-
-        .btn-outline-primary:hover,
-        .btn-outline-secondary:hover {
-            transform: scale(1.05);
-            transition: transform 0.15s ease-in-out;
-        }
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 
-<body>
-    <!-- Navbar -->
+<body class="bg-light">
+    <!-- Barra de navegación principal -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
         <div class="container">
             <a class="navbar-brand" href="/">📜 Oposiciones BOE</a>
         </div>
     </nav>
+    <!-- Título principal de la aplicación -->
+    <h1 id="titulo" class="text-center mb-4">Oposiciones BOE</h1>
 
+    <!-- Contenedor principal con tarjetas de departamentos -->
     <div class="container py-5">
-        <div class="card shadow-lg p-4">
-            <h2 class="mb-4 text-center">Últimas oposiciones publicadas</h2>
-
-            <!-- Formulario de filtros -->
-            <form class="row g-3 mb-4" method="get" action="/">
-                <div class="col-md-5">
-                    <input type="text" name="q" value="{{ q|e }}" class="form-control"
-                        placeholder="🔍 Buscar por texto...">
-                </div>
-                <div class="col-md-4">
-                    <select name="departamento" class="form-select">
-                        <option value="">Todos los departamentos</option>
-                        {% for dep in departamentos %}
-                        <option value="{{ dep['departamento'] }}" {% if departamento==dep['departamento'] %}selected{%
-                            endif %}>
-                            {{ dep['departamento'] }}
-                        </option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="col-md-3 d-flex gap-2">
-                    <button class="btn btn-primary flex-fill" type="submit">Filtrar</button>
-                    <a href="{{ url_for('do_scrape') }}" class="btn btn-success flex-fill">Actualizar datos</a>
-                </div>
-            </form>
-
-            <!-- Tabla de resultados -->
-            <div class="table-responsive">
-                <table class="table table-striped table-hover align-middle">
-                    <thead class="table-dark">
-                        <tr>
-                            <th scope="col" style="width:10%">Identificador</th>
-                            <th scope="col" style="width:35%">Título</th>
-                            <th scope="col" style="width:25%">Departamento</th>
-                            <th scope="col" style="width:10%">Fecha</th>
-                            <th scope="col" style="width:20%">Enlaces</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% if rows and rows|length > 0 %}
-                        {% for row in rows %}
-                        <tr>
-                            <td>{{ row['identificador'] or '-' }}</td>
-                            <td>{{ row['titulo'] or '-' }}</td>
-                            <td>{{ row['departamento'] or '-' }}</td>
-                            <td>{{ row['fecha'] or '-' }}</td>
-                            <td>
-                                {% if row['url_html'] %}
-                                <a href="{{ row['url_html'] }}" target="_blank" class="btn btn-sm btn-outline-primary">
-                                    Ver en BOE
-                                </a>
-                                {% endif %}
-                                {% if row['url_pdf'] %}
-                                <a href="{{ row['url_pdf'] }}" target="_blank" class="btn btn-sm btn-outline-secondary">
-                                    Ver PDF
-                                </a>
-                                {% endif %}
-                            </td>
-                        </tr>
-                        {% endfor %}
-                        {% else %}
-                        <tr>
-                            <td colspan="5" class="text-center text-muted py-3">
-                                ⚠️ No se encontraron oposiciones para los filtros seleccionados.
-                            </td>
-                        </tr>
-                        {% endif %}
-                    </tbody>
-                </table>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="mb-0">Departamentos</h2>
+            <a href="{{ url_for('do_scrape') }}" class="btn btn-primary">
+                 Actualizar datos BOE
+            </a>
+        </div>
+        <div class="row g-4">
+            {% for dep in departamentos %}
+            <div class="col-md-4 col-lg-3">
+                <a href="{{ url_for('mostrar_departamento', nombre=dep['departamento']) }}"
+                    class="text-decoration-none">
+                    <div class="card h-100 shadow-sm">
+                        <img src="{{ url_for('static', filename='img/' + dep['departamento']|replace(' ', '_') + '.jpg') }}"
+                            class="card-img-top" alt="{{ dep['departamento'] }}"
+                            onerror="this.src='{{ url_for('static', filename='img/default.svg') }}'">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ dep['departamento'] }}</h5>
+                        </div>
+                    </div>
+                </a>
             </div>
+            {% endfor %}
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>
