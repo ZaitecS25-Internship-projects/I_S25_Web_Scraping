@@ -26,7 +26,7 @@ DB_PATH = 'oposiciones.db'
 app = Flask(__name__)
 
 # --------------------
-# Jinja2 filters
+# filtros Jinja2 
 # --------------------
 
 @app.template_filter('format_date')
@@ -51,7 +51,7 @@ def format_date_filter(date_str):
         return date_str
 
 # --------------------
-# Database helpers
+# Ayudas con la bases de datos
 # --------------------
 
 
@@ -143,7 +143,7 @@ def scrape_boe():
         'Accept': 'application/xml, text/xml, */*; q=0.01',
     }
 
-    # Buscar hasta encontrar resultado en BOE si error 4xx hasta 7 días atrás.
+    # Buscar hasta encontrar resultado en BOE si da error hasta 7 días atrás.
     for _ in range(7):
         hoy = fecha.strftime('%Y%m%d')
         boe_url = f'https://www.boe.es/datosabiertos/api/boe/sumario/{hoy}'
@@ -225,24 +225,61 @@ def index():
 
 @app.route('/departamento/<nombre>')
 def mostrar_departamento(nombre):
-    """Vista detallada de oposiciones por departamento.
+    """Vista detallada de oposiciones por departamento con filtros.
     
     Args:
         nombre (str): Nombre del departamento a consultar
         
+    Query Parameters:
+        busqueda (str): Texto para buscar en identificador, título o control
+        fecha_desde (str): Fecha desde en formato YYYY-MM-DD
+        fecha_hasta (str): Fecha hasta en formato YYYY-MM-DD
+        
     Returns:
-        str: HTML renderizado con tabla de oposiciones del departamento
+        str: HTML renderizado con tabla de oposiciones del departamento filtradas
     """
     init_db()
     db = get_db()
-
-    cur = db.execute(
-        'SELECT * FROM oposiciones WHERE departamento = ? ORDER BY id DESC',
-        (nombre,)
-    )
+    
+    # Obtener parámetros de filtro de la URL
+    texto_busqueda = request.args.get('busqueda', '').strip()
+    fecha_desde = request.args.get('fecha_desde', '').strip()
+    fecha_hasta = request.args.get('fecha_hasta', '').strip()
+    
+    # Construir consulta SQL dinámica
+    query = 'SELECT * FROM oposiciones WHERE departamento = ?'
+    params = [nombre]
+    
+    # Filtro por texto (busca en identificador, título y control)
+    if texto_busqueda:
+        query += ' AND (identificador LIKE ? OR titulo LIKE ? OR control LIKE ?)'
+        busqueda_param = f'%{texto_busqueda}%'
+        params.extend([busqueda_param, busqueda_param, busqueda_param])
+    
+    # Filtro por fecha desde (convertir YYYY-MM-DD a YYYYMMDD)
+    if fecha_desde:
+        fecha_desde_formateada = fecha_desde.replace('-', '')
+        query += ' AND fecha >= ?'
+        params.append(fecha_desde_formateada)
+    
+    # Filtro por fecha hasta (convertir YYYY-MM-DD a YYYYMMDD)
+    if fecha_hasta:
+        fecha_hasta_formateada = fecha_hasta.replace('-', '')
+        query += ' AND fecha <= ?'
+        params.append(fecha_hasta_formateada)
+    
+    query += ' ORDER BY id DESC'
+    
+    # Ejecutar consulta con filtros
+    cur = db.execute(query, params)
     rows = cur.fetchall()
 
-    return render_template('tarjeta.html', departamento=nombre, rows=rows)
+    return render_template('tarjeta.html', 
+                         departamento=nombre, 
+                         rows=rows,
+                         busqueda=texto_busqueda,
+                         fecha_desde=fecha_desde,
+                         fecha_hasta=fecha_hasta)
 
 
 @app.route('/scrape')
