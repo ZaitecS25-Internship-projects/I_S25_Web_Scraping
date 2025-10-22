@@ -23,6 +23,15 @@
             <a class="navbar-brand" href="/">📜 Oposiciones BOE</a>
         </div>
     </nav>
+
+    <form method="get">
+        <label>Desde:</label>
+        <input type="date" name="desde" value="{{ request.args.get('desde', '') }}">
+        <label>Hasta:</label>
+        <input type="date" name="hasta" value="{{ request.args.get('hasta', '') }}">
+        <button type="submit" class="btn btn-primary btn-sm">Filtrar</button>
+    </form>
+
     <!-- Título principal de la aplicación -->
     <h1 id="titulo" class="text-center mb-4">Oposiciones BOE</h1>
 
