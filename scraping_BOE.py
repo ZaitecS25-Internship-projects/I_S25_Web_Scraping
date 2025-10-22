@@ -19,11 +19,12 @@ import sqlite3
 from datetime import datetime, timedelta
 
 import requests
-from flask import Flask, request, g, redirect, url_for, render_template
+from flask import Flask, request, g, redirect, url_for, render_template, flash
 from bs4 import BeautifulSoup
 
 DB_PATH = 'oposiciones.db'
 app = Flask(__name__)
+app.secret_key = 'clave-secreta-para-flask-sessions-cambiar-en-produccion'
 
 # --------------------
 # filtros Jinja2 
@@ -177,86 +178,111 @@ def scrape_boe():
     5. Guarda en base de datos evitando duplicados
     
     Returns:
-        int: Número de registros nuevos insertados
+        tuple: (éxito: bool, mensaje: str, registros_nuevos: int)
         
     Raises:
-        requests.RequestException: Error de conexión a la API
-        sqlite3.Error: Error de base de datos
+        Exception: Captura y retorna cualquier error que ocurra
     """
-    init_db()
-    db = get_db()
-    collected = 0
+    try:
+        init_db()
+        db = get_db()
+        collected = 0
 
-    # Construir URL con la fecha actual
-    fecha = datetime.today()
+        # Construir URL con la fecha actual
+        fecha = datetime.today()
 
-    headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
-        'AppleWebKit/537.36 (KHTML, like Gecko) '
-        'Chrome/118.0.5993.118 Safari/537.36',
-        'Accept': 'application/xml, text/xml, */*; q=0.01',
-    }
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
+            'AppleWebKit/537.36 (KHTML, like Gecko) '
+            'Chrome/118.0.5993.118 Safari/537.36',
+            'Accept': 'application/xml, text/xml, */*; q=0.01',
+        }
 
-    # Buscar hasta encontrar resultado en BOE si da error hasta 7 días atrás.
-    for _ in range(7):
-        hoy = fecha.strftime('%Y%m%d')
-        boe_url = f'https://www.boe.es/datosabiertos/api/boe/sumario/{hoy}'
+        # Buscar hasta encontrar resultado en BOE si da error hasta 7 días atrás.
+        r = None
+        for _ in range(7):
+            hoy = fecha.strftime('%Y%m%d')
+            boe_url = f'https://www.boe.es/datosabiertos/api/boe/sumario/{hoy}'
+            try:
+                r = requests.get(boe_url, headers=headers, timeout=10)
+                if r.status_code == 200:
+                    print(f" BOE encontrado {boe_url}")
+                    break
+                print(f" No disponible para {hoy}. Probando día anterior.")
+            except requests.RequestException as e:
+                print(f" Error al obtener {boe_url}: {e}")
+
+            fecha -= timedelta(days=1)  # Retroceder un día si falla.
+        else:
+            mensaje = "No se encontró ningún BOE reciente en los últimos 7 días."
+            print(f" {mensaje}")
+            return (False, mensaje, 0)
+
+        if not r or r.status_code != 200:
+            return (False, "No se pudo conectar con el BOE.", 0)
+
+        # Parsear XML con lxml
         try:
-            r = requests.get(boe_url, headers=headers, timeout=10)
-            if r.status_code == 200:
-                print(f" BOE encontrado {boe_url}")
-                break
-            print(f" No disponible para {hoy}. Probando día anterior.")
-        except requests.RequestException as e:
-            print(f" Error al obtener {boe_url}: {e}")
+            soup = BeautifulSoup(r.content, 'lxml-xml')
+        except Exception as e:
+            # Intentar con html.parser como fallback
+            try:
+                soup = BeautifulSoup(r.content, 'html.parser')
+                print("Advertencia: usando html.parser en lugar de lxml")
+            except Exception as e2:
+                return (False, f"Error al parsear XML: {str(e)}. SOLUCIÓN: 1) Cierra Flask (Ctrl+C), 2) Ejecuta 'pip install lxml', 3) Reinicia Flask con 'python scraping_BOE.py'", 0)
 
-        fecha -= timedelta(days=1)  # Retroceder un día si falla.
-    else:
-        print(" No se encontró ningún BOE reciente.")
-        return 0
+        # Buscar las entradas de tipo <item>
+        seccion = soup.find("seccion", {"codigo": "2B"})
+        if not seccion:
+            mensaje = "No se encontró la sección 2B (Oposiciones y Concursos) en el BOE."
+            print(mensaje)
+            return (True, mensaje, 0)
 
-    soup = BeautifulSoup(r.content, 'xml')
+        items = seccion.find_all("item")
 
-    # Buscar las entradas de tipo <item>
-    seccion = soup.find("seccion", {"codigo": "2B"})
-    if not seccion:
-        print("No se encontró la sección 2B en el XML.")
-        return 0
+        for item in items:
+            identificador_tag = item.find("identificador")
+            control_tag = item.find("control")
+            titulo_tag = item.find("titulo")
+            url_html_tag = item.find("url_html")
+            url_pdf_tag = item.find("url_pdf")
 
-    items = seccion.find_all("item")
+            identificador = identificador_tag.text.strip() if identificador_tag else None
+            control = control_tag.text.strip() if control_tag else None
+            titulo = titulo_tag.text.strip() if titulo_tag else None
+            url_html = url_html_tag.text.strip() if url_html_tag else None
+            url_pdf = url_pdf_tag.text.strip() if url_pdf_tag else None
 
-    for item in items:
-        identificador_tag = item.find("identificador")
-        control_tag = item.find("control")
-        titulo_tag = item.find("titulo")
-        url_html_tag = item.find("url_html")
-        url_pdf_tag = item.find("url_pdf")
+            # Buscar el departamento padre
+            dept_parent = item.find_parent("departamento")
+            departamento = dept_parent.get(
+                'nombre') if dept_parent and dept_parent.has_attr('nombre') else None
+            
+            # Extraer provincia del título o control
+            provincia = extraer_provincia(titulo) or extraer_provincia(control)
 
-        identificador = identificador_tag.text.strip() if identificador_tag else None
-        control = control_tag.text.strip() if control_tag else None
-        titulo = titulo_tag.text.strip() if titulo_tag else None
-        url_html = url_html_tag.text.strip() if url_html_tag else None
-        url_pdf = url_pdf_tag.text.strip() if url_pdf_tag else None
+            try:
+                db.execute('''
+                    INSERT INTO oposiciones (identificador, control, titulo, url_html, url_pdf, departamento, fecha, provincia)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                ''', (identificador, control, titulo, url_html, url_pdf, departamento, hoy, provincia))
+                db.commit()
+                collected += 1
+            except sqlite3.IntegrityError:
+                continue  # URL ya existe
 
-        # Buscar el departamento padre
-        dept_parent = item.find_parent("departamento")
-        departamento = dept_parent.get(
-            'nombre') if dept_parent and dept_parent.has_attr('nombre') else None
-        
-        # Extraer provincia del título o control
-        provincia = extraer_provincia(titulo) or extraer_provincia(control)
-
-        try:
-            db.execute('''
-                INSERT INTO oposiciones (identificador, control, titulo, url_html, url_pdf, departamento, fecha, provincia)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            ''', (identificador, control, titulo, url_html, url_pdf, departamento, hoy, provincia))
-            db.commit()
-            collected += 1
-        except sqlite3.IntegrityError:
-            continue  # URL ya existe
-
-    return collected
+        if collected > 0:
+            return (True, f"Se han añadido {collected} nuevas oposiciones.", collected)
+        else:
+            return (True, "No se encontraron nuevas oposiciones (todas ya estaban en la base de datos).", 0)
+            
+    except Exception as e:
+        mensaje_error = f"Error inesperado: {str(e)}"
+        print(f" {mensaje_error}")
+        import traceback
+        traceback.print_exc()
+        return (False, mensaje_error, 0)
 # --------------------
 # Flask routes
 # --------------------
@@ -350,7 +376,13 @@ def do_scrape():
         werkzeug.wrappers.Response: Redirección a la página principal
     """
     init_db()
-    scrape_boe()
+    exito, mensaje, registros = scrape_boe()
+    
+    if exito:
+        flash(mensaje, 'success')
+    else:
+        flash(mensaje, 'danger')
+    
     return redirect(url_for('index'))
 
 

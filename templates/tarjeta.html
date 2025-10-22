@@ -78,7 +78,6 @@
                         <th>Identificador</th>
                         <th>Título</th>
                         <th>Control</th>
-                        <th>Provincia</th>
                         <th>PDF</th>
                         <th>Fecha</th>
                     </tr>
@@ -89,20 +88,13 @@
                         <td>{{ row['identificador'] }}</td>
                         <td>{{ row['titulo'] }}</td>
                         <td>{{ row['control'] }}</td>
-                        <td>
-                            {% if row['provincia'] %}
-                                <span class="badge bg-info">{{ row['provincia'] }}</span>
-                            {% else %}
-                                <span class="text-muted">-</span>
-                            {% endif %}
-                        </td>
                         <td><a href="{{ row['url_pdf'] }}" target="_blank" class="btn btn-sm btn-primary">Ver PDF</a>
                         </td>
                         <td>{{ row['fecha']|format_date }}</td>
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="6" class="text-center">No hay oposiciones registradas para este departamento.</td>
+                        <td colspan="5" class="text-center">No hay oposiciones registradas para este departamento.</td>
                     </tr>
                     {% endfor %}
                 </tbody>
