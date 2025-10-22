@@ -36,12 +36,24 @@
                 <form method="GET" action="{{ url_for('mostrar_departamento', nombre=departamento) }}">
                     <!-- Filtro por texto -->
                     <div class="row g-3 mb-3">
-                        <div class="col-md-12">
+                        <div class="col-md-8">
                             <label for="busqueda" class="form-label">Buscar por palabras clave:</label>
                             <input type="text" class="form-control" id="busqueda" name="busqueda" 
                                    value="{{ busqueda or '' }}"
-                                   placeholder="Buscar en identificador, título, control o provincia...">
-                            <small class="text-muted">Busca en: Identificador, Título, Control y Provincia</small>
+                                   placeholder="Buscar en identificador, título, control...">
+                            <small class="text-muted">Busca en: Identificador, Título y Control</small>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="provincia" class="form-label">Filtrar por provincia:</label>
+                            <select class="form-select" id="provincia" name="provincia">
+                                <option value="">Todas las provincias</option>
+                                {% for prov in provincias %}
+                                <option value="{{ prov['provincia'] }}" 
+                                        {% if provincia_filtro == prov['provincia'] %}selected{% endif %}>
+                                    {{ prov['provincia'] }}
+                                </option>
+                                {% endfor %}
+                            </select>
                         </div>
                     </div>
 

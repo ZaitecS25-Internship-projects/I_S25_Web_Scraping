@@ -315,6 +315,7 @@ def mostrar_departamento(nombre):
         
     Query Parameters:
         busqueda (str): Texto para buscar en identificador, título, control o provincia
+        provincia (str): Filtrar por provincia específica
         fecha_desde (str): Fecha desde en formato YYYY-MM-DD
         fecha_hasta (str): Fecha hasta en formato YYYY-MM-DD
         
@@ -326,8 +327,15 @@ def mostrar_departamento(nombre):
     
     # Obtener parámetros de filtro de la URL
     texto_busqueda = request.args.get('busqueda', '').strip()
+    provincia_filtro = request.args.get('provincia', '').strip()
     fecha_desde = request.args.get('fecha_desde', '').strip()
     fecha_hasta = request.args.get('fecha_hasta', '').strip()
+    
+    # Obtener lista de provincias disponibles para este departamento
+    provincias_disponibles = db.execute(
+        'SELECT DISTINCT provincia FROM oposiciones WHERE departamento = ? AND provincia IS NOT NULL ORDER BY provincia',
+        [nombre]
+    ).fetchall()
     
     # Construir consulta SQL dinámica
     query = 'SELECT * FROM oposiciones WHERE departamento = ?'
@@ -338,6 +346,11 @@ def mostrar_departamento(nombre):
         query += ' AND (identificador LIKE ? OR titulo LIKE ? OR control LIKE ? OR provincia LIKE ?)'
         busqueda_param = f'%{texto_busqueda}%'
         params.extend([busqueda_param, busqueda_param, busqueda_param, busqueda_param])
+    
+    # Filtro por provincia específica
+    if provincia_filtro:
+        query += ' AND provincia = ?'
+        params.append(provincia_filtro)
     
     # Filtro por fecha desde (convertir YYYY-MM-DD a YYYYMMDD)
     if fecha_desde:
@@ -361,6 +374,8 @@ def mostrar_departamento(nombre):
                          departamento=nombre, 
                          rows=rows,
                          busqueda=texto_busqueda,
+                         provincia_filtro=provincia_filtro,
+                         provincias=provincias_disponibles,
                          fecha_desde=fecha_desde,
                          fecha_hasta=fecha_hasta)
 
