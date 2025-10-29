@@ -13,14 +13,9 @@ import sqlite3
 from datetime import datetime, timedelta
 
 import requests
-<<<<<<< HEAD
 from flask import (
     Flask, request, g, redirect, url_for, render_template, session, flash
-)
-=======
-from flask import Flask, request, g, redirect, url_for, render_template, flash
->>>>>>> 29ca368eeda45687fb7db43040ee36e1a86bc1ae
-from bs4 import BeautifulSoup
+)from bs4 import BeautifulSoup
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_mail import Mail, Message
 
@@ -57,11 +52,7 @@ def format_date_filter(date_str):
         return date_str
 
 # --------------------
-<<<<<<< HEAD
 # Helpers DB
-=======
-# Ayudas con la bases de datos
->>>>>>> 29ca368eeda45687fb7db43040ee36e1a86bc1ae
 # --------------------
 
 def get_db():
@@ -77,64 +68,11 @@ def close_connection(_):
     if db is not None:
         db.close()
 
-<<<<<<< HEAD
 def init_db():
-=======
-
-def extraer_provincia(texto):
-    """Extrae el nombre de la provincia del texto usando palabras clave.
-    
-    Args:
-        texto (str): Texto donde buscar la provincia (título, control, etc.)
-        
-    Returns:
-        str: Nombre de la provincia encontrada o None
-    """
-    if not texto:
-        return None
-    
-    # Lista de provincias españolas
-    provincias = [
-        'Álava', 'Albacete', 'Alicante', 'Almería', 'Asturias', 'Ávila',
-        'Badajoz', 'Barcelona', 'Burgos', 'Cáceres', 'Cádiz', 'Cantabria',
-        'Castellón', 'Ciudad Real', 'Córdoba', 'Cuenca', 'Girona', 'Granada',
-        'Guadalajara', 'Guipúzcoa', 'Huelva', 'Huesca', 'Jaén', 'La Coruña',
-        'La Rioja', 'Las Palmas', 'León', 'Lérida', 'Lugo', 'Madrid',
-        'Málaga', 'Murcia', 'Navarra', 'Ourense', 'Palencia', 'Pontevedra',
-        'Salamanca', 'Segovia', 'Sevilla', 'Soria', 'Tarragona', 'Teruel',
-        'Toledo', 'Valencia', 'Valladolid', 'Vizcaya', 'Zamora', 'Zaragoza',
-        'Ceuta', 'Melilla'
-    ]
-    
-    texto_upper = texto.upper()
-    
-    for provincia in provincias:
-        if provincia.upper() in texto_upper:
-            return provincia
-    
-    return None
-
-
-def init_db():
-    """Inicializa la estructura de base de datos.
-    
-    Crea la tabla 'oposiciones' con los siguientes campos:
-    - id: Clave primaria autoincremental
-    - identificador: ID único del BOE
-    - control: Número de control
-    - titulo: Título de la convocatoria
-    - url_html: URL del documento HTML
-    - url_pdf: URL del documento PDF (UNIQUE para evitar duplicados)
-    - departamento: Entidad convocante
-    - fecha: Fecha de publicación
-    - provincia: Provincia extraída del título/control
-    """
->>>>>>> 29ca368eeda45687fb7db43040ee36e1a86bc1ae
     db = get_db()
     # Tabla oposiciones
     db.execute("""
         CREATE TABLE IF NOT EXISTS oposiciones (
-<<<<<<< HEAD
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             identificador TEXT NOT NULL,
             control TEXT,
@@ -154,40 +92,6 @@ def init_db():
             created_at TEXT NOT NULL
         )
     """)
-=======
-               id INTEGER PRIMARY KEY AUTOINCREMENT,
-               identificador TEXT NOT NULL,
-               control TEXT,
-               titulo TEXT,
-               url_html TEXT UNIQUE,
-               url_pdf TEXT,
-               departamento TEXT,
-               fecha TEXT,
-               provincia TEXT
-        )
-    ''')
-    
-    # Migración: Añadir columna provincia si no existe
-    try:
-        db.execute('SELECT provincia FROM oposiciones LIMIT 1')
-    except sqlite3.OperationalError:
-        # La columna no existe, añadirla
-        print("Añadiendo columna 'provincia' a la base de datos...")
-        db.execute('ALTER TABLE oposiciones ADD COLUMN provincia TEXT')
-        
-        # Actualizar registros existentes con provincia extraída
-        cursor = db.execute('SELECT id, titulo, control FROM oposiciones')
-        rows = cursor.fetchall()
-        for row in rows:
-            provincia = extraer_provincia(row['titulo']) or extraer_provincia(row['control'])
-            if provincia:
-                db.execute('UPDATE oposiciones SET provincia = ? WHERE id = ?', (provincia, row['id']))
-        print(f"Actualizado {len(rows)} registros con información de provincia.")
-    
-             #   fecha  TEXT
-# )
-    ''')
->>>>>>> 29ca368eeda45687fb7db43040ee36e1a86bc1ae
     db.commit()
 
 # --------------------
