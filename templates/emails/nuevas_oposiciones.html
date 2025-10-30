@@ -1,0 +1,16 @@
+<!doctype html>
+<html>
+  <body>
+    <p>Hay {{ oposiciones|length }} nuevas oposiciones publicadas:</p>
+    <ul>
+      {% for o in oposiciones %}
+        <li>
+          <strong>{{ o.titulo }}</strong> — {{ o.fecha|format_date }}
+          — <a href="{{ o.url_html }}">HTML</a>
+          {% if o.url_pdf %} | <a href="{{ o.url_pdf }}">PDF</a>{% endif %}
+          {% if o.departamento %} — {{ o.departamento }}{% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+  </body>
+</html>

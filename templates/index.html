@@ -21,10 +21,23 @@
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
         <div class="container">
             <a class="navbar-brand" href="/">📜 Oposiciones BOE</a>
+            {% if user %}
+            <div class="navbar-nav ms-auto">
+                <span class="navbar-text me-3">Bienvenido, {{ user['email'] }}</span>
+                <a class="btn btn-outline-light btn-sm me-2" href="{{ url_for('preferencias') }}">Preferencias</a>
+                <a class="btn btn-outline-light btn-sm" href="{{ url_for('logout') }}">Cerrar sesión</a>
+            </div>
+            {% else %}
+            <div class="navbar-nav ms-auto">
+                <a class="btn btn-outline-light btn-sm me-2" href="{{ url_for('login') }}">Iniciar sesión</a>
+                <a class="btn btn-primary btn-sm" href="{{ url_for('register') }}">Registrarse</a>
+            </div>
+            {% endif %}
         </div>
     </nav>
+    
     <!-- Título principal de la aplicación -->
-    <h1 id="titulo" class="text-center mb-4">Oposiciones BOE</h1>
+    <h1 id="titulo" class="text-center mb-4 mt-4">Oposiciones BOE</h1>
 
     <!-- Contenedor principal con tarjetas de departamentos -->
     <div class="container py-5">
@@ -42,10 +55,18 @@
         
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2 class="mb-0">Departamentos</h2>
+            {% if user %}
             <a href="{{ url_for('do_scrape') }}" class="btn btn-primary">
-                 Actualizar datos BOE
+                Actualizar datos BOE
             </a>
+            {% endif %}
         </div>
+        
+        {% if not departamentos %}
+        <div class="alert alert-info" role="alert">
+            No hay datos todavía. {% if user %}Pulsa "Actualizar datos BOE" para comenzar.{% else %}Inicia sesión para actualizar los datos.{% endif %}
+        </div>
+        {% else %}
         <div class="row g-4">
             {% for dep in departamentos %}
             <div class="col-md-4 col-lg-3">
@@ -63,6 +84,7 @@
             </div>
             {% endfor %}
         </div>
+        {% endif %}
     </div>
 
     <!-- Bootstrap JS para funcionalidad de alertas -->
