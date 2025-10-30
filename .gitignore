@@ -1,0 +1,14 @@
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# DB local
+oposiciones.db
+*.sqlite3
+
+# Entornos/IDE
+.env
+
+oposiciones.db
