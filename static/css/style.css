@@ -46,3 +46,363 @@ body {
   font-size: 0.8rem;
   margin-left: 6px;
 }
+
+/*--------------------index.html-------------*/
+
+/* ------------------ BASE ------------------ */
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: #f8f9fb;
+  color: #1a1a1a;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+
+
+/* ------------------ NAVBAR ------------------ */
+.mi-navbar {
+  background: linear-gradient(135deg, #002b5b 0%, #004aad 100%);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  padding: 1rem 0;
+}
+
+.animated-navbar {
+  animation: slideDownFade 0.8s ease-out;
+}
+
+@keyframes slideDownFade {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ------------------ HERO ------------------ */
+.hero {
+  background: linear-gradient(135deg, #002b5b 0%, #004aad 100%);
+  color: white;
+  text-align: center;
+  padding: 3rem 1rem 4rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  margin-bottom: 3rem;
+}
+
+.hero-title {
+  font-weight: 700;
+  font-size: 2.2rem;
+  display: inline-block;
+  overflow: hidden;
+}
+
+.hero-title span {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(-20px);
+  animation: letterFadeIn 0.5s forwards;
+}
+
+@keyframes letterFadeIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.hero p {
+  opacity: 0.9;
+  font-size: 1.05rem;
+  margin-top: 0.5rem;
+}
+
+/* ------------------ BOTÓN ACTUALIZAR ------------------ */
+.btn-update {
+  background-color: #198754;
+  color: #fff;
+  font-weight: 600;
+  border-radius: 10px;
+  padding: 0.75rem 1.5rem;
+  transition: all 0.3s ease;
+  border: none;
+}
+
+.btn-update:hover {
+  background-color: #157347;
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* ------------------ CONTENIDO PRINCIPAL ------------------ */
+.contenido-principal {
+  padding-top: 0;
+  padding-bottom: 4rem; /* Espacio extra antes del footer */
+}
+
+/* ------------------ TARJETAS ------------------ */
+.card {
+  border: none;
+  border-radius: 16px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.card:hover {
+  transform: translateY(-10px) scale(1.02);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.card-img-top {
+  height: 180px;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.card:hover .card-img-top {
+  transform: scale(1.05);
+}
+
+.card-body {
+  text-align: center;
+  padding: 1.5rem;
+}
+
+.card-title {
+  color: #002b5b;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  transition: color 0.3s ease;
+}
+
+.card:hover .card-title {
+  color: #004aad;
+}
+
+/* ------------------ MENSAJE VACÍO ------------------ */
+.text-muted {
+  font-size: 0.95rem;
+  color: #6c757d !important;
+}
+
+/* ------------------ FOOTER ------------------ */
+.mi-footer {
+  background: #002b5b;
+  color: white;
+  text-align: center;
+  padding: 1rem 0;
+  font-size: 0.9rem;
+  margin-top: auto;
+}
+
+.mi-footer a {
+  color: #ffcc00;
+  text-decoration: none;
+}
+
+.mi-footer a:hover {
+  text-decoration: underline;
+}
+
+body {
+  background: linear-gradient(120deg, #e9f1ff, #d6e4f0, #f0fdf4);
+  background-attachment: fixed;
+  background-size: cover;
+}
+
+
+
+/*------------------TARJETA.HTML------------------*/
+
+/* ------------------ BASE ------------------ */
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: #f8f9fb;
+  color: #1a1a1a;
+}
+
+
+/* ------------------ NAVBAR ------------------ */
+.navbar {
+  background: linear-gradient(135deg, #002b5b 0%, #004aad 100%);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  animation: fadeSlideDown 0.6s ease-out;
+}
+
+@keyframes fadeSlideDown {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.navbar .btn {
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.navbar .btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
+}
+
+/* ------------------ ENCABEZADO ------------------ */
+h2 {
+  font-weight: 700;
+  color: #004aad;
+  animation: fadeInUp 0.5s ease-out;
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ------------------ FILTROS ------------------ */
+.card-title {
+  font-weight: 600;
+  color: #002b5b;
+}
+
+.form-label {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.form-control,
+.form-select {
+  font-size: 0.95rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: 8px;
+  transition: box-shadow 0.3s ease;
+}
+
+.form-control:focus,
+.form-select:focus {
+  box-shadow: 0 0 0 0.2rem rgba(0, 74, 173, 0.25);
+}
+
+/* ------------------ BOTONES ------------------ */
+.btn-primary {
+  background-color: #198754;
+  border: none;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+  background-color: #157347;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.btn-outline-secondary {
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.btn-outline-secondary:hover {
+  background-color: #dee2e6;
+  transform: translateY(-2px);
+}
+
+.btn-secondary {
+  font-weight: 600;
+}
+
+/* ------------------ TABLA ------------------ */
+.table {
+  border-radius: 12px;
+  overflow: hidden;
+  animation: fadeInTable 0.6s ease-out;
+}
+
+@keyframes fadeInTable {
+  from { opacity: 0; transform: scale(0.98); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.table th {
+  background-color: #002b5b;
+  color: white;
+  font-weight: 600;
+}
+
+.table td {
+  vertical-align: middle;
+}
+
+/* ------------------ BOTÓN PDF ------------------ */
+.table a.btn-primary {
+  background-color: #004aad;
+  border: none;
+  font-weight: 500;
+}
+
+.table a.btn-primary:hover {
+  background-color: #003b8e;
+  transform: scale(1.05);
+}
+
+/* ------------------ PAGINACIÓN ------------------ */
+.pagination .page-link {
+  color: #004aad;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.pagination .page-link:hover {
+  background-color: #e9ecef;
+  transform: scale(1.05);
+}
+
+.pagination .active .page-link {
+  background-color: #004aad;
+  border-color: #004aad;
+  color: white;
+}
+
+/* ------------------ RESPONSIVE ------------------ */
+@media (max-width: 768px) {
+  .row > div {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+
+  .btn {
+    font-size: 0.9rem;
+  }
+
+  h2 {
+    font-size: 1.5rem;
+  }
+}
+
+/* BOTÓN VOLVER */
+.btn-volver {
+  background: linear-gradient(135deg, #004aad, #198754);
+  color: white;
+  font-weight: 600;
+  border: none;
+  padding: 0.5rem 1.2rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+}
+
+.btn-volver:hover {
+  background: linear-gradient(135deg, #198754, #004aad);
+  transform: translateY(-2px) scale(1.03);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+}
+
+body {
+  background: linear-gradient(120deg, #e9f1ff, #d6e4f0, #f0fdf4);
+  background-attachment: fixed;
+  background-size: cover;
+}
+

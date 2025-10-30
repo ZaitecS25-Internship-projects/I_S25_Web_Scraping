@@ -1,94 +1,108 @@
 <!--
-    Plantilla principal - Lista de departamentos
-    
-    Muestra todos los departamentos disponibles en formato de tarjetas.
-    Cada tarjeta enlaza a la vista detallada del departamento.
-    Incluye botón para actualizar datos del BOE.
+Plantilla principal - Lista de departamentos
+
+Muestra todos los departamentos disponibles en formato de tarjetas.
+Cada tarjeta enlaza a la vista detallada del departamento.
+Incluye botón para actualizar datos del BOE.
 -->
+
 <!DOCTYPE html>
 <html lang="es">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Oposiciones y Concursos - BOE</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Oposiciones y Concursos - BOE</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 
 <body class="bg-light">
-    <!-- Barra de navegación principal -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
-        <div class="container">
-            <a class="navbar-brand" href="/">📜 Oposiciones BOE</a>
-        </div>
-    </nav>
-    <!-- Título principal de la aplicación -->
-    <h1 id="titulo" class="text-center mb-4">Oposiciones BOE</h1>
+  <!-- Barra de navegación principal -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm mi-navbar animated-navbar">
+    <div class="container">
+      <a class="navbar-brand" href="/">📜 Oposiciones BOE</a>
+    </div>
+  </nav>
 
-    <!-- Contenedor principal con tarjetas de departamentos -->
-    <div class="container py-5">
-        <!-- Mensajes flash para feedback de operaciones -->
-        {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
+  <!-- Título principal de la aplicación -->
+  <h1 id="titulo" class="text-center mb-4 hero-title">Oposiciones BOE</h1>
+
+  <!-- Contenedor principal con tarjetas de departamentos -->
+  <div class="container py-5 contenido-principal">
+    <!-- Mensajes flash para feedback de operaciones -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
         {% for category, message in messages %}
-        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+          <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
             {{ message }}
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
+          </div>
         {% endfor %}
-        {% endif %}
-        {% endwith %}
+      {% endif %}
+    {% endwith %}
 
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2 class="mb-0">Departamentos</h2>
-            <a href="{{ url_for('do_scrape') }}" class="btn btn-primary">
-                Actualizar datos BOE
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h2 class="mb-0">Departamentos</h2>
+      <a href="{{ url_for('do_scrape') }}" class="btn btn-primary btn-update">
+        Actualizar datos BOE
+      </a>
+    </div>
+
+    <div class="row g-4">
+      {% for dep in departamentos %}
+        <div class="col-md-4 col-lg-3">
+          <a href="{{ url_for('mostrar_departamento', nombre=dep['departamento']) }}" class="text-decoration-none">
+            <div class="card h-100 shadow-sm tarjeta-departamento">
+              <img src="{{ url_for('static', filename='img/' + dep['departamento']|replace(' ', '_') + '.avif') }}"
+                   class="card-img-top" alt="{{ dep['departamento'] }}"
+                   onerror="this.src='{{ url_for('static', filename='img/default.svg') }}'">
+              <div class="card-body">
+                <h5 class="card-title">{{ dep['departamento'] }}</h5>
+              </div>
+            </div>
+          </a>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  
+  {% extends 'base.html' %}
+  {% block content %}
+  <h1 class="mb-3">Departamentos</h1>
+  <div class="row">
+    {% for d in departamentos %}
+      <div class="col-md-6 col-lg-4 mb-3">
+        <div class="card h-100 tarjeta-departamento">
+          <div class="card-body">
+            <h5 class="card-title">{{ d['departamento'] }}</h5>
+            <a class="btn btn-primary" href="{{ url_for('mostrar_departamento', nombre=d['departamento']) }}">
+              Ver oposiciones
             </a>
+          </div>
         </div>
-        <div class="row g-4">
-            {% for dep in departamentos %}
-            <div class="col-md-4 col-lg-3">
-                <a href="{{ url_for('mostrar_departamento', nombre=dep['departamento']) }}"
-                    class="text-decoration-none">
-                    <div class="card h-100 shadow-sm">
-                        <img src="{{ url_for('static', filename='img/' + dep['departamento']|replace(' ', '_') + '.avif') }}"
-                            class="card-img-top" alt="{{ dep['departamento'] }}"
-                            onerror="this.src='{{ url_for('static', filename='img/default.svg') }}'">
-                        <div class="card-body">
-                            <h5 class="card-title">{{ dep['departamento'] }}</h5>
-                        </div>
-                    </div>
-                </a>
-            </div>
-            {% endfor %}
-        </div>
+      </div>
+    {% endfor %}
+  </div>
+  {% if not departamentos %}
+    <p>No hay datos todavía.
+      {% if user %}
+        Pulsa <a href="{{ url_for('do_scrape') }}">Actualizar y notificar</a>.
+      {% else %}
+        Inicia sesión para actualizar.
+      {% endif %}
+    </p>
+  {% endif %}
+  {% endblock %}
 
-    </div>
-    {% extends 'base.html' %}
-    {% block content %}
-    <h1 class="mb-3">Departamentos</h1>
-    <div class="row">
-        {% for d in departamentos %}
-        <div class="col-md-6 col-lg-4 mb-3">
-            <div class="card h-100">
-                <div class="card-body">
-                    <h5 class="card-title">{{ d['departamento'] }}</h5>
-                    <a class="btn btn-primary"
-                        href="{{ url_for('mostrar_departamento', nombre=d['departamento']) }}">Ver oposiciones</a>
-                </div>
-            </div>
-        </div>
-        {% endfor %}
-    </div>
-    {% if not departamentos %}
-    <p>No hay datos todavía. {% if user %}Pulsa <a href="{{ url_for('do_scrape') }}">Actualizar y notificar</a>.{% else
-        %}Inicia sesión para actualizar.{% endif %}</p>
-    {% endif %}
-    {% endblock %}
+  <!-- Footer -->
+  <footer class="mi-footer">
+    <p>© 2025 Oposiciones BOE</p>
+  </footer>
 
-    <!-- Bootstrap JS para funcionalidad de alertas -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Bootstrap JS para funcionalidad de alertas -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
-</html>
+</html> 
