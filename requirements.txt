@@ -1,7 +1,8 @@
-# Librerías necesarias para scraping BOE con Flask
-Flask>=2.3
-requests>=2.31
-beautifulsoup4>=4.12
-lxml>=4.9
-Werkzeug>=2.3
-Flask-Mail>=0.9
+Flask==3.0.3
+Flask-Mail==0.9.1
+requests==2.32.3
+beautifulsoup4==4.12.3
+Werkzeug==3.0.3
+itsdangerous==2.2.0
+Jinja2==3.1.4
+MarkupSafe==2.1.5
