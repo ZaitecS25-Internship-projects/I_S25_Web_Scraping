@@ -74,36 +74,6 @@ Incluye botón para actualizar datos del BOE.
       {% endfor %}
     </div>
   </div>
-
-  
-  {% extends 'base.html' %}
-  {% block content %}
-  <h1 class="mb-3">Departamentos</h1>
-  <div class="row">
-    {% for d in departamentos %}
-      <div class="col-md-6 col-lg-4 mb-3">
-        <div class="card h-100 tarjeta-departamento">
-          <div class="card-body">
-            <h5 class="card-title">{{ d['departamento'] }}</h5>
-            <a class="btn btn-primary" href="{{ url_for('mostrar_departamento', nombre=d['departamento']) }}">
-              Ver oposiciones
-            </a>
-          </div>
-        </div>
-      </div>
-    {% endfor %}
-  </div>
-  {% if not departamentos %}
-    <p>No hay datos todavía.
-      {% if user %}
-        Pulsa <a href="{{ url_for('do_scrape') }}">Actualizar y notificar</a>.
-      {% else %}
-        Inicia sesión para actualizar.
-      {% endif %}
-    </p>
-  {% endif %}
-  {% endblock %}
-
   <!-- Footer -->
   <footer class="mi-footer">
     <p>© 2025 Oposiciones BOE</p>
