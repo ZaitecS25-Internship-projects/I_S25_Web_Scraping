@@ -25,8 +25,16 @@ Incluye botón para actualizar datos del BOE.
     </div>
   </nav>
 
-  <!-- Título principal de la aplicación -->
-  <h1 id="titulo" class="text-center mb-4 hero-title">Oposiciones BOE</h1>
+  <!-- Hero/Portada con imagen responsive -->
+  <div class="hero-image-container">
+    <img src="{{ url_for('static', filename='img/hero-oposiciones.png') }}" 
+         alt="Oposiciones BOE" 
+         class="hero-image"
+         onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+    <div class="hero-fallback" style="display: none;">
+      <h1 class="hero-title">Oposiciones BOE</h1>
+    </div>
+  </div>
 
   <!-- Contenedor principal con tarjetas de departamentos -->
   <div class="container py-5 contenido-principal">
