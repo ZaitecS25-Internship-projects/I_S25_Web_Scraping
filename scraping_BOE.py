@@ -9,9 +9,11 @@ Ampliado con auth + email: 2025
 """
 
 import os
+import re
 import sqlite3
 import re
 from datetime import datetime, timedelta
+from pathlib import Path
 
 import requests
 from bs4 import BeautifulSoup
@@ -20,7 +22,6 @@ from flask import (
 )
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_mail import Mail, Message
-from pathlib import Path
 
 # --- Flask + DB en instance/ ---
 app = Flask(__name__, instance_relative_config=True)
@@ -73,9 +74,8 @@ def close_connection(_):
         db.close()
 
 def ensure_schema():
-    """Crea tablas si no existen y añade columna 'provincia' si falta."""
+    """Crea tablas si no existen y añade columna 'provincia' si falta (no rompe merges previos)."""
     db = get_db()
-    # Tabla oposiciones
     db.execute("""
         CREATE TABLE IF NOT EXISTS oposiciones (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -88,11 +88,9 @@ def ensure_schema():
             fecha TEXT
         )
     """)
-    # Añadir columna 'provincia' si no existe
     cols = [r[1] for r in db.execute("PRAGMA table_info(oposiciones)").fetchall()]
     if 'provincia' not in cols:
         db.execute("ALTER TABLE oposiciones ADD COLUMN provincia TEXT")
-    # Tabla usuarios
     db.execute("""
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -178,7 +176,6 @@ def all_user_emails():
 # Utilidades: detectar provincia
 # --------------------
 _PROVINCIAS = {
-    # CCAA + provincias comunes (simplificado)
     "A CORUÑA","ALAVA","ARABA","ALBACETE","ALICANTE","ALMERIA","ASTURIAS","AVILA","BADAJOZ","BARCELONA",
     "BIZKAIA","VIZCAYA","BURGOS","CACERES","CADIZ","CANTABRIA","CASTELLON","CIUDAD REAL","CORDOBA","CUENCA",
     "GIPUZKOA","GUIPUZCOA","GIRONA","GERONA","GRANADA","GUADALAJARA","HUELVA","HUESCA","ILLES BALEARS","BALEARES",
@@ -190,21 +187,18 @@ def extraer_provincia(texto: str | None) -> str | None:
     if not texto:
         return None
     t = re.sub(r'[\W_]+', ' ', texto.upper())
-    # Busca coincidencias exactas de palabra
     for prov in _PROVINCIAS:
         if re.search(rf'(^|\s){re.escape(prov)}(\s|$)', t):
             return prov.title()
     return None
 
 # --------------------
-# Scraper BOE (avanzado con fallback y provincia)
+# Scraper BOE (avanzado + retroceso 7 días + provincia + fallback)
 # --------------------
 def scrape_boe():
     """
-    Extrae oposiciones de la sección 2B (Oposiciones y Concursos) del BOE.
-    Retrocede hasta 7 días si el sumario del día no estuviera disponible.
-    Inserta evitando duplicados por url_html.
-    Devuelve la lista de nuevas oposiciones insertadas (para notificar por email).
+    Devuelve lista de oposiciones NUEVAS insertadas (para email).
+    No rompe datos ya existentes (evita duplicados por url_html).
     """
     init_db()
     db = get_db()
@@ -231,7 +225,6 @@ def scrape_boe():
     else:
         return []
 
-    # Parseo XML con lxml-xml y fallback a html.parser
     try:
         soup = BeautifulSoup(r.content, 'lxml-xml')
     except Exception:
@@ -242,8 +235,7 @@ def scrape_boe():
         return []
 
     newly_inserted = []
-    items = seccion.find_all("item")
-    for item in items:
+    for item in seccion.find_all("item"):
         identificador_tag = item.find("identificador")
         control_tag = item.find("control")
         titulo_tag = item.find("titulo")
@@ -256,11 +248,9 @@ def scrape_boe():
         url_html = url_html_tag.text.strip() if url_html_tag else None
         url_pdf = url_pdf_tag.text.strip() if url_pdf_tag else None
 
-        # Departamento
         dept_parent = item.find_parent("departamento")
         departamento = dept_parent.get('nombre') if (dept_parent and dept_parent.has_attr('nombre')) else None
 
-        # Provincia (heurística por título o control)
         provincia = extraer_provincia(titulo) or extraer_provincia(control)
 
         try:
@@ -303,13 +293,11 @@ def mostrar_departamento(nombre):
     init_db()
     db = get_db()
 
-    # Filtros
     texto_busqueda = (request.args.get('busqueda') or '').strip()
     provincia_filtro = (request.args.get('provincia') or '').strip()
     fecha_desde = (request.args.get('fecha_desde') or '').strip()
     fecha_hasta = (request.args.get('fecha_hasta') or '').strip()
 
-    # Provincias disponibles para este departamento
     provincias_disponibles = db.execute(
         'SELECT DISTINCT provincia FROM oposiciones WHERE departamento = ? AND provincia IS NOT NULL ORDER BY provincia',
         [nombre]
@@ -389,7 +377,7 @@ def login():
     init_db()
     if request.method == 'POST':
         email = (request.form.get('email') or '').strip()
-        password = request.form.get('password') or ''
+        password = (request.form.get('password') or '')
         user = find_user_by_email(email)
         if not user or not check_password_hash(user['password_hash'], password):
             flash("Credenciales inválidas.", "danger")
@@ -411,5 +399,3 @@ if __name__ == '__main__':
     with app.app_context():
         init_db()
     app.run(debug=True)
-
-
