@@ -97,21 +97,10 @@ Incluye botón de retorno a la página principal y paginación.
         </thead>
         <tbody>
           {% for row in rows %}
-            {% set es_vista = user and row['id'] in oposiciones_vistas %}
-            <tr class="{% if row['fecha'] == hoy %}nueva-oposicion{% endif %} {% if es_vista %}oposicion-vista{% endif %}">
-              <td class="text-center">
-                {% if user %}
-                  <span class="check-visto" data-oposicion-id="{{ row['id'] }}">
-                    {% if es_vista %}
-                      <span class="text-success">✓</span>
-                    {% else %}
-                      <span class="text-muted">○</span>
-                    {% endif %}
-                  </span>
-                {% else %}
-                  <span class="text-muted">-</span>
-                {% endif %}
-              </td>
+            <tr class="
+                {% if row['fecha'] == hoy %}nueva-oposicion{% endif %}
+                {% if row['id'] in visitadas %} visitada-oposicion{% endif %}
+            ">
               <td>{{ row['identificador'] }}</td>
               <td>
                 {% if row['url_html'] %}
@@ -124,11 +113,18 @@ Incluye botón de retorno a la página principal y paginación.
                 {% if row['fecha'] == hoy %}
                   <span class="badge-nuevo">🟡 Nuevo</span>
                 {% endif %}
+                {% if row['id'] in visitadas %}
+                  <span class="badge-visitada">🔵 Visitada</span>
+               {% endif %}
               </td>
               <td>{{ row['control'] }}</td>
               <td>
                 {% if row['url_pdf'] %}
-                  <a href="{{ row['url_pdf'] }}" target="_blank" class="btn btn-sm btn-primary enlace-pdf" data-oposicion-id="{{ row['id'] }}">Ver PDF</a>
+                  <a href="{{ row['url_pdf'] }}" target="_blank" 
+                    class="btn btn-sm btn-primary btn-pdf" 
+                    data-id="{{ row['id'] }}">
+                    Ver PDF
+                  </a>
                 {% endif %}
               </td>
               <td>{{ row['fecha']|format_date }}</td>
@@ -192,40 +188,30 @@ Incluye botón de retorno a la página principal y paginación.
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-    // Marcar oposición como vista cuando se hace clic en enlaces
-    document.addEventListener('DOMContentLoaded', function() {
-      const enlaces = document.querySelectorAll('.enlace-oposicion, .enlace-pdf');
-      enlaces.forEach(function(enlace) {
-        enlace.addEventListener('click', function() {
-          const oposicionId = this.getAttribute('data-oposicion-id');
-          if (oposicionId) {
-            // Marcar como vista en el servidor
-            fetch('/marcar_vista/' + oposicionId, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              credentials: 'same-origin'
-            }).then(function(response) {
-              if (response.ok) {
-                // Actualizar el check visual
-                const checkElement = document.querySelector('.check-visto[data-oposicion-id="' + oposicionId + '"]');
-                if (checkElement) {
-                  checkElement.innerHTML = '<span class="text-success">✓</span>';
-                  // Marcar la fila como vista
-                  const row = checkElement.closest('tr');
-                  if (row) {
-                    row.classList.add('oposicion-vista');
-                  }
-                }
-              }
-            }).catch(function(error) {
-              console.error('Error al marcar como vista:', error);
-            });
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.btn-pdf').forEach(btn => {
+      btn.addEventListener('click', e => {
+        const id = btn.dataset.id;
+
+        // Evitar abrir el PDF antes de registrar
+        fetch(`/marcar_visitada/${id}`, { 
+         method: 'POST',
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest'
           }
-        });
+        })
+        .then(res => {
+          if (res.ok) {
+            // Marcar visualmente como visitada
+            btn.closest('tr').classList.add('visitada');
+          } else {
+            console.warn('Error al registrar la visita');
+          }
+        })
+        .catch(err => console.error('Fetch error:', err));
       });
     });
+  });
   </script>
 </body>
 

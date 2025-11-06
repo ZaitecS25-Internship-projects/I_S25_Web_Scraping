@@ -6,3 +6,4 @@ lxml>=4.9
 Werkzeug>=2.3
 Flask-Mail>=0.9
 Flask-Login>=0.6
+

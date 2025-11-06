@@ -1,87 +1,35 @@
-body {
-    background: linear-gradient(to right, #f8f9fa, #e9ecef);
-}
-
-.navbar-brand {
-    font-weight: bold;
-    font-size: 1.4rem;
-}
-
-.table-hover tbody tr:hover {
-    background-color: #f1f5f9;
-    transition: background-color 0.2s ease-in-out;
-}
-
-.card {
-    border-radius: 1rem;
-}
-
-.btn-outline-primary:hover,
-.btn-outline-secondary:hover {
-    transform: scale(1.05);
-    transition: transform 0.15s ease-in-out;
-}
-
-/* 🔹 Fila completamente resaltada para las oposiciones nuevas (día actual) */
-.nueva-oposicion {
-  background-color: #ffde8a !important; /* Amarillo claro en toda la fila */
-  transition: background-color 0.3s ease-in-out, transform 0.2s ease, box-shadow 0.3s ease-in-out;
-  box-shadow: 0 0 10px rgba(255, 193, 7, 0.5);
-}
-
-/* 🔹 Efecto al pasar el ratón */
-.nueva-oposicion:hover {
-  background-color: #ffd54f !important; /* Amarillo más intenso */
-  transform: scale(1.01);
-  box-shadow: 0 0 15px rgba(255, 193, 7, 0.7);
-}
-
-/* 🔹 Etiqueta “Nuevo” */
-.badge-nuevo {
-  background-color: #ffbf00;
-  color: #000;
-  font-weight: bold;
-  border-radius: 8px;
-  padding: 3px 8px;
-  font-size: 0.8rem;
-  margin-left: 6px;
-}
-
-/*--------------------index.html-------------*/
-
 /* ------------------ BASE ------------------ */
 body {
   font-family: 'Inter', sans-serif;
-  background-color: #f8f9fb;
-  color: #1a1a1a;
   margin: 0;
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  background: linear-gradient(120deg, #e9f1ff, #d6e4f0, #f0fdf4);
+  background-attachment: fixed;
+  background-size: cover;
+  color: #1a1a1a;
 }
 
-
+/* ------------------ CONTENEDOR ------------------ */
+.container {
+  padding: 0 1rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
 
 /* ------------------ NAVBAR ------------------ */
-.mi-navbar {
+.mi-navbar,
+.navbar {
   background: linear-gradient(135deg, #002b5b 0%, #004aad 100%);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   padding: 1rem 0;
-}
-
-.animated-navbar {
   animation: slideDownFade 0.8s ease-out;
 }
 
 @keyframes slideDownFade {
-  from {
-    opacity: 0;
-    transform: translateY(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 /* ------------------ HERO ------------------ */
@@ -92,11 +40,44 @@ body {
   padding: 3rem 1rem 4rem;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
   margin-bottom: 3rem;
+  min-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* ------------------ HERO IMAGE CONTAINER ------------------ */
+.hero-image-container {
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.hero-image {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: cover;
+  object-position: center;
+  max-height: 400px;
+}
+
+.hero-fallback {
+  background: linear-gradient(135deg, #002b5b 0%, #004aad 100%);
+  color: white;
+  text-align: center;
+  padding: 3rem 1rem;
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .hero-title {
   font-weight: 700;
-  font-size: 2.2rem;
+  font-size: clamp(1.5rem, 2vw + 1rem, 2.5rem);
   display: inline-block;
   overflow: hidden;
 }
@@ -109,10 +90,7 @@ body {
 }
 
 @keyframes letterFadeIn {
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .hero p {
@@ -121,15 +99,20 @@ body {
   margin-top: 0.5rem;
 }
 
-/* ------------------ BOTÓN ACTUALIZAR ------------------ */
-.btn-update {
-  background-color: #198754;
-  color: #fff;
+/* ------------------ BOTONES ------------------ */
+.btn,
+.btn-update,
+.btn-volver {
   font-weight: 600;
   border-radius: 10px;
   padding: 0.75rem 1.5rem;
   transition: all 0.3s ease;
   border: none;
+}
+
+.btn-update {
+  background-color: #198754;
+  color: #fff;
 }
 
 .btn-update:hover {
@@ -138,10 +121,16 @@ body {
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
 }
 
-/* ------------------ CONTENIDO PRINCIPAL ------------------ */
-.contenido-principal {
-  padding-top: 0;
-  padding-bottom: 4rem; /* Espacio extra antes del footer */
+.btn-volver {
+  background: linear-gradient(135deg, #004aad, #198754);
+  color: white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn-volver:hover {
+  background: linear-gradient(135deg, #198754, #004aad);
+  transform: translateY(-2px) scale(1.03);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
 }
 
 /* ------------------ TARJETAS ------------------ */
@@ -152,6 +141,7 @@ body {
   transition: all 0.3s ease;
   background: #fff;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  max-width: 100%;
 }
 
 .card:hover {
@@ -160,7 +150,8 @@ body {
 }
 
 .card-img-top {
-  height: 180px;
+  width: 100%;
+  height: auto;
   object-fit: cover;
   transition: transform 0.3s ease;
 }
@@ -185,171 +176,27 @@ body {
   color: #004aad;
 }
 
-/* ------------------ MENSAJE VACÍO ------------------ */
-.text-muted {
-  font-size: 0.95rem;
-  color: #6c757d !important;
+/* ------------------ NUEVAS OPOSICIONES ------------------ */
+.nueva-oposicion {
+  background-color: #ffde8a !important;
+  transition: background-color 0.3s ease-in-out, transform 0.2s ease, box-shadow 0.3s ease-in-out;
+  box-shadow: 0 0 10px rgba(255, 193, 7, 0.5);
 }
 
-/* ------------------ FOOTER ------------------ */
-.mi-footer {
-  background: #002b5b;
-  color: white;
-  text-align: center;
-  padding: 1rem 0;
-  font-size: 0.9rem;
-  margin-top: auto;
+.nueva-oposicion:hover {
+  background-color: #ffd54f !important;
+  transform: scale(1.01);
+  box-shadow: 0 0 15px rgba(255, 193, 7, 0.7);
 }
 
-.mi-footer a {
-  color: #ffcc00;
-  text-decoration: none;
-}
-
-.mi-footer a:hover {
-  text-decoration: underline;
-}
-
-body {
-  background: linear-gradient(120deg, #e9f1ff, #d6e4f0, #f0fdf4);
-  background-attachment: fixed;
-  background-size: cover;
-}
-
-/* Estilos para oposiciones vistas */
-.oposicion-vista {
-  opacity: 0.7;
-  background-color: #f0f0f0 !important;
-}
-
-.oposicion-vista:hover {
-  opacity: 0.9;
-  background-color: #e0e0e0 !important;
-}
-
-.check-visto {
-  font-size: 1.2rem;
+.badge-nuevo {
+  background-color: #ffbf00;
+  color: #000;
   font-weight: bold;
-  cursor: default;
-}
-
-.check-visto .text-success {
-  color: #198754 !important;
-  font-size: 1.3rem;
-}
-
-.check-visto .text-muted {
-  color: #6c757d !important;
-}
-
-.enlace-oposicion {
-  text-decoration: none;
-  color: inherit;
-  transition: color 0.2s ease;
-}
-
-.enlace-oposicion:hover {
-  color: #004aad;
-  text-decoration: underline;
-}
-
-
-
-
-/*------------------TARJETA.HTML------------------*/
-
-/* ------------------ BASE ------------------ */
-body {
-  font-family: 'Inter', sans-serif;
-  background-color: #f8f9fb;
-  color: #1a1a1a;
-}
-
-
-/* ------------------ NAVBAR ------------------ */
-.navbar {
-  background: linear-gradient(135deg, #002b5b 0%, #004aad 100%);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-  animation: fadeSlideDown 0.6s ease-out;
-}
-
-@keyframes fadeSlideDown {
-  from { opacity: 0; transform: translateY(-20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.navbar .btn {
-  font-weight: 500;
-  transition: all 0.3s ease;
-}
-
-.navbar .btn:hover {
-  transform: scale(1.05);
-  box-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
-}
-
-/* ------------------ ENCABEZADO ------------------ */
-h2 {
-  font-weight: 700;
-  color: #004aad;
-  animation: fadeInUp 0.5s ease-out;
-}
-
-@keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-/* ------------------ FILTROS ------------------ */
-.card-title {
-  font-weight: 600;
-  color: #002b5b;
-}
-
-.form-label {
-  font-weight: 600;
-  font-size: 0.95rem;
-}
-
-.form-control,
-.form-select {
-  font-size: 0.95rem;
-  padding: 0.6rem 0.75rem;
   border-radius: 8px;
-  transition: box-shadow 0.3s ease;
-}
-
-.form-control:focus,
-.form-select:focus {
-  box-shadow: 0 0 0 0.2rem rgba(0, 74, 173, 0.25);
-}
-
-/* ------------------ BOTONES ------------------ */
-.btn-primary {
-  background-color: #198754;
-  border: none;
-  font-weight: 600;
-  transition: all 0.3s ease;
-}
-
-.btn-primary:hover {
-  background-color: #157347;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-}
-
-.btn-outline-secondary {
-  font-weight: 600;
-  transition: all 0.3s ease;
-}
-
-.btn-outline-secondary:hover {
-  background-color: #dee2e6;
-  transform: translateY(-2px);
-}
-
-.btn-secondary {
-  font-weight: 600;
+  padding: 3px 8px;
+  font-size: 0.8rem;
+  margin-left: 6px;
 }
 
 /* ------------------ TABLA ------------------ */
@@ -374,16 +221,9 @@ h2 {
   vertical-align: middle;
 }
 
-/* ------------------ BOTÓN PDF ------------------ */
-.table a.btn-primary {
-  background-color: #004aad;
-  border: none;
-  font-weight: 500;
-}
-
-.table a.btn-primary:hover {
-  background-color: #003b8e;
-  transform: scale(1.05);
+.table-hover tbody tr:hover {
+  background-color: #f1f5f9;
+  transition: background-color 0.2s ease-in-out;
 }
 
 /* ------------------ PAGINACIÓN ------------------ */
@@ -404,44 +244,186 @@ h2 {
   color: white;
 }
 
+/* ------------------ FOOTER ------------------ */
+.mi-footer {
+  background: #002b5b;
+  color: white;
+  text-align: center;
+  padding: 1rem 0;
+  font-size: 0.9rem;
+  margin-top: auto;
+}
+
+.mi-footer a {
+  color: #ffcc00;
+  text-decoration: none;
+}
+
+.mi-footer a:hover {
+  text-decoration: underline;
+}
+
 /* ------------------ RESPONSIVE ------------------ */
 @media (max-width: 768px) {
-  .row > div {
-    flex: 0 0 100%;
-    max-width: 100%;
+  .hero {
+    padding: 2rem 1rem;
+  }
+
+  .hero-image {
+    max-height: 250px;
+    min-height: 200px;
+  }
+
+  .hero-title {
+    font-size: 1.5rem;
+  }
+
+  .hero-fallback {
+    padding: 2rem 1rem;
+    min-height: 150px;
   }
 
   .btn {
     font-size: 0.9rem;
+    padding: 0.5rem 1rem;
+  }
+
+  .card-body {
+    padding: 1rem;
   }
 
   h2 {
     font-size: 1.5rem;
   }
+
+  .row {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .navbar,
+  .mi-navbar {
+    padding: 0.5rem;
+  }
 }
 
-/* BOTÓN VOLVER */
-.btn-volver {
-  background: linear-gradient(135deg, #004aad, #198754);
-  color: white;
+@media (max-width: 480px) {
+  .hero-image {
+    max-height: 200px;
+    min-height: 150px;
+  }
+
+  .hero-fallback {
+    padding: 1.5rem 1rem;
+    min-height: 120px;
+  }
+
+  .hero-fallback .hero-title {
+    font-size: 1.25rem;
+  }
+
+  .table thead {
+    display: none;
+  }
+
+  .table tr {
+    display: block;
+    margin-bottom: 1rem;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 0.75rem;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  }
+
+  .table td {
+    display: block;
+    width: 100%;
+    font-size: 0.8rem;
+    padding: 0.3rem 0;
+    white-space: normal;
+    word-break: break-word;
+  }
+
+  .col-id::before {
+    content: "Identificador: ";
+    font-weight: 600;
+    color: #004aad;
+  }
+
+  .col-titulo::before {
+    content: "Título: ";
+    font-weight: 600;
+    color: #004aad;
+  }
+
+  .col-control::before {
+    content: "Control: ";
+    font-weight: 600;
+    color: #004aad;
+  }
+
+  .col-pdf::before {
+    content: "PDF: ";
+    font-weight: 600;
+    color: #004aad;
+  }
+
+  .col-fecha::before {
+    content: "Fecha: ";
+    font-weight: 600;
+    color: #004aad;
+  }
+
+  .badge-nuevo {
+    font-size: 0.7rem;
+    padding: 2px 6px;
+  }
+
+  .btn-sm {
+    font-size: 0.7rem;
+    padding: 0.3rem 0.6rem;
+  }
+}
+
+@media (max-width: 480px) {
+  td.col-titulo {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+} 
+
+/* 🔵 Fila completamente resaltada para oposiciones visitadas */
+.visitada-oposicion {
+  background-color: #b3d4ff !important;  /* Azul más fuerte */
+  transition: background-color 0.3s ease-in-out, transform 0.2s ease;
+  box-shadow: 0 0 12px rgba(0, 86, 179, 0.5);
+  position: relative;
+  z-index: 1;
+}
+
+/* 🔵 Hover más intenso */
+.visitada-oposicion:hover {
+  background-color: #82b3ff !important; /* Azul vibrante */
+  transform: scale(1.01);
+  box-shadow: 0 0 18px rgba(0, 86, 179, 0.6);
+}
+
+/* Si una oposición es nueva y visitada, gana el azul */
+.nueva-oposicion.visitada {
+  background-color: #0c47e9 !important;
+  box-shadow: 0 0 15px rgba(0, 123, 255, 0.5);
+}
+
+/* 🔵 Etiqueta “Visitada” */
+.badge-visitada {
+  background-color: #0d6efd;
+  color: #fff;
   font-weight: 600;
-  border: none;
-  padding: 0.5rem 1.2rem;
   border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  transition: all 0.3s ease;
-}
-
-.btn-volver:hover {
-  background: linear-gradient(135deg, #198754, #004aad);
-  transform: translateY(-2px) scale(1.03);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
-}
-
-body {
-  background: linear-gradient(120deg, #e9f1ff, #d6e4f0, #f0fdf4);
-  background-attachment: fixed;
-  background-size: cover;
+  padding: 3px 8px;
+  font-size: 0.8rem;
+  margin-left: 6px;
 }
 
 /* Estilos para oposiciones vistas */
