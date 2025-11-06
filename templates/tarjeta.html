@@ -87,6 +87,7 @@ Incluye botón de retorno a la página principal y paginación.
       <table class="table table-striped table-bordered align-middle">
         <thead class="table-dark">
           <tr>
+            <th style="width: 50px;">Visto</th>
             <th>Identificador</th>
             <th>Título</th>
             <th>Control</th>
@@ -102,7 +103,13 @@ Incluye botón de retorno a la página principal y paginación.
             ">
               <td>{{ row['identificador'] }}</td>
               <td>
-                {{ row['titulo'] }}
+                {% if row['url_html'] %}
+                  <a href="{{ row['url_html'] }}" target="_blank" class="enlace-oposicion" data-oposicion-id="{{ row['id'] }}">
+                    {{ row['titulo'] }}
+                  </a>
+                {% else %}
+                  {{ row['titulo'] }}
+                {% endif %}
                 {% if row['fecha'] == hoy %}
                   <span class="badge-nuevo">🟡 Nuevo</span>
                 {% endif %}
@@ -124,7 +131,7 @@ Incluye botón de retorno a la página principal y paginación.
             </tr>
           {% else %}
             <tr>
-              <td colspan="5" class="text-center">No hay oposiciones registradas para este departamento.</td>
+              <td colspan="6" class="text-center">No hay oposiciones registradas para este departamento.</td>
             </tr>
           {% endfor %}
         </tbody>

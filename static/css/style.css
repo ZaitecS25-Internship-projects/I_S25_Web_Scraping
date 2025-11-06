@@ -425,3 +425,42 @@ body {
   font-size: 0.8rem;
   margin-left: 6px;
 }
+
+/* Estilos para oposiciones vistas */
+.oposicion-vista {
+  opacity: 0.7;
+  background-color: #f0f0f0 !important;
+}
+
+.oposicion-vista:hover {
+  opacity: 0.9;
+  background-color: #e0e0e0 !important;
+}
+
+.check-visto {
+  font-size: 1.2rem;
+  font-weight: bold;
+  cursor: default;
+}
+
+.check-visto .text-success {
+  color: #198754 !important;
+  font-size: 1.3rem;
+}
+
+.check-visto .text-muted {
+  color: #6c757d !important;
+}
+
+.enlace-oposicion {
+  text-decoration: none;
+  color: inherit;
+  transition: color 0.2s ease;
+}
+
+.enlace-oposicion:hover {
+  color: #004aad;
+  text-decoration: underline;
+}
+
+
