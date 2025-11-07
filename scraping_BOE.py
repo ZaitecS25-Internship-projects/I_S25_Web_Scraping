@@ -20,11 +20,36 @@ from flask import (
 from bs4 import BeautifulSoup
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_mail import Mail, Message
+from flask_login import (
+    LoginManager, UserMixin, login_user, logout_user, login_required, current_user
+)
 from flask import jsonify
 
 DB_PATH = os.getenv('DB_PATH', 'oposiciones.db')
 app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY', 'cambia-esto-en-produccion')
+
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = "login"  # redirige a /login si no hay sesión
+
+class User(UserMixin):
+    def __init__(self, id, email):
+        self.id = id
+        self.email = email
+
+
+    @staticmethod
+    def get(user_id):
+        db = get_db()
+        row = db.execute("SELECT id, email FROM users WHERE id = ?", (user_id,)).fetchone()
+        if row:
+            return User(row["id"], row["email"])
+        return None
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.get(user_id)
 
 # === Configuración de Flask-Mail (desde variables de entorno) ===
 app.config['MAIL_SERVER'] = os.getenv('MAIL_SERVER', 'localhost')
@@ -130,26 +155,6 @@ def init_db():
 # Helpers Auth
 # --------------------
 
-def current_user():
-    uid = session.get('user_id')
-    if not uid:
-        return None
-    db = get_db()
-    row = db.execute("SELECT id, email FROM users WHERE id = ?", (uid,)).fetchone()
-    return row
-
-
-def login_required(fn):
-    from functools import wraps
-
-    @wraps(fn)
-    def wrapper(*args, **kwargs):
-        if not current_user():
-            flash("Inicia sesión para continuar.", "warning")
-            return redirect(url_for('login', next=request.path))
-        return fn(*args, **kwargs)
-
-    return wrapper
 
 
 def create_user(email, password):
@@ -359,7 +364,7 @@ def index():
         (hoy,)
     ).fetchall()
 
-    return render_template('index.html', departamentos=deps, user=current_user())
+    return render_template('index.html', departamentos=deps, user = current_user)
 
 
 
@@ -370,8 +375,8 @@ def mostrar_departamento(nombre):
     # 🔹 Fecha actual para marcar las oposiciones nuevas
     hoy = datetime.today().strftime("%Y%m%d")
 
-    user = current_user()
-    user_id = user["id"] if user else None
+    user = current_user
+    user_id = user.id if user else None
 
     busqueda = request.args.get("busqueda", "")
     provincia = request.args.get("provincia", "")
@@ -413,7 +418,8 @@ def mostrar_departamento(nombre):
 
     # 🔵 Obtener las oposiciones visitadas por el usuario actual
     visitadas = []
-    user = current_user()
+    user = current_user
+
     if user:
         db.execute("""
             CREATE TABLE IF NOT EXISTS visitas (
@@ -429,7 +435,7 @@ def mostrar_departamento(nombre):
         visitadas = [
             row["oposicion_id"]
             for row in db.execute(
-                "SELECT oposicion_id FROM visitas WHERE user_id = ?", (user["id"],)
+                "SELECT oposicion_id FROM visitas WHERE user_id = ?", (user.id,)
             ).fetchall()
         ]
 
@@ -475,26 +481,6 @@ def do_scrape():
 
 # --- Registro / Login ---
 
-@app.route('/register', methods=['GET', 'POST'])
-def register():
-    init_db()
-    if request.method == 'POST':
-        email = (request.form.get('email') or '').strip()
-        password = request.form.get('password') or ''
-        if not email or not password:
-            flash("Email y contraseña son obligatorios.", "danger")
-            return render_template('register.html', user=current_user())
-        if find_user_by_email(email):
-            flash("Ese email ya está registrado.", "warning")
-            return render_template('register.html', user=current_user())
-        create_user(email, password)
-        user = find_user_by_email(email)
-        session['user_id'] = user['id']
-        flash("Registro correcto. Sesion iniciada.", "success")
-        return redirect(url_for('index'))
-    return render_template('register.html', user=current_user())
-
-
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     init_db()
@@ -504,26 +490,110 @@ def login():
         user = find_user_by_email(email)
         if not user or not check_password_hash(user['password_hash'], password):
             flash("Credenciales inválidas.", "danger")
-            return render_template('login.html', user=current_user())
-        session['user_id'] = user['id']
+            return render_template('login.html', user = current_user)
+        login_user(User(user["id"], user["email"]))
         flash("Sesión iniciada.", "success")
         next_url = request.args.get('next') or url_for('index')
         return redirect(next_url)
-    return render_template('login.html', user=current_user())
-
+    return render_template('login.html', user = current_user)
 
 @app.route('/logout')
 @login_required
 def logout():
-    session.pop('user_id', None)
+    logout_user()
     flash("Sesión cerrada.", "info")
     return redirect(url_for('index'))
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    init_db()
+    if request.method == 'POST':
+        email = (request.form.get('email') or '').strip()
+        password = (request.form.get('password') or '')
+        if not email or not password:
+            flash("Email y contraseña son obligatorios.", "danger")
+            return render_template('register.html', user=current_user)
+        if find_user_by_email(email):
+            flash("Ese email ya está registrado.", "warning")
+            return render_template('register.html', user=current_user)
+        create_user(email, password)
+        user = find_user_by_email(email)
+        login_user(User(user["id"], user["email"]))  # 🔹 Usamos Flask-Login
+        flash("Registro correcto. Sesión iniciada.", "success")
+        return redirect(url_for('index'))
+    return render_template('register.html', user=current_user)
+
+
+@app.route("/user", methods=["GET", "POST"])
+@login_required
+def user():
+    db = get_db()
+    desde = (datetime.today() - timedelta(days=30)).strftime("%Y%m%d")
+
+    # 🔹 Obtener todos los departamentos con oposiciones recientes
+    departamentos = db.execute('''
+        SELECT DISTINCT departamento 
+        FROM oposiciones 
+        WHERE fecha >= ? AND departamento IS NOT NULL 
+        ORDER BY departamento
+    ''', (desde,)).fetchall()
+
+    # --- Filtros ---
+    selected_departamentos = request.form.getlist("departamentos")
+    busqueda = request.args.get("busqueda", "")
+    provincia = request.args.get("provincia", "")
+    fecha_desde = request.args.get("fecha_desde", "")
+    fecha_hasta = request.args.get("fecha_hasta", "")
+
+    sql = "SELECT * FROM oposiciones WHERE fecha >= ?"
+    params = [desde]
+
+    if selected_departamentos:
+        sql += " AND departamento IN ({})".format(",".join(["?"] * len(selected_departamentos)))
+        params.extend(selected_departamentos)
+
+    if busqueda:
+        like = f"%{busqueda}%"
+        sql += " AND (titulo LIKE ? OR identificador LIKE ? OR control LIKE ?)"
+        params += [like, like, like]
+
+    if provincia:
+        sql += " AND provincia = ?"
+        params.append(provincia)
+
+    if fecha_desde:
+        sql += " AND fecha >= ?"
+        params.append(fecha_desde.replace("-", ""))
+
+    if fecha_hasta:
+        sql += " AND fecha <= ?"
+        params.append(fecha_hasta.replace("-", ""))
+
+    sql += " ORDER BY fecha DESC"
+    oposiciones = db.execute(sql, params).fetchall()
+
+    provincias = db.execute(
+        "SELECT DISTINCT provincia FROM oposiciones WHERE provincia IS NOT NULL ORDER BY provincia"
+    ).fetchall()
+
+    return render_template(
+        "user.html",
+        user=current_user,
+        departamentos=departamentos,
+        selected_departamentos=selected_departamentos,
+        oposiciones=oposiciones,
+        provincias=provincias,
+        busqueda=busqueda,
+        provincia_filtro=provincia,
+        fecha_desde=fecha_desde,
+        fecha_hasta=fecha_hasta,
+    )
 
 
 @app.route("/marcar_visitada/<int:oposicion_id>", methods=["POST"])
 @login_required
 def marcar_visitada(oposicion_id):
-    user = current_user()
+    user = current_user
     print(f"🟢 Registro de visita recibido: user={user['id']}, oposicion_id={oposicion_id}")
     registrar_visita(user["id"], oposicion_id)
     return jsonify({"ok": True})

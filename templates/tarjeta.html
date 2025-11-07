@@ -6,25 +6,10 @@ en formato de tabla con enlaces a los PDFs oficiales.
 Incluye botón de retorno a la página principal y paginación.
 -->
 
-<!DOCTYPE html>
-<html lang="es">
+{% extends "base.html" %}
+{% block title %}Oposiciones del día - BOE{% endblock %}
 
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Oposiciones - {{ departamento }}</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-</head>
-
-<body class="bg-light d-flex flex-column min-vh-100">
-  <!-- Barra de navegación -->
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm mi-navbar animated-navbar">
-    <div class="container">
-      <a class="navbar-brand fs-4" href="/">📜 Oposiciones BOE</a>
-    </div>
-  </nav>
+{% block content %}
 
   <div class="container py-4 contenido-principal">
     <a href="{{ url_for('index') }}" class="btn btn-secondary btn-volver mb-3">&larr; Volver</a>
@@ -174,13 +159,9 @@ Incluye botón de retorno a la página principal y paginación.
     {% endif %}
   </div>
 
-  <!-- Footer -->
-  <footer class="mi-footer">
-    <p>© 2025 Oposiciones BOE</p>
-  </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
+  <script>
   document.addEventListener('DOMContentLoaded', () => {
     // Seleccionamos todos los botones/links PDF que tienen data-id y href
     document.querySelectorAll('.btn-pdf').forEach(btn => {
@@ -243,6 +224,4 @@ Incluye botón de retorno a la página principal y paginación.
     });
   });
   </script>
-</body>
-
-</html>
+{% endblock %}
