@@ -6,25 +6,10 @@ en formato de tabla con enlaces a los PDFs oficiales.
 Incluye botón de retorno a la página principal y paginación.
 -->
 
-<!DOCTYPE html>
-<html lang="es">
+{% extends "base.html" %}
+{% block title %}Oposiciones del día - BOE{% endblock %}
 
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Oposiciones - {{ departamento }}</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-</head>
-
-<body class="bg-light d-flex flex-column min-vh-100">
-  <!-- Barra de navegación -->
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm mi-navbar animated-navbar">
-    <div class="container">
-      <a class="navbar-brand fs-4" href="/">📜 Oposiciones BOE</a>
-    </div>
-  </nav>
+{% block content %}
 
   <div class="container py-4 contenido-principal">
     <a href="{{ url_for('index') }}" class="btn btn-secondary btn-volver mb-3">&larr; Volver</a>
@@ -96,18 +81,28 @@ Incluye botón de retorno a la página principal y paginación.
         </thead>
         <tbody>
           {% for row in rows %}
-            <tr class="{% if row['fecha'] == hoy %}nueva-oposicion{% endif %}">
+            <tr class="
+                {% if row['fecha'] == hoy %}nueva-oposicion{% endif %}
+                {% if row['id'] in visitadas %} visitada-oposicion{% endif %}
+            ">
               <td>{{ row['identificador'] }}</td>
               <td>
                 {{ row['titulo'] }}
                 {% if row['fecha'] == hoy %}
                   <span class="badge-nuevo">🟡 Nuevo</span>
                 {% endif %}
+                {% if row['id'] in visitadas %}
+                  <span class="badge-visitada">🔵 Visitada</span>
+               {% endif %}
               </td>
               <td>{{ row['control'] }}</td>
               <td>
                 {% if row['url_pdf'] %}
-                  <a href="{{ row['url_pdf'] }}" target="_blank" class="btn btn-sm btn-primary">Ver PDF</a>
+                  <a href="{{ row['url_pdf'] }}" target="_blank" 
+                    class="btn btn-sm btn-primary btn-pdf" 
+                    data-id="{{ row['id'] }}">
+                    Ver PDF
+                  </a>
                 {% endif %}
               </td>
               <td>{{ row['fecha']|format_date }}</td>
@@ -164,12 +159,69 @@ Incluye botón de retorno a la página principal y paginación.
     {% endif %}
   </div>
 
-  <!-- Footer -->
-  <footer class="mi-footer">
-    <p>© 2025 Oposiciones BOE</p>
-  </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-</body>
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // Seleccionamos todos los botones/links PDF que tienen data-id y href
+    document.querySelectorAll('.btn-pdf').forEach(btn => {
+      btn.addEventListener('click', function (e) {
+        e.preventDefault(); // evitamos la navegación automática
 
-</html>
+        const id = this.dataset.id;
+        const pdfUrl = this.getAttribute('href');
+        const tr = this.closest('tr');
+
+        // 1) Intentamos usar sendBeacon si está disponible (no bloquea navegación)
+        const beaconUrl = `/marcar_visitada/${id}`;
+        let beaconSent = false;
+
+        try {
+          if (navigator.sendBeacon) {
+            // sendBeacon envía POST con body; usamos un blob vacío o un JSON pequeño
+            const payload = JSON.stringify({ts: new Date().toISOString()});
+            const blob = new Blob([payload], { type: 'application/json' });
+            beaconSent = navigator.sendBeacon(beaconUrl, blob);
+          }
+        } catch (err) {
+          console.warn('sendBeacon falló:', err);
+          beaconSent = false;
+        }
+
+        // 2) Si sendBeacon no está disponible, hacemos fetch en background (no await)
+        if (!beaconSent) {
+          fetch(beaconUrl, {
+            method: 'POST',
+            headers: { 'X-Requested-With': 'XMLHttpRequest', 'Content-Type': 'application/json' },
+            body: JSON.stringify({ts: new Date().toISOString()})
+          }).then(resp => {
+            if (!resp.ok) console.warn('marcar_visitada respondió', resp.status);
+          }).catch(err => console.warn('Error fetch marcar_visitada:', err));
+        }
+
+        // 3) Actualizar UI inmediatamente (añadir clase y badge)
+        if (tr) {
+          tr.classList.add('visitada-oposicion');   // clase CSS que colorea toda la fila
+          // añadir badge si no existe
+          const tituloCell = tr.querySelector('td:nth-child(2)');
+          if (tituloCell && !tituloCell.querySelector('.badge-visitada')) {
+            const span = document.createElement('span');
+            span.className = 'badge-visitada ms-2';
+            span.textContent = '🔵 Visitada';
+            tituloCell.appendChild(span);
+          }
+        }
+
+        // 4) Abrir PDF en nueva pestaña (no bloqueante)
+        // Abrimos la url inmediatamente para una UX fluida
+        try {
+          window.open(pdfUrl, '_blank');
+        } catch (err) {
+          // fallback: navegación en la misma pestaña
+          window.location.href = pdfUrl;
+        }
+      });
+    });
+  });
+  </script>
+{% endblock %}
