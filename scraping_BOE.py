@@ -563,7 +563,7 @@ def oposiciones_vigentes():
     ''', (desde,)).fetchall()
 
     # --- Filtros ---
-    selected_departamentos = request.form.getlist("departamentos")
+    selected_departamentos = request.args.getlist("departamentos")
     busqueda = request.args.get("busqueda", "")
     provincia = request.args.get("provincia", "")
     fecha_desde = request.args.get("fecha_desde", "")
