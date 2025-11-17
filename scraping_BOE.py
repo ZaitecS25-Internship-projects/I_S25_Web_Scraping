@@ -8,6 +8,7 @@ Autor original: franSM, Cristóbal Delgado Romero
 Ampliado con auth + email: 2025
 """
 
+from datetime import datetime, date
 import os
 import re
 import sqlite3
@@ -33,23 +34,26 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "login"  # redirige a /login si no hay sesión
 
+
 class User(UserMixin):
     def __init__(self, id, email):
         self.id = id
         self.email = email
 
-
     @staticmethod
     def get(user_id):
         db = get_db()
-        row = db.execute("SELECT id, email FROM users WHERE id = ?", (user_id,)).fetchone()
+        row = db.execute(
+            "SELECT id, email FROM users WHERE id = ?", (user_id,)).fetchone()
         if row:
             return User(row["id"], row["email"])
         return None
 
+
 @login_manager.user_loader
 def load_user(user_id):
     return User.get(user_id)
+
 
 # === Configuración de Flask-Mail (desde variables de entorno) ===
 app.config['MAIL_SERVER'] = os.getenv('MAIL_SERVER', 'localhost')
@@ -58,13 +62,15 @@ app.config['MAIL_USE_TLS'] = os.getenv('MAIL_USE_TLS', '0') == '1'
 app.config['MAIL_USE_SSL'] = os.getenv('MAIL_USE_SSL', '0') == '1'
 app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
 app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
-app.config['MAIL_DEFAULT_SENDER'] = os.getenv('MAIL_DEFAULT_SENDER', app.config.get('MAIL_USERNAME'))
+app.config['MAIL_DEFAULT_SENDER'] = os.getenv(
+    'MAIL_DEFAULT_SENDER', app.config.get('MAIL_USERNAME'))
 
 mail = Mail(app)
 
 # --------------------
 # filtros Jinja2
 # --------------------
+
 
 @app.template_filter('format_date')
 def format_date_filter(date_str):
@@ -78,10 +84,11 @@ def format_date_filter(date_str):
         return f"{day}/{month}/{year}"
     except Exception:
         return date_str
-    
-from datetime import datetime, date
+
 
 # 🟡 Filtro Jinja: marca como recientes las oposiciones de los últimos x días
+
+
 @app.template_filter('es_reciente')
 def es_reciente(fecha_str, dias=0):
     """
@@ -105,6 +112,7 @@ def get_db():
         db = g._database = sqlite3.connect(DB_PATH)
         db.row_factory = sqlite3.Row
     return db
+
 
 @app.teardown_appcontext
 def close_connection(exception):
@@ -156,12 +164,12 @@ def init_db():
 # --------------------
 
 
-
 def create_user(email, password):
     db = get_db()
     db.execute(
         "INSERT INTO users (email, password_hash, created_at) VALUES (?, ?, ?)",
-        (email.lower(), generate_password_hash(password), datetime.utcnow().isoformat())
+        (email.lower(), generate_password_hash(
+            password), datetime.utcnow().isoformat())
     )
     db.commit()
 
@@ -173,6 +181,7 @@ def find_user_by_email(email):
 # --------------------
 # Extraer provincia
 # --------------------
+
 
 def extraer_provincia(texto):
     """Intenta extraer la provincia de un texto con patrones comunes.
@@ -204,6 +213,7 @@ def extraer_provincia(texto):
 # --------------------
 # Email (Notificación)
 # --------------------
+
 
 def send_new_oposiciones_email(recipients, oposiciones):
     """Envía email HTML con la lista de nuevas oposiciones.
@@ -244,6 +254,7 @@ def all_user_emails():
 # --------------------
 # Scraper BOE
 # --------------------
+
 
 def scrape_boe():
     """Busca en la API de datos abiertos del BOE y guarda nuevas oposiciones.
@@ -302,7 +313,8 @@ def scrape_boe():
         url_pdf = url_pdf_tag.text.strip() if url_pdf_tag else None
 
         dept_parent = item.find_parent('departamento')
-        departamento = dept_parent.get('nombre') if dept_parent and dept_parent.has_attr('nombre') else None
+        departamento = dept_parent.get(
+            'nombre') if dept_parent and dept_parent.has_attr('nombre') else None
 
         provincia = extraer_provincia(titulo) or extraer_provincia(control)
 
@@ -333,6 +345,8 @@ def scrape_boe():
 # Registrar oposiciones vistas
 # --------------------
 # 🆕 Función para registrar una visita
+
+
 def registrar_visita(user_id, oposicion_id):
     db = get_db()
     fecha = datetime.utcnow().isoformat()
@@ -364,8 +378,7 @@ def index():
         (hoy,)
     ).fetchall()
 
-    return render_template('index.html', departamentos=deps, user = current_user)
-
+    return render_template('index.html', departamentos=deps, user=current_user)
 
 
 @app.route("/departamento/<nombre>")
@@ -435,10 +448,10 @@ def mostrar_departamento(nombre):
         visitadas = [
             row["oposicion_id"]
             for row in db.execute(
-                "SELECT oposicion_id FROM visitas WHERE user_id = ?", (user.id,)
+                "SELECT oposicion_id FROM visitas WHERE user_id = ?", (
+                    user.id,)
             ).fetchall()
         ]
-
 
     return render_template(
         "tarjeta.html",
@@ -453,10 +466,8 @@ def mostrar_departamento(nombre):
         fecha_hasta=fecha_hasta,
         hoy=hoy,
         visitadas=visitadas,
-        user=user,  
+        user=user,
     )
-
-
 
 
 @app.route('/scrape')
@@ -469,9 +480,11 @@ def do_scrape():
             try:
                 if recipients:
                     send_new_oposiciones_email(recipients, new_items)
-                flash(f"Se han insertado {len(new_items)} nuevas oposiciones.", "success")
+                flash(
+                    f"Se han insertado {len(new_items)} nuevas oposiciones.", "success")
             except Exception as e:
-                flash(f"Se insertaron {len(new_items)} nuevas oposiciones, pero falló el envío de email: {e}", "warning")
+                flash(
+                    f"Se insertaron {len(new_items)} nuevas oposiciones, pero falló el envío de email: {e}", "warning")
         else:
             flash("No hay nuevas oposiciones hoy.", "info")
     except Exception as e:
@@ -490,12 +503,13 @@ def login():
         user = find_user_by_email(email)
         if not user or not check_password_hash(user['password_hash'], password):
             flash("Credenciales inválidas.", "danger")
-            return render_template('login.html', user = current_user)
+            return render_template('login.html', user=current_user)
         login_user(User(user["id"], user["email"]))
         flash("Sesión iniciada.", "success")
         next_url = request.args.get('next') or url_for('index')
         return redirect(next_url)
-    return render_template('login.html', user = current_user)
+    return render_template('login.html', user=current_user)
+
 
 @app.route('/logout')
 @login_required
@@ -503,6 +517,7 @@ def logout():
     logout_user()
     flash("Sesión cerrada.", "info")
     return redirect(url_for('index'))
+
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -549,7 +564,8 @@ def user():
     params = [desde]
 
     if selected_departamentos:
-        sql += " AND departamento IN ({})".format(",".join(["?"] * len(selected_departamentos)))
+        sql += " AND departamento IN ({})".format(
+            ",".join(["?"] * len(selected_departamentos)))
         params.extend(selected_departamentos)
 
     if busqueda:
@@ -590,11 +606,36 @@ def user():
     )
 
 
+@app.route("/user_oposiciones")
+@login_required
+def oposiciones_vigentes():
+    """Sección para mostrar oposiciones relevantes al usuario."""
+    # En el futuro: filtrar por preferencias del usuario, etc.
+    return render_template("user_oposiciones.html", user=current_user)
+
+
+@app.route("/user_alertas")
+@login_required
+def newsletter_prefs():
+    """Sección para gestionar alertas por correo / newsletter."""
+    # En el futuro: formulario para suscribirse a departamentos concretos.
+    return render_template("user_newsletter.html", user=current_user)
+
+
+@app.route("/user_configuracion")
+@login_required
+def configuracion_cuenta():
+    """Panel de configuración de perfil del usuario."""
+    # En el futuro: formularios de perfil, seguridad, etc.
+    return render_template("user_configuracion.html", user=current_user)
+
+
 @app.route("/marcar_visitada/<int:oposicion_id>", methods=["POST"])
 @login_required
 def marcar_visitada(oposicion_id):
     user = current_user
-    print(f"🟢 Registro de visita recibido: user={user['id']}, oposicion_id={oposicion_id}")
+    print(
+        f"🟢 Registro de visita recibido: user={user['id']}, oposicion_id={oposicion_id}")
     registrar_visita(user["id"], oposicion_id)
     return jsonify({"ok": True})
 
