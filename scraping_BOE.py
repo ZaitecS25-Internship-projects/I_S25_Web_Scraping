@@ -1,11 +1,7 @@
-"""scraping_boe.py
-
+"""
 Aplicación Flask para Web Scraping del BOE (Boletín Oficial del Estado)
 con sistema de usuarios (sign up / login) y notificación por email de
 nuevas oposiciones detectadas.
-
-Autor original: franSM, Cristóbal Delgado Romero
-Ampliado con auth + email: 2025
 """
 
 from datetime import datetime, date
@@ -33,7 +29,7 @@ app.secret_key = os.getenv('SECRET_KEY', 'cambia-esto-en-produccion')
 
 login_manager = LoginManager()
 login_manager.init_app(app)
-login_manager.login_view = "login"  # redirige a /login si no hay sesión
+login_manager.login_view = "login"  
 
 
 
@@ -357,8 +353,6 @@ def scrape_boe():
 # --------------------
 # Registrar oposiciones vistas
 # --------------------
-# 🆕 Función para registrar una visita
-
 
 def registrar_visita(user_id, oposicion_id):
     db = get_db()
@@ -398,7 +392,7 @@ def index():
 def mostrar_departamento(nombre):
     db = get_db()
 
-    # 🔹 Fecha actual para marcar las oposiciones nuevas
+    # Fecha actual para marcar las oposiciones nuevas
     hoy = datetime.today().strftime("%Y%m%d")
 
     user = current_user
@@ -442,7 +436,7 @@ def mostrar_departamento(nombre):
         "SELECT DISTINCT provincia FROM oposiciones WHERE provincia IS NOT NULL ORDER BY provincia"
     ).fetchall()
 
-    # 🔵 Obtener las oposiciones visitadas por el usuario actual
+    # Obtener las oposiciones visitadas por el usuario actual
     visitadas = []
     user = current_user
 
@@ -554,7 +548,7 @@ def oposiciones_vigentes():
     db = get_db()
     desde = (datetime.today() - timedelta(days=30)).strftime("%Y%m%d")
 
-    # 🔹 Obtener todos los departamentos con oposiciones recientes
+    # Obtener todos los departamentos con oposiciones recientes
     departamentos = db.execute('''
         SELECT DISTINCT departamento 
         FROM oposiciones 
