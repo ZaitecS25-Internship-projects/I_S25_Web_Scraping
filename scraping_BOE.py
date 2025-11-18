@@ -171,6 +171,18 @@ def init_db():
             UNIQUE(user_id, oposicion_id)
         )
     """)
+    # NUEVA TABLA: favoritas
+    db.execute("""
+        CREATE TABLE IF NOT EXISTS favoritas (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            oposicion_id INTEGER NOT NULL,
+            fecha_favorito TEXT NOT NULL,
+            UNIQUE(user_id, oposicion_id),
+            FOREIGN KEY (user_id) REFERENCES users(id),
+            FOREIGN KEY (oposicion_id) REFERENCES oposiciones(id)
+        )
+    """)
     db.commit()
 
 # --------------------
@@ -374,6 +386,39 @@ def registrar_visita(user_id, oposicion_id):
 
 
 # --------------------
+# Gestionar favoritos
+# --------------------
+def toggle_favorito(user_id, oposicion_id):
+    """Añade o quita una oposición de la lista de favoritos.
+    Retorna True si se marcó como favorito (INSERT), False si se desmarcó (DELETE).
+    """
+    db = get_db()
+    fecha = datetime.utcnow().isoformat()
+    try:
+        # Intenta eliminar el favorito (si ya existe)
+        cursor = db.execute(
+            "DELETE FROM favoritas WHERE user_id = ? AND oposicion_id = ?",
+            (user_id, oposicion_id)
+        )
+        
+        # Si se eliminó una fila, es porque existía -> desmarcado
+        if cursor.rowcount > 0:
+            db.commit()
+            return False
+        else:
+            # Si no se eliminó ninguna fila, inserta como nuevo favorito
+            db.execute(
+                "INSERT INTO favoritas (user_id, oposicion_id, fecha_favorito) VALUES (?, ?, ?)",
+                (user_id, oposicion_id, fecha)
+            )
+            db.commit()
+            return True
+    except Exception as e:
+        # En caso de error (ej. IntegrityError en otros casos no previstos), registra y devuelve False
+        print(f"Error al gestionar favorito: {e}")
+        return False
+
+# --------------------
 # Rutas Flask
 # --------------------
 
@@ -442,21 +487,12 @@ def mostrar_departamento(nombre):
         "SELECT DISTINCT provincia FROM oposiciones WHERE provincia IS NOT NULL ORDER BY provincia"
     ).fetchall()
 
-    # 🔵 Obtener las oposiciones visitadas por el usuario actual
+# 🔵 Obtener las oposiciones visitadas y favoritas por el usuario actual
     visitadas = []
+    favoritas = [] # 🆕 Inicializar lista de favoritas
     user = current_user
 
-    if user:
-        db.execute("""
-            CREATE TABLE IF NOT EXISTS visitas (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                user_id INTEGER,
-                oposicion_id INTEGER,
-                fecha_visita TEXT,
-                UNIQUE(user_id, oposicion_id)
-            )
-        """)
-        db.commit()
+    if user.is_authenticated: 
 
         visitadas = [
             row["oposicion_id"]
@@ -465,6 +501,18 @@ def mostrar_departamento(nombre):
                     user.id,)
             ).fetchall()
         ]
+        
+        # 🆕 Obtener los IDs de las oposiciones favoritas
+        favoritas = [
+            row["oposicion_id"]
+            for row in db.execute(
+                "SELECT oposicion_id FROM favoritas WHERE user_id = ?", (
+                    user.id,)
+            ).fetchall()
+        ]
+
+
+
 
     return render_template(
         "tarjeta.html",
@@ -479,8 +527,11 @@ def mostrar_departamento(nombre):
         fecha_hasta=fecha_hasta,
         hoy=hoy,
         visitadas=visitadas,
-        user=user,
+        favoritas=favoritas,
+        user=user,  
     )
+
+
 
 
 @app.route('/scrape')
@@ -634,11 +685,94 @@ def configuracion_cuenta():
 @app.route("/marcar_visitada/<int:oposicion_id>", methods=["POST"])
 @login_required
 def marcar_visitada(oposicion_id):
-    user = current_user
-    print(
-        f"🟢 Registro de visita recibido: user={user['id']}, oposicion_id={oposicion_id}")
-    registrar_visita(user["id"], oposicion_id)
+    user_id = current_user.id
+    registrar_visita(user_id, oposicion_id)
+    print(f"🟢 Registro de visita recibido: user={user_id}, oposicion_id={oposicion_id}")
     return jsonify({"ok": True})
+
+@app.route("/estadisticas")
+@login_required
+def estadisticas():
+    db = get_db()
+
+    # Obtener número de visitas agrupadas por departamento
+    stats = db.execute("""
+        SELECT o.departamento, COUNT(v.id) AS total_visitas
+        FROM visitas v
+        JOIN oposiciones o ON v.oposicion_id = o.id
+        GROUP BY o.departamento
+        ORDER BY total_visitas DESC
+    """).fetchall()
+
+    # Convertir a listas para el gráfico
+    labels = [row["departamento"] for row in stats]
+    values = [row["total_visitas"] for row in stats]
+
+    return render_template(
+        "estadisticas.html",
+        stats=stats,
+        labels=labels,
+        values=values,
+        user=current_user
+    )
+
+# Ruta para marcar/desmarcar como favorita 
+@app.route("/toggle_favorito/<int:oposicion_id>", methods=["POST"])
+@login_required
+def toggle_favorito_route(oposicion_id):
+    """Endpoint para que el frontend marque/desmarque una oposición como favorita."""
+    user = current_user
+    # Nota: Es una buena práctica usar 'current_user.id' en lugar de 'user["id"]' 
+    # para consistencia con la clase User(UserMixin).
+    is_favorite = toggle_favorito(user.id, oposicion_id)
+    # Devuelve el nuevo estado para actualizar el icono en el frontend
+    return jsonify({"ok": True, "is_favorite": is_favorite})
+
+# 🆕 Ruta para ver las oposiciones favoritas
+@app.route("/user_favoritas")
+@login_required
+def oposiciones_favoritas():
+    db = get_db()
+    user = current_user
+
+    # Obtener todas las oposiciones marcadas como favoritas por el usuario
+    oposiciones = db.execute('''
+        SELECT 
+            o.*, f.fecha_favorito
+        FROM 
+            oposiciones o
+        JOIN 
+            favoritas f ON o.id = f.oposicion_id
+        WHERE 
+            f.user_id = ?
+        ORDER BY 
+            f.fecha_favorito DESC
+    ''', (user.id,)).fetchall()
+
+    # Oposiciones visitadas (para poder mostrarlas en la lista)
+    visitadas = [
+        row["oposicion_id"]
+        for row in db.execute(
+            "SELECT oposicion_id FROM visitas WHERE user_id = ?", (user.id,)
+        ).fetchall()
+    ]
+
+    # Reutilizamos el template de oposiciones para mostrar la lista
+    return render_template(
+        "user_oposiciones.html",
+        user=user,
+        oposiciones=oposiciones,
+        departamentos=[], 
+        selected_departamentos=[],
+        provincias=[],
+        busqueda="",
+        provincia_filtro="",
+        fecha_desde="",
+        fecha_hasta="",
+        visitadas=visitadas,
+        # Todas las oposiciones que se muestran aquí son favoritas
+        favoritas=[o['id'] for o in oposiciones], 
+    )
 
 
 if __name__ == '__main__':
