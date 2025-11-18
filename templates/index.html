@@ -15,27 +15,12 @@
   </div>
 
   <!-- Contenedor principal con tarjetas de departamentos -->
-  <div class="container py-5 contenido-principal">
-    <!-- Mensajes flash para feedback de operaciones -->
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        {% for category, message in messages %}
-          <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-            {{ message }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-          </div>
-        {% endfor %}
-      {% endif %}
-    {% endwith %}
-
+  
   <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
   <h2 class="mb-0">Departamentos</h2>
   <div class="d-flex gap-2">
     <a href="{{ url_for('do_scrape') }}" class="btn btn-primary btn-update">
       Actualizar datos BOE
-    </a>
-    <a href="https://www.boe.es" target="_blank" class="btn btn-primary btn-update">
-      Ir al BOE
     </a>
   </div>
 </div>

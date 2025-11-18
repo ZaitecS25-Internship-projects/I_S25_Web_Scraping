@@ -9,6 +9,7 @@ Ampliado con auth + email: 2025
 """
 
 from datetime import datetime, date
+from datetime import datetime, date
 import os
 import re
 import sqlite3
@@ -35,18 +36,28 @@ login_manager.init_app(app)
 login_manager.login_view = "login"  # redirige a /login si no hay sesión
 
 
+
 class User(UserMixin):
-    def __init__(self, id, email):
+    def __init__(self, id, email, name, apellidos, age, genero):
         self.id = id
         self.email = email
+        self.name = name
+        self.apellidos = apellidos
+        self.age = age
+        self.genero = genero
+
 
     @staticmethod
     def get(user_id):
         db = get_db()
         row = db.execute(
-            "SELECT id, email FROM users WHERE id = ?", (user_id,)).fetchone()
+            
+            "SELECT id, email, name, apellidos, age, genero FROM users WHERE id = ?", (user_id,)
+    ).fetchone()
+
         if row:
-            return User(row["id"], row["email"])
+            return User(row["id"], row["email"], row["name"], row["apellidos"], row["age"], row["genero"]
+    )
         return None
 
 
@@ -143,9 +154,12 @@ def init_db():
     db.execute("""
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            email TEXT UNIQUE NOT NULL,
-            password_hash TEXT NOT NULL,
-            created_at TEXT NOT NULL
+            email TEXT UNIQUE,
+            password_hash TEXT,
+            name TEXT,
+            apellidos TEXT,
+            age INTEGER,
+            genero TEXT
         )
     """)
     db.execute("""
@@ -164,15 +178,14 @@ def init_db():
 # --------------------
 
 
-def create_user(email, password):
+def create_user(email, password, name, apellidos, age, genero):
     db = get_db()
+    password_hash = generate_password_hash(password)
     db.execute(
-        "INSERT INTO users (email, password_hash, created_at) VALUES (?, ?, ?)",
-        (email.lower(), generate_password_hash(
-            password), datetime.utcnow().isoformat())
+        "INSERT INTO users (email, password_hash, name, apellidos, age, genero) VALUES (?, ?, ?, ?, ?, ?)",
+        (email.lower(), password_hash, name, apellidos, age, genero)
     )
     db.commit()
-
 
 def find_user_by_email(email):
     db = get_db()
@@ -475,18 +488,6 @@ def do_scrape():
     init_db()
     try:
         new_items = scrape_boe()
-        if new_items:
-            recipients = all_user_emails()
-            try:
-                if recipients:
-                    send_new_oposiciones_email(recipients, new_items)
-                flash(
-                    f"Se han insertado {len(new_items)} nuevas oposiciones.", "success")
-            except Exception as e:
-                flash(
-                    f"Se insertaron {len(new_items)} nuevas oposiciones, pero falló el envío de email: {e}", "warning")
-        else:
-            flash("No hay nuevas oposiciones hoy.", "info")
     except Exception as e:
         flash(f"Error al hacer scraping: {e}", "danger")
     return redirect(url_for('index'))
@@ -503,8 +504,8 @@ def login():
         user = find_user_by_email(email)
         if not user or not check_password_hash(user['password_hash'], password):
             flash("Credenciales inválidas.", "danger")
-            return render_template('login.html', user=current_user)
-        login_user(User(user["id"], user["email"]))
+            return redirect(url_for('login'))  # 🔹 redirect limpio
+        login_user(User(user["id"], user["email"], user["name"]))
         flash("Sesión iniciada.", "success")
         next_url = request.args.get('next') or url_for('index')
         return redirect(next_url)
@@ -525,15 +526,19 @@ def register():
     if request.method == 'POST':
         email = (request.form.get('email') or '').strip()
         password = (request.form.get('password') or '')
-        if not email or not password:
-            flash("Email y contraseña son obligatorios.", "danger")
+        name = (request.form.get('nombre') or '')
+        apellidos = (request.form.get('apellidos') or '')
+        age = (request.form.get ('edad') or '')
+        genero = (request.form.get('genero') or '')
+        if not email or not password or not name or not apellidos or not age or not genero:
+            flash("¡Rellena todos los campos!", "danger")
             return render_template('register.html', user=current_user)
         if find_user_by_email(email):
             flash("Ese email ya está registrado.", "warning")
             return render_template('register.html', user=current_user)
-        create_user(email, password)
+        create_user(email, password, name, apellidos, age, genero)
         user = find_user_by_email(email)
-        login_user(User(user["id"], user["email"]))  # 🔹 Usamos Flask-Login
+        login_user(User(user["id"], user["email"], user["name"], user["apellidos"], user["age"], user["genero"]))
         flash("Registro correcto. Sesión iniciada.", "success")
         return redirect(url_for('index'))
     return render_template('register.html', user=current_user)
@@ -542,6 +547,10 @@ def register():
 @app.route("/user", methods=["GET", "POST"])
 @login_required
 def user():
+    return render_template("user.html", user=current_user)
+@app.route("/user_oposiciones")
+@login_required
+def oposiciones_vigentes():
     db = get_db()
     desde = (datetime.today() - timedelta(days=30)).strftime("%Y%m%d")
 
@@ -554,7 +563,7 @@ def user():
     ''', (desde,)).fetchall()
 
     # --- Filtros ---
-    selected_departamentos = request.form.getlist("departamentos")
+    selected_departamentos = request.args.getlist("departamentos")
     busqueda = request.args.get("busqueda", "")
     provincia = request.args.get("provincia", "")
     fecha_desde = request.args.get("fecha_desde", "")
@@ -593,7 +602,7 @@ def user():
     ).fetchall()
 
     return render_template(
-        "user.html",
+        "user_oposiciones.html",
         user=current_user,
         departamentos=departamentos,
         selected_departamentos=selected_departamentos,
@@ -604,14 +613,6 @@ def user():
         fecha_desde=fecha_desde,
         fecha_hasta=fecha_hasta,
     )
-
-
-@app.route("/user_oposiciones")
-@login_required
-def oposiciones_vigentes():
-    """Sección para mostrar oposiciones relevantes al usuario."""
-    # En el futuro: filtrar por preferencias del usuario, etc.
-    return render_template("user_oposiciones.html", user=current_user)
 
 
 @app.route("/user_alertas")
