@@ -440,6 +440,10 @@ def toggle_favorito(user_id, oposicion_id):
 @app.route('/')
 def index():
     init_db()
+    try:
+        scrape_boe()
+    except Exception as e:
+        app.logger.warning(f"Error al actualizar datos automáticamente: {e}")
     db = get_db()
     hoy = datetime.today().strftime('%Y%m%d')
     deps = db.execute(
