@@ -1,21 +1,75 @@
 {% extends "base.html" %}
-{% block title %}Alertas por correo{% endblock %}
+{% block title %}Mis Alertas - Oposiciones BOE{% endblock %}
 
 {% block content %}
-<div class="container py-4">
-    <h2 class="mb-3">📬 Alertas por correo</h2>
-    <p class="text-muted">
-        Elige qué departamentos quieres seguir y te enviaremos un email cuando haya
-        nuevas oposiciones relacionadas.
-    </p>
+<div class="container py-4 contenido-principal">
+  <h2 class="mb-4 text-center hero-title">📬 Gestión de Alertas</h2>
 
-    <div class="alert alert-info">
-        Aquí podrás añadir en el futuro:
-        <ul class="mb-0">
-            <li>Un listado de departamentos con checkboxes.</li>
-            <li>Un botón para guardar tus preferencias de alertas.</li>
-            <li>Opciones de frecuencia (diaria, semanal, solo nuevas).</li>
-        </ul>
+  <div class="row">
+    <div class="col-md-3 mb-4">
+      <div class="list-group shadow-sm">
+        <a href="{{ url_for('configuracion_cuenta') }}" class="list-group-item list-group-item-action">
+          <i class="bi bi-shield-lock me-2"></i> Seguridad
+        </a>
+        
+        <a href="#" class="list-group-item list-group-item-action active" aria-current="true">
+          <i class="bi bi-envelope me-2"></i> Alertas / Email
+        </a>
+        
+        <a href="#" class="list-group-item list-group-item-action disabled">
+          <i class="bi bi-person-badge me-2"></i> Perfil (Próximamente)
+        </a>
+      </div>
     </div>
+
+    <div class="col-md-9">
+      <div class="card shadow-sm">
+        <div class="card-header bg-white py-3">
+          <h5 class="mb-0 text-primary">Suscripciones por Correo</h5>
+        </div>
+        <div class="card-body">
+          <p class="text-muted">
+            Configura aquí qué notificaciones quieres recibir en tu correo electrónico: <strong>{{ user.email }}</strong>
+          </p>
+
+          <form>
+            <div class="form-check form-switch mb-3">
+              <input class="form-check-input" type="checkbox" id="alertasDiarias" checked>
+              <label class="form-check-label" for="alertasDiarias">
+                <strong>Resumen diario</strong>
+                <div class="text-muted small">Recibe un email cada mañana con las nuevas oposiciones publicadas.</div>
+              </label>
+            </div>
+
+            <div class="form-check form-switch mb-3">
+              <input class="form-check-input" type="checkbox" id="alertasFavoritos">
+              <label class="form-check-label" for="alertasFavoritos">
+                <strong>Cambios en mis favoritas</strong>
+                <div class="text-muted small">Avísame si hay actualizaciones en las oposiciones que he marcado como favoritas.</div>
+              </label>
+            </div>
+
+            <hr class="my-4">
+
+            <h6 class="mb-3">Filtrar alertas por departamento:</h6>
+            <div class="mb-3">
+                <select class="form-select" aria-label="Seleccionar departamento">
+                    <option selected>Todos los departamentos</option>
+                    <option value="1">Ministerio de Defensa</option>
+                    <option value="2">Ministerio de Hacienda</option>
+                    <option value="3">Administración Local</option>
+                </select>
+            </div>
+
+            <div class="mt-4 d-flex justify-content-end">
+              <button type="button" class="btn btn-primary" onclick="alert('Funcionalidad en desarrollo')">
+                <i class="bi bi-save"></i> Guardar Preferencias
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 {% endblock %}

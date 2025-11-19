@@ -1,41 +1,74 @@
 {% extends "base.html" %}
-{% block title %}Configuración de cuenta{% endblock %}
+{% block title %}Configuración - Oposiciones BOE{% endblock %}
 
 {% block content %}
-<div class="container py-4" style="max-width: 720px;">
-    <h2 class="mb-4">⚙️ Configuración de cuenta</h2>
+<div class="container py-4 contenido-principal">
+  <h2 class="mb-4 text-center hero-title">⚙️ Configuración de Cuenta</h2>
 
-    <div class="card mb-4 shadow-sm">
-        <div class="card-body">
-            <h5 class="card-title">Perfil</h5>
-            <p class="text-muted small mb-3">
-                Aquí podrás editar tu nombre, email visible y foto de perfil.
-            </p>
-            <!-- Futuro: formulario de perfil -->
-            <p class="mb-0">Pendiente de implementar formulario de perfil.</p>
-        </div>
+  <div class="row">
+    <div class="col-md-3 mb-4">
+      <div class="list-group shadow-sm">
+        <a href="#" class="list-group-item list-group-item-action active" aria-current="true">
+          <i class="bi bi-shield-lock me-2"></i> Seguridad
+        </a>
+        <a href="{{ url_for('newsletter_prefs') }}" class="list-group-item list-group-item-action">
+          <i class="bi bi-envelope me-2"></i> Alertas / Email
+        </a>
+        <a href="#" class="list-group-item list-group-item-action disabled">
+          <i class="bi bi-person-badge me-2"></i> Perfil (Próximamente)
+        </a>
+      </div>
     </div>
 
-    <div class="card mb-4 shadow-sm">
-        <div class="card-body">
-            <h5 class="card-title">Seguridad</h5>
-            <p class="text-muted small mb-3">
-                Cambia tu contraseña y revisa opciones de seguridad de la cuenta.
-            </p>
-            <!-- Futuro: formulario de cambio de contraseña -->
-            <p class="mb-0">Pendiente de implementar cambio de contraseña.</p>
+    <div class="col-md-9">
+      <div class="card shadow-sm">
+        <div class="card-header bg-white py-3">
+          <h5 class="mb-0 text-primary">Cambiar Contraseña</h5>
         </div>
-    </div>
+        <div class="card-body">
+          <p class="text-muted small mb-4">
+            Para proteger tu cuenta, te pediremos tu contraseña actual antes de realizar cambios.
+          </p>
 
-    <div class="card mb-4 shadow-sm">
-        <div class="card-body">
-            <h5 class="card-title">Preferencias</h5>
-            <p class="text-muted small mb-3">
-                Ajusta idioma, zona horaria y la forma en que quieres recibir notificaciones.
-            </p>
-            <!-- Futuro: switches de preferencias -->
-            <p class="mb-0">Pendiente de implementar ajustes de preferencias.</p>
+          <form action="{{ url_for('change_password') }}" method="POST">
+            
+            <div class="mb-3">
+              <label for="current_password" class="form-label fw-bold">Contraseña Actual</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-key"></i></span>
+                <input type="password" class="form-control" id="current_password" name="current_password" required>
+              </div>
+            </div>
+
+            <hr class="my-4">
+
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label for="new_password" class="form-label fw-bold">Nueva Contraseña</label>
+                <div class="input-group">
+                  <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                  <input type="password" class="form-control" id="new_password" name="new_password" required minlength="6">
+                </div>
+              </div>
+              <div class="col-md-6">
+                <label for="confirm_password" class="form-label fw-bold">Confirmar Nueva</label>
+                <div class="input-group">
+                  <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
+                  <input type="password" class="form-control" id="confirm_password" name="confirm_password" required minlength="6">
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-4 d-flex justify-content-end">
+              <button type="submit" class="btn btn-primary">
+                <i class="bi bi-check-lg"></i> Actualizar Contraseña
+              </button>
+            </div>
+
+          </form>
         </div>
+      </div>
     </div>
+  </div>
 </div>
 {% endblock %}

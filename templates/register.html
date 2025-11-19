@@ -28,8 +28,31 @@
   </div>
   <div class="mb-3">
     <label class="form-label">Contraseña</label>
-    <input class="form-control" type="password" name="password" minlength="6" required>
+    <div class="input-group">
+      <input class="form-control" type="password" name="password" id="password-register" minlength="6" required>
+      <button class="btn btn-outline-secondary" type="button" id="togglePassword-register" onclick="togglePasswordVisibility('register')">
+        <i class="bi bi-eye" id="eye-icon-register"></i>
+      </button>
+    </div>
+    <small class="form-text text-muted">Mínimo 6 caracteres</small>
   </div>
   <button class="btn btn-success">Crear cuenta</button>
 </form>
+
+<script>
+function togglePasswordVisibility(formType) {
+  const passwordInput = document.getElementById('password-' + formType);
+  const eyeIcon = document.getElementById('eye-icon-' + formType);
+  
+  if (passwordInput.type === 'password') {
+    passwordInput.type = 'text';
+    eyeIcon.classList.remove('bi-eye');
+    eyeIcon.classList.add('bi-eye-slash');
+  } else {
+    passwordInput.type = 'password';
+    eyeIcon.classList.remove('bi-eye-slash');
+    eyeIcon.classList.add('bi-eye');
+  }
+}
+</script>
 {% endblock %}
