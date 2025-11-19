@@ -11,11 +11,9 @@
         <a href="{{ url_for('configuracion_cuenta') }}" class="list-group-item list-group-item-action">
           <i class="bi bi-shield-lock me-2"></i> Seguridad
         </a>
-        
         <a href="#" class="list-group-item list-group-item-action active" aria-current="true">
           <i class="bi bi-envelope me-2"></i> Alertas / Email
         </a>
-        
         <a href="#" class="list-group-item list-group-item-action disabled">
           <i class="bi bi-person-badge me-2"></i> Perfil (Próximamente)
         </a>
@@ -23,52 +21,78 @@
     </div>
 
     <div class="col-md-9">
-      <div class="card shadow-sm">
+      
+      <div class="card shadow-sm mb-4">
         <div class="card-header bg-white py-3">
           <h5 class="mb-0 text-primary">Suscripciones por Correo</h5>
         </div>
         <div class="card-body">
           <p class="text-muted">
-            Configura aquí qué notificaciones quieres recibir en tu correo electrónico: <strong>{{ user.email }}</strong>
+            Configura aquí qué notificaciones quieres recibir en: <strong>{{ user.email }}</strong>
           </p>
 
-          <form>
+          <form method="POST" action="{{ url_for('newsletter_prefs') }}">
             <div class="form-check form-switch mb-3">
-              <input class="form-check-input" type="checkbox" id="alertasDiarias" checked>
-              <label class="form-check-label" for="alertasDiarias">
+              <input class="form-check-input" type="checkbox" 
+                     id="alerta_diaria" name="alerta_diaria"
+                     {% if prefs['alerta_diaria'] %}checked{% endif %}>
+              <label class="form-check-label" for="alerta_diaria">
                 <strong>Resumen diario</strong>
-                <div class="text-muted small">Recibe un email cada mañana con las nuevas oposiciones publicadas.</div>
+                <div class="text-muted small">Recibe un email cada mañana con las nuevas oposiciones.</div>
               </label>
             </div>
 
             <div class="form-check form-switch mb-3">
-              <input class="form-check-input" type="checkbox" id="alertasFavoritos">
-              <label class="form-check-label" for="alertasFavoritos">
+              <input class="form-check-input" type="checkbox" 
+                     id="alerta_favoritos" name="alerta_favoritos"
+                     {% if prefs['alerta_favoritos'] %}checked{% endif %}>
+              <label class="form-check-label" for="alerta_favoritos">
                 <strong>Cambios en mis favoritas</strong>
-                <div class="text-muted small">Avísame si hay actualizaciones en las oposiciones que he marcado como favoritas.</div>
+                <div class="text-muted small">Avísame si hay actualizaciones en mis oposiciones guardadas.</div>
               </label>
             </div>
 
             <hr class="my-4">
 
-            <h6 class="mb-3">Filtrar alertas por departamento:</h6>
+            <h6 class="mb-3">Filtrar resumen diario por departamento:</h6>
             <div class="mb-3">
-                <select class="form-select" aria-label="Seleccionar departamento">
-                    <option selected>Todos los departamentos</option>
-                    <option value="1">Ministerio de Defensa</option>
-                    <option value="2">Ministerio de Hacienda</option>
-                    <option value="3">Administración Local</option>
+                <select class="form-select" name="departamento_filtro" aria-label="Seleccionar departamento">
+                    <option value="Todos" {% if prefs['departamento_filtro'] == 'Todos' %}selected{% endif %}>
+                        Todos los departamentos
+                    </option>
+                    {% for dept in departamentos %}
+                    <option value="{{ dept }}" {% if prefs['departamento_filtro'] == dept %}selected{% endif %}>
+                        {{ dept }}
+                    </option>
+                    {% endfor %}
                 </select>
+                <div class="form-text">Este filtro también se aplica al botón de envío manual de abajo.</div>
             </div>
 
-            <div class="mt-4 d-flex justify-content-end">
-              <button type="button" class="btn btn-primary" onclick="alert('Funcionalidad en desarrollo')">
+            <div class="d-flex justify-content-end">
+              <button type="submit" class="btn btn-primary">
                 <i class="bi bi-save"></i> Guardar Preferencias
               </button>
             </div>
           </form>
         </div>
       </div>
+
+      <div class="card shadow-sm border-warning">
+        <div class="card-body d-flex align-items-center justify-content-between">
+          <div>
+            <h6 class="fw-bold mb-1"><i class="bi bi-send-check text-warning"></i> ¿Quieres probar tus alertas?</h6>
+            <small class="text-muted">Te enviaremos ahora mismo un resumen con las últimas oposiciones según tu filtro.</small>
+          </div>
+          
+          <form method="POST" action="{{ url_for('enviar_resumen_ahora') }}">
+             <button type="submit" class="btn btn-outline-dark">
+               Enviar Email Ahora
+             </button>
+          </form>
+        </div>
+      </div>
+
     </div>
   </div>
 </div>

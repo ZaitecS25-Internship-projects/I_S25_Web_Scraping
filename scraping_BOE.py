@@ -87,16 +87,15 @@ def load_user(user_id):
     return User.get(user_id)
 
 
-# === Configuración de Flask-Mail (desde variables de entorno) ===
-app.config['MAIL_SERVER'] = os.getenv('MAIL_SERVER', 'localhost')
-app.config['MAIL_PORT'] = int(os.getenv('MAIL_PORT', '25'))
-app.config['MAIL_USE_TLS'] = os.getenv('MAIL_USE_TLS', '0') == '1'
-app.config['MAIL_USE_SSL'] = os.getenv('MAIL_USE_SSL', '0') == '1'
-app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
-app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
-app.config['MAIL_DEFAULT_SENDER'] = os.getenv(
-    'MAIL_DEFAULT_SENDER', app.config.get('MAIL_USERNAME')
-)
+# === Configuración de Flask-Mail (GMAIL) ===
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USE_SSL'] = False
+app.config['MAIL_USERNAME'] = 'notificaciones.scraper@gmail.com'  
+app.config['MAIL_PASSWORD'] = 'sqoj zfue ovcf dlhz'     
+app.config['MAIL_DEFAULT_SENDER'] = 'notificaciones.scraper@gmail.com' 
+# ============================================
 
 mail = Mail(app)
 
@@ -191,6 +190,16 @@ def init_db():
             UNIQUE(user_id, oposicion_id),
             FOREIGN KEY (user_id) REFERENCES users(id),
             FOREIGN KEY (oposicion_id) REFERENCES oposiciones(id)
+        )
+    """)
+    # Suscripciones de usuario
+    db.execute("""
+        CREATE TABLE IF NOT EXISTS suscripciones (
+            user_id INTEGER PRIMARY KEY,
+            alerta_diaria INTEGER DEFAULT 0,
+            alerta_favoritos INTEGER DEFAULT 0,
+            departamento_filtro TEXT,
+            FOREIGN KEY (user_id) REFERENCES users(id)
         )
     """)
     db.commit()
@@ -715,10 +724,45 @@ def oposiciones_vigentes():
     )
 
 
-@app.route("/user_alertas")
+@app.route("/user_alertas", methods=["GET", "POST"])
 @login_required
 def newsletter_prefs():
-    return render_template("user_newsletter.html", user=current_user)
+    db = get_db()
+    user_id = current_user.id
+
+    # 1. Procesar el formulario al guardar (POST)
+    if request.method == "POST":
+        # Los checkbox solo envían valor si están marcados ("on")
+        alerta_diaria = 1 if request.form.get("alerta_diaria") else 0
+        alerta_favoritos = 1 if request.form.get("alerta_favoritos") else 0
+        departamento = request.form.get("departamento_filtro")
+
+        # Usamos REPLACE INTO para insertar o actualizar si ya existe (gracias a la PK user_id)
+        db.execute("""
+            INSERT OR REPLACE INTO suscripciones (user_id, alerta_diaria, alerta_favoritos, departamento_filtro)
+            VALUES (?, ?, ?, ?)
+        """, (user_id, alerta_diaria, alerta_favoritos, departamento))
+        db.commit()
+        flash("¡Preferencias de alertas actualizadas!", "success")
+        return redirect(url_for("newsletter_prefs"))
+
+    # 2. Cargar preferencias actuales (GET)
+    prefs = db.execute("SELECT * FROM suscripciones WHERE user_id = ?", (user_id,)).fetchone()
+
+    # Si no tiene preferencias guardadas, creamos un diccionario por defecto
+    if not prefs:
+        prefs = {"alerta_diaria": 0, "alerta_favoritos": 0, "departamento_filtro": "Todos"}
+
+    # 3. Cargar lista de departamentos para el select
+    dept_rows = db.execute("SELECT DISTINCT departamento FROM oposiciones WHERE departamento IS NOT NULL ORDER BY departamento").fetchall()
+    departamentos = [d["departamento"] for d in dept_rows]
+
+    return render_template(
+        "user_newsletter.html", 
+        user=current_user,
+        prefs=prefs,
+        departamentos=departamentos
+    )
 
 
 @app.route("/user_configuracion")
@@ -823,6 +867,53 @@ def change_password():
     flash("¡Contraseña actualizada correctamente!", "success")
     return redirect(url_for("configuracion_cuenta"))
 
+
+# 🆕 Ruta para forzar el envío de un email resumen ahora mismo (CORREGIDA)
+@app.route("/enviar_resumen_ahora", methods=["POST"])
+@login_required
+def enviar_resumen_ahora():
+    db = get_db()
+    user = current_user
+
+    # 1. Obtener preferencias guardadas del usuario
+    prefs = db.execute("SELECT * FROM suscripciones WHERE user_id = ?", (user.id,)).fetchone()
+    
+    # Si no ha guardado nada, asumimos "Todos"
+    # Nota: sqlite3.Row permite acceso por índice prefs['columna'] pero no .get()
+    dept_filter = prefs["departamento_filtro"] if prefs and prefs["departamento_filtro"] else "Todos"
+
+    # 2. Buscar oposiciones recientes (últimos 7 días para asegurar que haya contenido)
+    fecha_limite = (datetime.now() - timedelta(days=7)).strftime("%Y%m%d")
+    
+    sql = "SELECT * FROM oposiciones WHERE fecha >= ?"
+    params = [fecha_limite]
+
+    # Aplicar filtro si el usuario tiene un departamento seleccionado
+    if dept_filter != "Todos":
+        sql += " AND departamento = ?"
+        params.append(dept_filter)
+
+    sql += " ORDER BY fecha DESC LIMIT 20"
+    rows = db.execute(sql, params).fetchall() # Obtenemos filas SQL
+
+    # 🔴 PASO CLAVE: Convertir las filas SQL a diccionarios normales
+    # Esto es necesario porque send_new_oposiciones_email usa .get(), que las filas SQL no tienen.
+    oposiciones = [dict(row) for row in rows]
+
+    # 3. Enviar Email
+    if oposiciones:
+        try:
+            send_new_oposiciones_email([user.email], oposiciones)
+            flash(f"✅ Email enviado correctamente a {user.email} con {len(oposiciones)} oposiciones recientes.", "success")
+        except Exception as e:
+            # Imprimir el error completo en consola para depurar mejor
+            import traceback
+            traceback.print_exc()
+            flash(f"❌ Error al enviar email (revisa la configuración SMTP): {e}", "danger")
+    else:
+        flash(f"⚠️ No se encontraron oposiciones recientes (últimos 7 días) para el departamento: {dept_filter}", "warning")
+
+    return redirect(url_for("newsletter_prefs"))
 
 if __name__ == '__main__':
     with app.app_context():
