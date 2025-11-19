@@ -706,16 +706,13 @@ def oposiciones_vigentes():
         provincia_filtro=provincia,
         fecha_desde=fecha_desde,
         fecha_hasta=fecha_hasta,
-<<<<<<< HEAD
         orden=orden,
         page=page,
         total_pages=total_pages,
         total=total,
-=======
         visitadas=visitadas, 
         favoritas=favoritas, 
         hoy=datetime.today().strftime("%Y%m%d")
->>>>>>> Demo
     )
 
 
@@ -783,6 +780,11 @@ def oposiciones_favoritas():
         fecha_hasta="",
         visitadas=visitadas,
         favoritas=[o['id'] for o in oposiciones],
+        hoy=datetime.now().strftime('%Y-%m-%d'),
+        total=len(oposiciones),
+        page=1,
+        total_pages=1,
+        orden="desc"
     )
 
 

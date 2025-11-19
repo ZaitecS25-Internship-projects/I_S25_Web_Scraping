@@ -71,13 +71,11 @@ Incluye botón de retorno a la página principal y paginación.
       <table class="table table-striped table-bordered align-middle">
         <thead class="table-dark">
           <tr>
-<<<<<<< HEAD
-<<<<<<< HEAD
-            <th>Identificador</th>
-            <th>Título</th>
-            <th>Control</th>
-            <th>PDF</th>
-            <th>
+            <th class="col-id">Identificador</th>
+            <th class="col-titulo">Título</th>
+            <th class="col-control">Control</th>
+            <th class="col-pdf">PDF</th>
+            <th class="col-fecha">
               Fecha
               <a href="{{ url_for('mostrar_departamento', nombre=departamento, orden='asc' if orden == 'desc' else 'desc', busqueda=busqueda, provincia=provincia_filtro, fecha_desde=fecha_desde, fecha_hasta=fecha_hasta, page=page) }}" 
                  class="text-white ms-2" 
@@ -89,18 +87,6 @@ Incluye botón de retorno a la página principal y paginación.
                   {% endif %}
               </a>
             </th>
-=======
-=======
->>>>>>> Demo
-            <th class="col-id">Identificador</th>
-            <th class="col-titulo">Título</th>
-            <th class="col-control">Control</th>
-            <th class="col-pdf">PDF</th>
-            <th class="col-fecha">Fecha</th>
-<<<<<<< HEAD
->>>>>>> Demo
-=======
->>>>>>> Demo
           </tr>
         </thead>
         <tbody>
