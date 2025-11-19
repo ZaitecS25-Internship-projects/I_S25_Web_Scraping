@@ -582,6 +582,15 @@ h2.titulo-registro + form .btn-success:hover {
     h2.titulo-registro + form .btn-success { font-size: 0.9rem; padding: 0.5rem; }
 }
 
+/* para que no se corte visitada y nuevo */
+.badge-nuevo {
+  white-space: nowrap;
+}
+
+.badge-visitada {
+  white-space: nowrap;
+}
+
 
 
 /* =========================================================
