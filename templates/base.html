@@ -9,6 +9,7 @@ Define la estructura general de la aplicación:
 
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -17,33 +18,50 @@ Define la estructura general de la aplicación:
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
+
 <body class="bg-light d-flex flex-column min-vh-100">
 
   <!-- Barra de navegación -->
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm mi-navbar animated-navbar">
     <div class="container">
       <a class="navbar-brand fs-4" href="{{ url_for('index') }}">📜 Oposiciones BOE</a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar" aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-
-      <div class="collapse navbar-collapse" id="mainNavbar">
-        <ul class="navbar-nav ms-auto align-items-center gap-2">
-
+      <div class="collapse navbar-collapse">
+        <ul class="navbar-nav ms-auto">
           {% if user.is_authenticated %}
-          <li class="nav-item">
-            <a href="{{ url_for('user') }}" class="btn btn-outline-light btn-sm me-2">
-              👤 Mi cuenta
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle text-white px-2" href="#" id="userMenuDropdown" role="button"
+              data-bs-toggle="dropdown" aria-expanded="false">
+              👤 Mi panel
             </a>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenuDropdown">
+              <li>
+                <a class="dropdown-item" href="{{ url_for('oposiciones_vigentes') }}">
+                  Oposiciones vigentes
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item" href="{{ url_for('newsletter_prefs') }}">
+                  Alertas por correo
+                </a>
+              </li>
+              <li>
+                <hr class="dropdown-divider">
+              </li>
+              <li>
+                <a class="dropdown-item" href="{{ url_for('configuracion_cuenta') }}">
+                  Configuración
+                </a>
+              </li>
+            </ul>
           </li>
-          <li class="nav-item">
-            <a href="{{ url_for('logout') }}" class="btn btn-danger btn-sm">
+          <li class="nav-item ms-2">
+            <a href="{{ url_for('logout') }}" class="btn btn-sm btn-danger">
               Salir
             </a>
           </li>
           {% else %}
-          <li class="nav-item">
-            <a href="{{ url_for('login') }}" class="btn btn-outline-light btn-sm me-2">
+          <li class="nav-item me-2">
+            <a href="{{ url_for('login') }}" class="btn btn-outline-light btn-sm">
               Iniciar sesión
             </a>
           </li>
@@ -53,14 +71,6 @@ Define la estructura general de la aplicación:
             </a>
           </li>
           {% endif %}
-
-          <!-- Botón de modo oscuro / claro -->
-          <li class="nav-item">
-            <a href="#" class="theme-toggle" id="theme-toggle">
-              🌙 Modo oscuro
-            </a>
-          </li>
-
         </ul>
       </div>
     </div>
@@ -71,11 +81,11 @@ Define la estructura general de la aplicación:
   <!-- Contenido principal -->
   <main class="container mt-4 contenido-principal flex-grow-1">
     {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        {% for cat, msg in messages %}
-          <div class="alert alert-{{ cat }} mb-3">{{ msg }}</div>
-        {% endfor %}
-      {% endif %}
+    {% if messages %}
+    {% for cat, msg in messages %}
+    <div class="alert alert-{{ cat }} mb-3">{{ msg }}</div>
+    {% endfor %}
+    {% endif %}
     {% endwith %}
     {% block content %}{% endblock %}
   </main>
@@ -83,44 +93,18 @@ Define la estructura general de la aplicación:
   <!-- Footer -->
   <footer class="mi-footer">
     <p>© 2025 Oposiciones BOE</p>
+
   </footer>
-
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
-  <!-- Script de modo oscuro -->
   <script>
-    document.addEventListener('DOMContentLoaded', function () {
-      const body = document.body;
-      const toggle = document.getElementById('theme-toggle');
-
-      function applyTheme(theme) {
-        const isDark = (theme === 'dark');
-
-        if (isDark) {
-          body.classList.add('dark-mode');
-          body.classList.remove('bg-light');
-          if (toggle) toggle.textContent = '☀️ Modo claro';
-        } else {
-          body.classList.remove('dark-mode');
-          body.classList.add('bg-light');
-          if (toggle) toggle.textContent = '🌙 Modo oscuro';
-        }
-      }
-
-      // Tema guardado o claro por defecto
-      const saved = localStorage.getItem('theme') || 'light';
-      applyTheme(saved);
-
-      if (toggle) {
-        toggle.addEventListener('click', function (e) {
-          e.preventDefault();
-          const current = body.classList.contains('dark-mode') ? 'dark' : 'light';
-          const next = current === 'dark' ? 'light' : 'dark';
-          localStorage.setItem('theme', next);
-          applyTheme(next);
-        });
-      }
-    });
+    const select = document.getElementById("edad");
+    for (let i = 18; i <= 67; i++) {
+      const option = document.createElement("option");
+      option.value = i;
+      option.textContent = i;
+      select.appendChild(option);
+    }
   </script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>
