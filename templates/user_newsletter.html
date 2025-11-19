@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Alertas por correo{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h2 class="mb-3">📬 Alertas por correo</h2>
+    <p class="text-muted">
+        Elige qué departamentos quieres seguir y te enviaremos un email cuando haya
+        nuevas oposiciones relacionadas.
+    </p>
+
+    <div class="alert alert-info">
+        Aquí podrás añadir en el futuro:
+        <ul class="mb-0">
+            <li>Un listado de departamentos con checkboxes.</li>
+            <li>Un botón para guardar tus preferencias de alertas.</li>
+            <li>Opciones de frecuencia (diaria, semanal, solo nuevas).</li>
+        </ul>
+    </div>
+</div>
+{% endblock %}

@@ -15,7 +15,6 @@ Incluye botón de retorno a la página principal y paginación.
     <a href="{{ url_for('index') }}" class="btn btn-secondary btn-volver mb-3">&larr; Volver</a>
     <h2 class="mb-4 text-center hero-title">Oposiciones - {{ departamento }}</h2>
 
-    <!-- Filtros de búsqueda -->
     <div class="card mb-4 shadow-sm">
       <div class="card-body">
         <h5 class="card-title mb-3">Filtros de búsqueda</h5>
@@ -87,7 +86,23 @@ Incluye botón de retorno a la página principal y paginación.
             ">
               <td>{{ row['identificador'] }}</td>
               <td>
+                {% if user.is_authenticated %}
+                <span style="float: right; margin-left: 10px;">
+                    <button type="button" 
+                            class="toggle-favorito-btn" 
+                            data-oposicion-id="{{ row.id }}" 
+                            aria-label="Marcar como favorito"
+                            style="border: none; background: none; cursor: pointer; color: orange;">
+                        <i class="bi {% if row.id in favoritas %}bi-star-fill{% else %}bi-star{% endif %}"
+                           title="{% if row.id in favoritas %}Quitar de Favoritos{% else %}Marcar como Favorito{% endif %}"
+                           >
+                        </i>
+                    </button>
+                </span>
+                {% endif %}
+                
                 {{ row['titulo'] }}
+                
                 {% if row['fecha'] == hoy %}
                   <span class="badge-nuevo">🟡 Nuevo</span>
                 {% endif %}
@@ -116,7 +131,6 @@ Incluye botón de retorno a la página principal y paginación.
       </table>
     </div>
 
-    <!-- Paginación -->
     {% if total_pages > 1 %}
     <nav aria-label="Paginación de oposiciones" class="mt-4">
       <ul class="pagination justify-content-center">
@@ -163,22 +177,59 @@ Incluye botón de retorno a la página principal y paginación.
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <script>
   document.addEventListener('DOMContentLoaded', () => {
-    // Seleccionamos todos los botones/links PDF que tienen data-id y href
+
+    // --- Lógica del botón FAVORITO (Estrella) ---
+    document.querySelectorAll('.toggle-favorito-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const oposicionId = this.dataset.oposicionId;
+            const url = `/toggle_favorito/${oposicionId}`;
+            const icon = this.querySelector('i');
+
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.ok) {
+                    // Actualizar el estado del icono a Bootstrap Icons
+                    if (data.is_favorite) {
+                        icon.classList.remove('bi-star');
+                        icon.classList.add('bi-star-fill'); 
+                        icon.title = "Quitar de Favoritos";
+                    } else {
+                        icon.classList.remove('bi-star-fill');
+                        icon.classList.add('bi-star');
+                        icon.title = "Marcar como Favorito";
+                    }
+                } else {
+                    alert("Error al actualizar favoritos.");
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert("Error de conexión al servidor.");
+            });
+        });
+    });
+    
+    // --- Lógica del botón PDF (Marcar como visitada) ---
     document.querySelectorAll('.btn-pdf').forEach(btn => {
       btn.addEventListener('click', function (e) {
-        e.preventDefault(); // evitamos la navegación automática
+        e.preventDefault(); 
 
         const id = this.dataset.id;
         const pdfUrl = this.getAttribute('href');
         const tr = this.closest('tr');
 
-        // 1) Intentamos usar sendBeacon si está disponible (no bloquea navegación)
+        // 1) Intentamos usar sendBeacon (enviar petición sin bloquear la navegación)
         const beaconUrl = `/marcar_visitada/${id}`;
         let beaconSent = false;
 
         try {
           if (navigator.sendBeacon) {
-            // sendBeacon envía POST con body; usamos un blob vacío o un JSON pequeño
             const payload = JSON.stringify({ts: new Date().toISOString()});
             const blob = new Blob([payload], { type: 'application/json' });
             beaconSent = navigator.sendBeacon(beaconUrl, blob);
@@ -188,7 +239,7 @@ Incluye botón de retorno a la página principal y paginación.
           beaconSent = false;
         }
 
-        // 2) Si sendBeacon no está disponible, hacemos fetch en background (no await)
+        // 2) Si sendBeacon no está disponible, hacemos fetch en background
         if (!beaconSent) {
           fetch(beaconUrl, {
             method: 'POST',
@@ -201,8 +252,7 @@ Incluye botón de retorno a la página principal y paginación.
 
         // 3) Actualizar UI inmediatamente (añadir clase y badge)
         if (tr) {
-          tr.classList.add('visitada-oposicion');   // clase CSS que colorea toda la fila
-          // añadir badge si no existe
+          tr.classList.add('visitada-oposicion');
           const tituloCell = tr.querySelector('td:nth-child(2)');
           if (tituloCell && !tituloCell.querySelector('.badge-visitada')) {
             const span = document.createElement('span');
@@ -213,11 +263,9 @@ Incluye botón de retorno a la página principal y paginación.
         }
 
         // 4) Abrir PDF en nueva pestaña (no bloqueante)
-        // Abrimos la url inmediatamente para una UX fluida
         try {
           window.open(pdfUrl, '_blank');
         } catch (err) {
-          // fallback: navegación en la misma pestaña
           window.location.href = pdfUrl;
         }
       });
