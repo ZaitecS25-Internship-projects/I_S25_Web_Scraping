@@ -447,8 +447,7 @@ def mostrar_departamento(nombre):
     hoy = datetime.today().strftime("%Y%m%d")
 
     user = current_user
-    user_id = user.id if user else None
-
+    user_id = user.id if user.is_authenticated else None
     busqueda = request.args.get("busqueda", "")
     provincia = request.args.get("provincia", "")
     fecha_desde = request.args.get("fecha_desde", "")
