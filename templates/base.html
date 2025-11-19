@@ -9,7 +9,9 @@ Define la estructura general de la aplicación:
 
 <!DOCTYPE html>
 <html lang="es" data-theme="{{ theme }}">
+
 <head>
+
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Oposiciones BOE</title>
@@ -17,16 +19,20 @@ Define la estructura general de la aplicación:
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+  <link rel="icon" type="image/ico" href="static/img/favicon.ico">
 </head>
 
 <body class="bg-light d-flex flex-column min-vh-100">
 
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm mi-navbar animated-navbar">
     <div class="container">
-      <a class="navbar-brand fs-4" href="{{ url_for('index') }}">📜 Oposiciones BOE</a>
+      <a class="navbar-brand fs-4 d-flex align-items-center gap-2" href="{{ url_for('index') }}">
+        <img src="{{ url_for('static', filename='img/logo-navbar.png') }}" alt="Oposiciones BOE" width="50" height="50" style="object-fit: contain;">
+        Oposiciones BOE
+      </a>
 
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
-              aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+        aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
 
@@ -35,29 +41,31 @@ Define la estructura general de la aplicación:
           {% if user.is_authenticated %}
           <li class="nav-item dropdown me-2">
             <a class="nav-link dropdown-toggle text-white px-2" href="#" id="userMenuDropdown" role="button"
-               data-bs-toggle="dropdown" aria-expanded="false">
-              👤 Mi panel
+              data-bs-toggle="dropdown" aria-expanded="false">
+              🏠 Mi panel
             </a>
             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenuDropdown">
               <li>
                 <a class="dropdown-item" href="{{ url_for('oposiciones_vigentes') }}">
-                  Oposiciones vigentes
+                  📚 Oposiciones vigentes
                 </a>
               </li>
               <li>
                 <a class="dropdown-item" href="{{ url_for('oposiciones_favoritas') }}">
-                  Mis Favoritas ⭐
+                ⭐ Mis Favoritas 
                 </a>
               </li>
               <li>
                 <a class="dropdown-item" href="{{ url_for('newsletter_prefs') }}">
-                  Alertas por correo
+                🔔 Alertas por correo
                 </a>
               </li>
-              <li><hr class="dropdown-divider"></li>
+              <li>
+                <hr class="dropdown-divider">
+              </li>
               <li>
                 <a class="dropdown-item" href="{{ url_for('configuracion_cuenta') }}">
-                  Configuración
+                  ⚙️ Configuración
                 </a>
               </li>
             </ul>
@@ -65,7 +73,7 @@ Define la estructura general de la aplicación:
 
           <li class="nav-item me-2">
             <a href="{{ url_for('logout') }}" class="btn btn-sm btn-danger">
-              Salir
+              🔓 Salir
             </a>
           </li>
           {% else %}
@@ -83,7 +91,7 @@ Define la estructura general de la aplicación:
 
           <li class="nav-item">
             <a href="{{ url_for('toggle_theme') }}" class="btn btn-outline-light btn-sm">
-              {% if theme == 'dark' %}☀️ Modo claro{% else %}🌙 Modo oscuro{% endif %}
+              {% if theme == 'dark' %}🔆{% else %}🌓{% endif %}
             </a>
           </li>
         </ul>
@@ -95,11 +103,11 @@ Define la estructura general de la aplicación:
 
   <main class="container mt-4 contenido-principal flex-grow-1">
     {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        {% for cat, msg in messages %}
-          <div class="alert alert-{{ cat }} mb-3">{{ msg }}</div>
-        {% endfor %}
-      {% endif %}
+    {% if messages %}
+    {% for cat, msg in messages %}
+    <div class="alert alert-{{ cat }} mb-3">{{ msg }}</div>
+    {% endfor %}
+    {% endif %}
     {% endwith %}
     {% block content %}{% endblock %}
   </main>
@@ -119,7 +127,206 @@ Define la estructura general de la aplicación:
       }
     }
   </script>
+  <script>
+    function togglePasswordVisibility(formType) {
+      const passwordInput = document.getElementById('password-' + formType);
+      const eyeIcon = document.getElementById('eye-icon-' + formType);
+
+      if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        eyeIcon.classList.remove('bi-eye');
+        eyeIcon.classList.add('bi-eye-slash');
+      } else {
+        passwordInput.type = 'password';
+        eyeIcon.classList.remove('bi-eye-slash');
+        eyeIcon.classList.add('bi-eye');
+      }
+    }
+  </script>
+  <script>
+    function togglePasswordVisibility(formType) {
+      const passwordInput = document.getElementById('password-' + formType);
+      const eyeIcon = document.getElementById('eye-icon-' + formType);
+
+      if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        eyeIcon.classList.remove('bi-eye');
+        eyeIcon.classList.add('bi-eye-slash');
+      } else {
+        passwordInput.type = 'password';
+        eyeIcon.classList.remove('bi-eye-slash');
+        eyeIcon.classList.add('bi-eye');
+      }
+    }
+  </script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+      // --- Lógica del botón FAVORITO (Estrella) ---
+      document.querySelectorAll('.toggle-favorito-btn').forEach(button => {
+        button.addEventListener('click', function () {
+          const oposicionId = this.dataset.oposicionId;
+          const url = `/toggle_favorito/${oposicionId}`;
+          const icon = this.querySelector('i');
+
+          fetch(url, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          })
+            .then(response => response.json())
+            .then(data => {
+              if (data.ok) {
+                // Actualizar el estado del icono a Bootstrap Icons
+                if (data.is_favorite) {
+                  icon.classList.remove('bi-star');
+                  icon.classList.add('bi-star-fill');
+                  icon.title = "Quitar de Favoritos";
+                } else {
+                  icon.classList.remove('bi-star-fill');
+                  icon.classList.add('bi-star');
+                  icon.title = "Marcar como Favorito";
+                }
+              } else {
+                alert("Error al actualizar favoritos.");
+              }
+            })
+            .catch(error => {
+              console.error('Error:', error);
+              alert("Error de conexión al servidor.");
+            });
+        });
+      });
+
+      // --- Lógica del botón PDF (Marcar como visitada) ---
+      document.querySelectorAll('.btn-pdf').forEach(btn => {
+        btn.addEventListener('click', function (e) {
+          e.preventDefault();
+
+          const id = this.dataset.id;
+          const pdfUrl = this.getAttribute('href');
+          const tr = this.closest('tr');
+
+          // 1) Intentamos usar sendBeacon (enviar petición sin bloquear la navegación)
+          const beaconUrl = `/marcar_visitada/${id}`;
+          let beaconSent = false;
+
+          try {
+            if (navigator.sendBeacon) {
+              const payload = JSON.stringify({ ts: new Date().toISOString() });
+              const blob = new Blob([payload], { type: 'application/json' });
+              beaconSent = navigator.sendBeacon(beaconUrl, blob);
+            }
+          } catch (err) {
+            console.warn('sendBeacon falló:', err);
+            beaconSent = false;
+          }
+
+          // 2) Si sendBeacon no está disponible, hacemos fetch en background
+          if (!beaconSent) {
+            fetch(beaconUrl, {
+              method: 'POST',
+              headers: { 'X-Requested-With': 'XMLHttpRequest', 'Content-Type': 'application/json' },
+              body: JSON.stringify({ ts: new Date().toISOString() })
+            }).then(resp => {
+              if (!resp.ok) console.warn('marcar_visitada respondió', resp.status);
+            }).catch(err => console.warn('Error fetch marcar_visitada:', err));
+          }
+
+          // 3) Actualizar UI inmediatamente (añadir clase y badge)
+          if (tr) {
+            tr.classList.add('visitada-oposicion');
+            const tituloCell = tr.querySelector('td:nth-child(2)');
+            if (tituloCell && !tituloCell.querySelector('.badge-visitada')) {
+              const span = document.createElement('span');
+              span.className = 'badge-visitada ms-2';
+              span.textContent = '🔵 Visitada';
+              tituloCell.appendChild(span);
+            }
+          }
+
+          // 4) Abrir PDF en nueva pestaña (no bloqueante)
+          try {
+            window.open(pdfUrl, '_blank');
+          } catch (err) {
+            window.location.href = pdfUrl;
+          }
+        });
+      });
+    });
+  </script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+      // --- Lógica del botón FAVORITO (Estrella) ---
+      document.querySelectorAll('.toggle-favorito-btn').forEach(button => {
+        button.addEventListener('click', function () {
+          const oposicionId = this.dataset.oposicionId;
+          const url = `/toggle_favorito/${oposicionId}`;
+          const icon = this.querySelector('i');
+
+          // Efecto visual inmediato
+          icon.style.transform = "scale(1.2)";
+          setTimeout(() => icon.style.transform = "scale(1)", 200);
+
+          fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+          })
+            .then(response => response.json())
+            .then(data => {
+              if (data.ok) {
+                if (data.is_favorite) {
+                  icon.classList.remove('bi-star');
+                  icon.classList.add('bi-star-fill');
+                  icon.title = "Quitar de Favoritos";
+                } else {
+                  icon.classList.remove('bi-star-fill');
+                  icon.classList.add('bi-star');
+                  icon.title = "Marcar como Favorito";
+                }
+              } else {
+                alert("Error al actualizar favoritos.");
+              }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+      });
+
+      // --- Lógica del botón PDF (Marcar como visitada) ---
+      document.querySelectorAll('.btn-pdf').forEach(btn => {
+        btn.addEventListener('click', function (e) {
+          const id = this.dataset.id;
+          const tr = this.closest('tr');
+
+          const beaconUrl = `/marcar_visitada/${id}`;
+          if (navigator.sendBeacon) {
+            const payload = JSON.stringify({ ts: new Date().toISOString() });
+            const blob = new Blob([payload], { type: 'application/json' });
+            navigator.sendBeacon(beaconUrl, blob);
+          } else {
+            fetch(beaconUrl, { method: 'POST' }).catch(err => console.warn(err));
+          }
+
+          if (tr) {
+            tr.classList.add('visitada-oposicion');
+            const badgesDiv = tr.querySelector('td:nth-child(2) .d-flex.flex-column');
+
+            if (badgesDiv && !badgesDiv.querySelector('.badge-visitada')) {
+              const span = document.createElement('span');
+              span.className = 'badge bg-info text-dark border border-info badge-visitada';
+              span.textContent = '🔵 Visitada';
+              badgesDiv.appendChild(span);
+            }
+          }
+        });
+      });
+    });
+  </script>
+
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>
