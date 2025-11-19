@@ -75,7 +75,18 @@ Incluye botón de retorno a la página principal y paginación.
             <th class="col-titulo">Título</th>
             <th class="col-control">Control</th>
             <th class="col-pdf">PDF</th>
-            <th class="col-fecha">Fecha</th>
+            <th class="col-fecha">
+              Fecha
+              <a href="{{ url_for('mostrar_departamento', nombre=departamento, orden='asc' if orden == 'desc' else 'desc', busqueda=busqueda, provincia=provincia_filtro, fecha_desde=fecha_desde, fecha_hasta=fecha_hasta, page=page) }}" 
+                 class="text-white ms-2" 
+                 title="Ordenar por fecha">
+                  {% if orden == 'desc' %}
+                      <i class="bi bi-sort-down"></i>
+                  {% else %}
+                      <i class="bi bi-sort-up"></i>
+                  {% endif %}
+              </a>
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -84,33 +95,38 @@ Incluye botón de retorno a la página principal y paginación.
                 {% if row['fecha'] == hoy %}nueva-oposicion{% endif %}
                 {% if row['id'] in visitadas %} visitada-oposicion{% endif %}
             ">
-              <td class="col-id">{{ row['identificador'] }}</td>
-              <td class="col-titulo">
-                {% if user.is_authenticated %}
-                <span style="float: right; margin-left: 10px;">
-                    <button type="button" 
-                            class="toggle-favorito-btn" 
-                            data-oposicion-id="{{ row.id }}" 
-                            aria-label="Marcar como favorito"
-                            style="border: none; background: none; cursor: pointer; color: orange;">
-                        <i class="bi {% if row.id in favoritas %}bi-star-fill{% else %}bi-star{% endif %}"
-                           title="{% if row.id in favoritas %}Quitar de Favoritos{% else %}Marcar como Favorito{% endif %}"
-                           >
-                        </i>
-                    </button>
-                </span>
-                {% endif %}
-                
-                {{ row['titulo'] }}
-                
-                {% if row['fecha'] == hoy %}
-                  <span class="badge-nuevo">🟡 Nuevo</span> 
-                {% endif %}
-                {% if row['id'] in visitadas %}
-                  <span class="badge-visitada">🔵 Visitada</span>
-               {% endif %}
+              <td>{{ row['identificador'] }}</td>
+              
+              <td>
+                <div class="d-flex justify-content-between align-items-start">
+                    <span>{{ row['titulo'] }}</span>
+                    
+                    {% if user.is_authenticated %}
+                    <span style="margin-left: 10px;">
+                        <button type="button" 
+                                class="toggle-favorito-btn" 
+                                data-oposicion-id="{{ row.id }}" 
+                                aria-label="Marcar como favorito"
+                                style="border: none; background: none; cursor: pointer; color: orange;">
+                            <i class="bi {% if row.id in favoritas %}bi-star-fill{% else %}bi-star{% endif %}"
+                               title="{% if row.id in favoritas %}Quitar de Favoritos{% else %}Marcar como Favorito{% endif %}">
+                            </i>
+                        </button>
+                    </span>
+                    {% endif %}
+                </div>
+
+                <div class="mt-2 d-flex flex-column align-items-start gap-1">
+                  {% if row['fecha'] == hoy %}
+                    <span class="badge-nuevo">🟡 Nuevo</span>
+                  {% endif %}
+                  {% if row['id'] in visitadas %}
+                    <span class="badge-visitada">🔵 Visitada</span>
+                  {% endif %}
+                </div>
               </td>
-              <td class="col-control">{{ row['control'] }}</td>
+
+              <td>{{ row['control'] }}</td>
               <td>
                 {% if row['url_pdf'] %}
                   <a href="{{ row['url_pdf'] }}" target="_blank" 
@@ -120,7 +136,7 @@ Incluye botón de retorno a la página principal y paginación.
                   </a>
                 {% endif %}
               </td>
-              <td class="col-fecha">{{ row['fecha']|format_date }}</td>
+              <td>{{ row['fecha']|format_date }}</td>
             </tr>
           {% else %}
             <tr>
@@ -135,7 +151,7 @@ Incluye botón de retorno a la página principal y paginación.
     <nav aria-label="Paginación de oposiciones" class="mt-4">
       <ul class="pagination justify-content-center">
         <li class="page-item {% if page <= 1 %}disabled{% endif %}">
-          <a class="page-link" href="{{ url_for('mostrar_departamento', nombre=departamento, page=page-1) }}">←</a>
+          <a class="page-link" href="{{ url_for('mostrar_departamento', nombre=departamento, page=page-1, orden=orden, busqueda=busqueda, provincia=provincia_filtro, fecha_desde=fecha_desde, fecha_hasta=fecha_hasta) }}">←</a>
         </li>
 
         {% set start_page = page - 2 if page > 3 else 1 %}
@@ -143,7 +159,7 @@ Incluye botón de retorno a la página principal y paginación.
 
         {% if start_page > 1 %}
           <li class="page-item">
-            <a class="page-link" href="{{ url_for('mostrar_departamento', nombre=departamento, page=1) }}">1</a>
+            <a class="page-link" href="{{ url_for('mostrar_departamento', nombre=departamento, page=1, orden=orden, busqueda=busqueda, provincia=provincia_filtro, fecha_desde=fecha_desde, fecha_hasta=fecha_hasta) }}">1</a>
           </li>
           {% if start_page > 2 %}
             <li class="page-item disabled"><span class="page-link">…</span></li>
@@ -152,7 +168,7 @@ Incluye botón de retorno a la página principal y paginación.
 
         {% for p in range(start_page, end_page + 1) %}
           <li class="page-item {% if p == page %}active{% endif %}">
-            <a class="page-link" href="{{ url_for('mostrar_departamento', nombre=departamento, page=p) }}">{{ p }}</a>
+            <a class="page-link" href="{{ url_for('mostrar_departamento', nombre=departamento, page=p, orden=orden, busqueda=busqueda, provincia=provincia_filtro, fecha_desde=fecha_desde, fecha_hasta=fecha_hasta) }}">{{ p }}</a>
           </li>
         {% endfor %}
 
@@ -161,12 +177,12 @@ Incluye botón de retorno a la página principal y paginación.
             <li class="page-item disabled"><span class="page-link">…</span></li>
           {% endif %}
           <li class="page-item">
-            <a class="page-link" href="{{ url_for('mostrar_departamento', nombre=departamento, page=total_pages) }}">{{ total_pages }}</a>
+            <a class="page-link" href="{{ url_for('mostrar_departamento', nombre=departamento, page=total_pages, orden=orden, busqueda=busqueda, provincia=provincia_filtro, fecha_desde=fecha_desde, fecha_hasta=fecha_hasta) }}">{{ total_pages }}</a>
           </li>
         {% endif %}
 
         <li class="page-item {% if page >= total_pages %}disabled{% endif %}">
-          <a class="page-link" href="{{ url_for('mostrar_departamento', nombre=departamento, page=page+1) }}">→</a>
+          <a class="page-link" href="{{ url_for('mostrar_departamento', nombre=departamento, page=page+1, orden=orden, busqueda=busqueda, provincia=provincia_filtro, fecha_desde=fecha_hasta, fecha_hasta=fecha_hasta) }}">→</a>
         </li>
       </ul>
     </nav>
@@ -194,7 +210,6 @@ Incluye botón de retorno a la página principal y paginación.
             .then(response => response.json())
             .then(data => {
                 if (data.ok) {
-                    // Actualizar el estado del icono a Bootstrap Icons
                     if (data.is_favorite) {
                         icon.classList.remove('bi-star');
                         icon.classList.add('bi-star-fill'); 
@@ -218,28 +233,27 @@ Incluye botón de retorno a la página principal y paginación.
     // --- Lógica del botón PDF (Marcar como visitada) ---
     document.querySelectorAll('.btn-pdf').forEach(btn => {
       btn.addEventListener('click', function (e) {
-        e.preventDefault(); 
+        e.preventDefault(); // evitamos la navegación automática
 
         const id = this.dataset.id;
         const pdfUrl = this.getAttribute('href');
         const tr = this.closest('tr');
 
-        // 1) Intentamos usar sendBeacon (enviar petición sin bloquear la navegación)
         const beaconUrl = `/marcar_visitada/${id}`;
         let beaconSent = false;
 
-        try {
-          if (navigator.sendBeacon) {
-            const payload = JSON.stringify({ts: new Date().toISOString()});
-            const blob = new Blob([payload], { type: 'application/json' });
-            beaconSent = navigator.sendBeacon(beaconUrl, blob);
-          }
-        } catch (err) {
-          console.warn('sendBeacon falló:', err);
-          beaconSent = false;
+      // 1) Intentamos usar sendBeacon
+      try {
+        if (navigator.sendBeacon) {
+          const payload = JSON.stringify({ts: new Date().toISOString()});
+          const blob = new Blob([payload], { type: 'application/json' });
+          beaconSent = navigator.sendBeacon(beaconUrl, blob);
         }
+      } catch (err) {
+        console.warn('sendBeacon falló:', err);
+        beaconSent = false;
+      }
 
-        // 2) Si sendBeacon no está disponible, hacemos fetch en background
         if (!beaconSent) {
           fetch(beaconUrl, {
             method: 'POST',
@@ -250,19 +264,44 @@ Incluye botón de retorno a la página principal y paginación.
           }).catch(err => console.warn('Error fetch marcar_visitada:', err));
         }
 
-        // 3) Actualizar UI inmediatamente (añadir clase y badge)
+        // Actualizar UI inmediatamente (añadir clase y badge)
         if (tr) {
           tr.classList.add('visitada-oposicion');
-          const tituloCell = tr.querySelector('td:nth-child(2)');
-          if (tituloCell && !tituloCell.querySelector('.badge-visitada')) {
+          
+          // Buscamos el div donde están los badges (el que tiene flex-column)
+          const badgesDiv = tr.querySelector('td:nth-child(2) .d-flex.flex-column');
+
+          if (badgesDiv && !badgesDiv.querySelector('.badge-visitada')) {
             const span = document.createElement('span');
-            span.className = 'badge-visitada ms-2';
+            span.className = 'badge-visitada'; // Usamos tu clase CSS original
             span.textContent = '🔵 Visitada';
-            tituloCell.appendChild(span);
+            badgesDiv.appendChild(span);
           }
         }
 
-        // 4) Abrir PDF en nueva pestaña (no bloqueante)
+    // --- Lógica del enlace del título (Marcar como visitada al hacer clic) ---
+    document.querySelectorAll('.titulo-oposicion').forEach(link => {
+      link.addEventListener('click', function (e) {
+        const id = this.dataset.id;
+        const tr = this.closest('tr');
+        marcarComoVisitada(id, tr);
+        // El enlace se abre normalmente por el comportamiento por defecto del navegador
+      });
+    });
+
+    // --- Lógica del botón PDF (Marcar como visitada) ---
+    document.querySelectorAll('.btn-pdf').forEach(btn => {
+      btn.addEventListener('click', function (e) {
+        e.preventDefault(); 
+
+        const id = this.dataset.id;
+        const pdfUrl = this.getAttribute('href');
+        const tr = this.closest('tr');
+
+        // Marcar como visitada
+        marcarComoVisitada(id, tr);
+
+        // Abrir PDF en nueva pestaña (no bloqueante)
         try {
           window.open(pdfUrl, '_blank');
         } catch (err) {

@@ -844,3 +844,19 @@ html[data-theme="dark"] .visitada-oposicion {
   color: #e5e7eb !important;
   box-shadow: 0 0 8px rgba(37, 99, 235, 0.4);
 }
+
+/* -------- TÍTULO CLICKEABLE DE OPOSICIÓN -------- */
+.titulo-oposicion {
+  transition: all 0.2s ease;
+  display: inline-block;
+}
+
+.titulo-oposicion:hover {
+  color: #0066cc !important;
+  text-decoration: underline !important;
+  transform: translateX(2px);
+}
+
+html[data-theme="dark"] .titulo-oposicion:hover {
+  color: #60a5fa !important;
+}
