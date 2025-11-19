@@ -23,6 +23,10 @@ from flask import ( # type: ignore
     Flask, request, g, redirect, url_for, render_template, session, flash)
 from werkzeug.security import generate_password_hash, check_password_hash # type: ignore
 from flask_mail import Mail, Message # type: ignore
+from flask_login import (
+    LoginManager, UserMixin, login_user, logout_user, login_required, current_user
+)
+
 
 # --- Flask + DB en instance/ ---
 app = Flask(__name__, instance_relative_config=True)
