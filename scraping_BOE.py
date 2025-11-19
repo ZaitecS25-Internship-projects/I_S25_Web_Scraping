@@ -15,19 +15,37 @@ from datetime import datetime, timedelta
 
 import requests
 from flask import (
-    Flask, request, g, redirect, url_for, render_template, session, flash
-)
+    Flask, request, g, redirect, url_for, render_template, session, flash)
 from bs4 import BeautifulSoup
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_mail import Mail, Message
 from flask_login import (
-    LoginManager, UserMixin, login_user, logout_user, login_required, current_user
-)
+    LoginManager, UserMixin, login_user, logout_user, login_required, current_user)
 from flask import jsonify
+from flask import make_response
 
 DB_PATH = os.getenv('DB_PATH', 'oposiciones.db')
 app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY', 'cambia-esto-en-produccion')
+# --- Tema (light/dark) ---
+@app.context_processor
+def inject_theme():
+    theme = session.get("theme", "light")
+    return {"theme": theme}
+
+@app.route("/theme/toggle")
+def toggle_theme():
+    theme = session.get("theme", "light")
+    session["theme"] = "dark" if theme == "light" else "light"
+    return redirect(request.referrer or url_for("index"))
+
+@app.route("/theme/<mode>")
+def set_theme(mode):
+    if mode not in ("light", "dark"):
+        mode = "light"
+    session["theme"] = mode
+    return redirect(request.referrer or url_for("index"))
+
 
 login_manager = LoginManager()
 login_manager.init_app(app)

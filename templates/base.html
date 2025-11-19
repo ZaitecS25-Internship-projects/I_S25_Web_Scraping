@@ -23,17 +23,44 @@ Define la estructura general de la aplicación:
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm mi-navbar animated-navbar">
     <div class="container">
       <a class="navbar-brand fs-4" href="{{ url_for('index') }}">📜 Oposiciones BOE</a>
-      <div class="collapse navbar-collapse">
-        <ul class="navbar-nav ms-auto">
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar" aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="mainNavbar">
+        <ul class="navbar-nav ms-auto align-items-center gap-2">
+
           {% if user.is_authenticated %}
-          <a href="{{ url_for('user') }}" class="btn btn-outline-light btn-sm me-2">
-            👤 Mi cuenta
-          </a>
-          <a href="{{ url_for('logout') }}" class="btn btn-danger btn-sm">Salir</a>
+          <li class="nav-item">
+            <a href="{{ url_for('user') }}" class="btn btn-outline-light btn-sm me-2">
+              👤 Mi cuenta
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="{{ url_for('logout') }}" class="btn btn-danger btn-sm">
+              Salir
+            </a>
+          </li>
           {% else %}
-          <a href="{{ url_for('login') }}" class="btn btn-outline-light btn-sm me-2">Iniciar sesión</a>
-          <a href="{{ url_for('register') }}" class="btn btn-success btn-sm">Registrarse</a>
+          <li class="nav-item">
+            <a href="{{ url_for('login') }}" class="btn btn-outline-light btn-sm me-2">
+              Iniciar sesión
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="{{ url_for('register') }}" class="btn btn-success btn-sm">
+              Registrarse
+            </a>
+          </li>
           {% endif %}
+
+          <!-- Botón de modo oscuro / claro -->
+          <li class="nav-item">
+            <a href="#" class="theme-toggle" id="theme-toggle">
+              🌙 Modo oscuro
+            </a>
+          </li>
+
         </ul>
       </div>
     </div>
@@ -59,5 +86,41 @@ Define la estructura general de la aplicación:
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Script de modo oscuro -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const body = document.body;
+      const toggle = document.getElementById('theme-toggle');
+
+      function applyTheme(theme) {
+        const isDark = (theme === 'dark');
+
+        if (isDark) {
+          body.classList.add('dark-mode');
+          body.classList.remove('bg-light');
+          if (toggle) toggle.textContent = '☀️ Modo claro';
+        } else {
+          body.classList.remove('dark-mode');
+          body.classList.add('bg-light');
+          if (toggle) toggle.textContent = '🌙 Modo oscuro';
+        }
+      }
+
+      // Tema guardado o claro por defecto
+      const saved = localStorage.getItem('theme') || 'light';
+      applyTheme(saved);
+
+      if (toggle) {
+        toggle.addEventListener('click', function (e) {
+          e.preventDefault();
+          const current = body.classList.contains('dark-mode') ? 'dark' : 'light';
+          const next = current === 'dark' ? 'light' : 'dark';
+          localStorage.setItem('theme', next);
+          applyTheme(next);
+        });
+      }
+    });
+  </script>
 </body>
 </html>
