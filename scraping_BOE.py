@@ -616,12 +616,10 @@ def oposiciones_vigentes():
     user = current_user
     desde = (datetime.today() - timedelta(days=30)).strftime("%Y%m%d")
 
-    departamentos = db.execute('''
-        SELECT DISTINCT departamento 
-        FROM oposiciones 
-        WHERE fecha >= ? AND departamento IS NOT NULL 
-        ORDER BY departamento
-    ''', (desde,)).fetchall()
+    # 1. Recoger parámetros de paginación y filtros
+    page = int(request.args.get("page", 1))
+    por_pagina = 10
+    offset = (page - 1) * por_pagina
 
     selected_departamentos = request.args.getlist("departamentos")
     busqueda = request.args.get("busqueda", "")
@@ -629,41 +627,58 @@ def oposiciones_vigentes():
     fecha_desde = request.args.get("fecha_desde", "")
     fecha_hasta = request.args.get("fecha_hasta", "")
 
-    sql = "SELECT * FROM oposiciones WHERE fecha >= ?"
+    # 2. Construir la consulta base (sin SELECT ni ORDER BY aún)
+    # Esto nos permite reutilizar los filtros para contar el total y para sacar los datos
+    sql_part = "FROM oposiciones WHERE fecha >= ?"
     params = [desde]
 
     if selected_departamentos:
-        sql += " AND departamento IN ({})".format(
+        sql_part += " AND departamento IN ({})".format(
             ",".join(["?"] * len(selected_departamentos))
         )
         params.extend(selected_departamentos)
 
     if busqueda:
         like = f"%{busqueda}%"
-        sql += " AND (titulo LIKE ? OR identificador LIKE ? OR control LIKE ?)"
+        sql_part += " AND (titulo LIKE ? OR identificador LIKE ? OR control LIKE ?)"
         params += [like, like, like]
 
     if provincia:
-        sql += " AND provincia = ?"
+        sql_part += " AND provincia = ?"
         params.append(provincia)
 
     if fecha_desde:
-        sql += " AND fecha >= ?"
+        sql_part += " AND fecha >= ?"
         params.append(fecha_desde.replace("-", ""))
 
     if fecha_hasta:
-        sql += " AND fecha <= ?"
+        sql_part += " AND fecha <= ?"
         params.append(fecha_hasta.replace("-", ""))
 
-    sql += " ORDER BY fecha DESC"
-    oposiciones = db.execute(sql, params).fetchall()
+    # 3. Calcular Total de Registros (para la paginación)
+    total_query = f"SELECT COUNT(*) {sql_part}"
+    total = db.execute(total_query, params).fetchone()[0]
+    total_pages = (total + por_pagina - 1) // por_pagina
+
+    # 4. Obtener los datos de la página actual
+    data_query = f"SELECT * {sql_part} ORDER BY fecha DESC LIMIT ? OFFSET ?"
+    # Hacemos una copia de params para no ensuciar la lista original si la necesitáramos luego
+    data_params = params + [por_pagina, offset]
+    oposiciones = db.execute(data_query, data_params).fetchall()
+
+    # --- Datos adicionales para la vista ---
+    departamentos = db.execute('''
+        SELECT DISTINCT departamento 
+        FROM oposiciones 
+        WHERE fecha >= ? AND departamento IS NOT NULL 
+        ORDER BY departamento
+    ''', (desde,)).fetchall()
 
     provincias = db.execute(
         "SELECT DISTINCT provincia FROM oposiciones "
         "WHERE provincia IS NOT NULL ORDER BY provincia"
     ).fetchall()
 
-    # Obtener Visitadas y Favoritas para pintar los iconos
     visitadas = [
         row["oposicion_id"]
         for row in db.execute(
@@ -681,17 +696,21 @@ def oposiciones_vigentes():
 
     return render_template(
         "user_oposiciones.html",
-        user=current_user,
+        user=user,
         departamentos=departamentos,
-        selected_departamentos=selected_departamentos,
+        # Pasamos los filtros seleccionados para mantenerlos en la paginación
+        selected_departamentos=selected_departamentos, 
         oposiciones=oposiciones,
         provincias=provincias,
         busqueda=busqueda,
         provincia_filtro=provincia,
         fecha_desde=fecha_desde,
         fecha_hasta=fecha_hasta,
-        visitadas=visitadas, 
-        favoritas=favoritas, 
+        # Variables de paginación
+        page=page,
+        total_pages=total_pages,
+        visitadas=visitadas,
+        favoritas=favoritas,
         hoy=datetime.today().strftime("%Y%m%d")
     )
 
@@ -761,6 +780,48 @@ def oposiciones_favoritas():
         visitadas=visitadas,
         favoritas=[o['id'] for o in oposiciones],
     )
+
+
+# Ruta para cambiar la contraseña
+@app.route("/change_password", methods=["POST"])
+@login_required
+def change_password():
+    db = get_db()
+    user_id = current_user.id
+    
+    current_password = request.form.get("current_password")
+    new_password = request.form.get("new_password")
+    confirm_password = request.form.get("confirm_password")
+
+    # Validaciones básicas
+    if not current_password or not new_password or not confirm_password:
+        flash("Por favor, rellena todos los campos.", "danger")
+        return redirect(url_for("configuracion_cuenta"))
+
+    if new_password != confirm_password:
+        flash("Las nuevas contraseñas no coinciden.", "danger")
+        return redirect(url_for("configuracion_cuenta"))
+
+    # Obtener el hash actual de la base de datos para verificar
+    row = db.execute("SELECT password_hash FROM users WHERE id = ?", (user_id,)).fetchone()
+    if not row:
+        flash("Usuario no encontrado.", "danger")
+        return redirect(url_for("index"))
+    
+    stored_hash = row["password_hash"]
+
+    # Verificar que la contraseña actual sea correcta
+    if not check_password_hash(stored_hash, current_password):
+        flash("La contraseña actual es incorrecta.", "danger")
+        return redirect(url_for("configuracion_cuenta"))
+
+    # Generar nuevo hash y actualizar en DB
+    new_hash = generate_password_hash(new_password)
+    db.execute("UPDATE users SET password_hash = ? WHERE id = ?", (new_hash, user_id))
+    db.commit()
+
+    flash("¡Contraseña actualizada correctamente!", "success")
+    return redirect(url_for("configuracion_cuenta"))
 
 
 if __name__ == '__main__':
