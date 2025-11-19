@@ -445,6 +445,29 @@ td.col-titulo {
     display: block;
 }
 
+@media (max-width: 992px) and (min-width: 576px) {
+
+    /* Para que no se rompa el filtro de busqueda en tablet*/
+    .card-body .row {
+        display: flex !important;
+        flex-direction: row !important;
+    }
+
+    .card-body .row > [class*="col-"] {
+        flex: 0 0 auto !important;
+        width: auto !important;
+    }
+
+    /* Anular columna completa en tablet */
+    .card-body .col-md-8 {
+        width: 66.666% !important;
+    }
+
+    .card-body .col-md-4 {
+        width: 33.333% !important;
+    }
+}
+
 @media (max-width: 768px) {
     .hero-image {
         width: 100%;
@@ -487,6 +510,80 @@ td.col-titulo {
     border-color: #084fc7;
     color: #fff;
 }
+
+/* ------------------ TÍTULO REGISTRO ------------------ */
+.titulo-registro {
+    text-align: center;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #004aad;
+    margin-bottom: 1.5rem;
+    position: relative;
+}
+
+/* Formulario registro */
+h2.titulo-registro + form {
+    max-width: 500px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+}
+
+/* Inputs, selects y radio buttons */
+h2.titulo-registro + form .form-control,
+h2.titulo-registro + form select {
+    width: 100%;
+    padding: 0.75rem;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    margin-bottom: 1rem;
+    transition: border-color .3s, box-shadow .3s;
+}
+
+h2.titulo-registro + form .form-control:focus,
+h2.titulo-registro + form select:focus {
+    border-color: #004aad;
+    box-shadow: 0 0 6px rgba(0,74,173,.3);
+    outline: none;
+}
+
+h2.titulo-registro + form input[type="radio"] { margin-right: 0.5rem; }
+
+/* Botón */
+h2.titulo-registro + form .btn-success {
+    width: 100%;
+    padding: 0.75rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 10px;
+    transition: all .3s;
+}
+h2.titulo-registro + form .btn-success:hover {
+    background-color: #157347;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0,0,0,.2);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    h2.titulo-registro + form { padding: 1.5rem; margin: 1.5rem auto; }
+    h2.titulo-registro { font-size: 1.5rem; }
+    h2.titulo-registro + form .btn-success { font-size: 0.95rem; padding: 0.6rem; }
+}
+
+@media (max-width: 480px) {
+    h2.titulo-registro + form { padding: 1rem; margin: 1rem auto; border-radius: 8px; }
+    h2.titulo-registro { font-size: 1.25rem; }
+    h2.titulo-registro + form label,
+    h2.titulo-registro + form .form-control,
+    h2.titulo-registro + form select { font-size: 0.9rem; padding: 0.6rem; }
+    h2.titulo-registro + form .btn-success { font-size: 0.9rem; padding: 0.5rem; }
+}
+
+
+
 /* =========================================================
    🌙 MODO OSCURO — ACTIVA CUANDO <html data-theme="dark">
    ========================================================= */
