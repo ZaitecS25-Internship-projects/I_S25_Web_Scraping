@@ -487,3 +487,360 @@ td.col-titulo {
     border-color: #084fc7;
     color: #fff;
 }
+/* =========================================================
+   🌙 MODO OSCURO — ACTIVA CUANDO <html data-theme="dark">
+   ========================================================= */
+
+:root[data-theme="dark"] {
+  --bg-main: #0d1117;
+  --bg-card: #161b22;
+  --bg-hover: #1f242c;
+  --text-main: #e6edf3;
+  --text-muted: #9aa4b2;
+  --border-soft: #30363d;
+  --accent-blue: #58a6ff;
+  --accent-green: #2ea043;
+}
+
+/* Fondo general */
+:root[data-theme="dark"] body {
+  background: var(--bg-main) !important;
+  color: var(--text-main) !important;
+}
+
+/* ---------------- NAVBAR ---------------- */
+:root[data-theme="dark"] .navbar,
+:root[data-theme="dark"] .mi-navbar {
+  background: #161b22 !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+}
+
+:root[data-theme="dark"] .navbar a,
+:root[data-theme="dark"] .navbar .nav-link,
+:root[data-theme="dark"] .navbar-brand {
+  color: var(--text-main) !important;
+}
+
+/* ----------------- HERO ----------------- */
+:root[data-theme="dark"] .hero {
+  background: #111827 !important;
+  color: var(--text-main) !important;
+}
+
+/* -------------- TARJETAS ----------------- */
+:root[data-theme="dark"] .card {
+  background: var(--bg-card) !important;
+  color: var(--text-main) !important;
+  border: 1px solid var(--border-soft) !important;
+}
+
+:root[data-theme="dark"] .card-title {
+  color: var(--accent-blue) !important;
+}
+
+/* Hover tarjeta */
+:root[data-theme="dark"] .card:hover {
+  background: var(--bg-hover) !important;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.45);
+}
+
+/* ---------------- TABLAS ----------------- */
+:root[data-theme="dark"] table,
+:root[data-theme="dark"] .table {
+  background: var(--bg-card) !important;
+  color: var(--text-main) !important;
+}
+
+:root[data-theme="dark"] .table th {
+  background: #1f2937 !important;
+  color: var(--text-main) !important;
+}
+
+:root[data-theme="dark"] .table td {
+  color: var(--text-main) !important;
+  border-color: var(--border-soft) !important;
+}
+
+:root[data-theme="dark"] .table-hover tbody tr:hover {
+  background-color: #22272e !important;
+}
+
+/* --------------- PAGINACIÓN --------------- */
+:root[data-theme="dark"] .pagination .page-link {
+  color: var(--accent-blue) !important;
+  background: var(--bg-card);
+  border-color: var(--border-soft);
+}
+
+:root[data-theme="dark"] .pagination .active .page-link {
+  background-color: var(--accent-blue) !important;
+  border-color: var(--accent-blue) !important;
+  color: #fff !important;
+}
+
+/* ---------------- BOTONES ---------------- */
+:root[data-theme="dark"] .btn,
+:root[data-theme="dark"] .btn-update,
+:root[data-theme="dark"] .btn-volver {
+  color: white !important;
+}
+
+:root[data-theme="dark"] .btn-outline-light {
+  border-color: var(--text-main) !important;
+  color: var(--text-main) !important;
+}
+
+:root[data-theme="dark"] .btn-outline-light:hover {
+  background: var(--text-main) !important;
+  color: var(--bg-main) !important;
+}
+
+/* Botón verde */
+:root[data-theme="dark"] .btn-update {
+  background-color: var(--accent-green) !important;
+}
+
+/* ---------------- FOOTER ---------------- */
+:root[data-theme="dark"] .mi-footer {
+  background: #161b22 !important;
+  color: var(--text-main) !important;
+}
+
+:root[data-theme="dark"] .mi-footer a {
+  color: var(--accent-blue) !important;
+}
+
+/* ----------- FILAS VISITADAS ------------- */
+:root[data-theme="dark"] .visitada-oposicion {
+  background-color: #1f2937 !important;
+  color: var(--accent-blue) !important;
+}
+
+/* ----------- BADGE NUEVA ---------------- */
+:root[data-theme="dark"] .badge-nuevo {
+  background-color: #facc15 !important;
+  color: black !important;
+}
+
+/* ----------- BADGE VISITADA ------------- */
+:root[data-theme="dark"] .badge-visitada {
+  background-color: var(--accent-blue) !important;
+  color: white !important;
+}
+/* =========================
+   MODO OSCURO - OVERRIDES
+   ========================= */
+
+/* Fondo general y color de texto */
+html[data-theme="dark"] body,
+html[data-theme="dark"] body.bg-light {
+  background: #020617 !important;  /* casi negro azulado */
+  color: #e5e7eb !important;       /* gris muy claro */
+}
+
+/* Navbar en modo oscuro - mantenerla legible */
+html[data-theme="dark"] .mi-navbar,
+html[data-theme="dark"] .navbar {
+  background: linear-gradient(135deg, #020617 0%, #111827 100%) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+}
+
+/* Texto de la navbar (incluye "Mi panel") */
+html[data-theme="dark"] .navbar .navbar-brand,
+html[data-theme="dark"] .navbar .nav-link,
+html[data-theme="dark"] .navbar .btn {
+  color: #f9fafb !important;
+}
+
+/* Dropdown del "Mi panel" */
+html[data-theme="dark"] .dropdown-menu {
+  background-color: #020617;
+  color: #e5e7eb;
+  border-color: #1f2937;
+}
+
+html[data-theme="dark"] .dropdown-menu .dropdown-item {
+  color: #e5e7eb;
+}
+
+html[data-theme="dark"] .dropdown-menu .dropdown-item:hover {
+  background-color: #1f2937;
+}
+
+/* Hero en modo oscuro */
+html[data-theme="dark"] .hero {
+  background: linear-gradient(135deg, #020617 0%, #111827 100%);
+  color: #e5e7eb;
+}
+
+/* Tarjetas de oposiciones en modo oscuro */
+html[data-theme="dark"] .card {
+  background-color: #020617;
+  color: #e5e7eb;
+  border: 1px solid #1f2937;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.6);
+}
+
+html[data-theme="dark"] .card-title {
+  color: #e5e7eb;
+}
+
+html[data-theme="dark"] .card:hover .card-title {
+  color: #60a5fa;
+}
+
+/* Tablas en modo oscuro */
+html[data-theme="dark"] .table {
+  color: #e5e7eb;
+  background-color: #020617;
+}
+
+html[data-theme="dark"] .table th {
+  background-color: #111827;
+  color: #e5e7eb;
+}
+
+html[data-theme="dark"] .table-hover tbody tr:hover {
+  background-color: #111827;
+}
+
+/* Badges "nueva oposición" y "visitada" adaptadas */
+html[data-theme="dark"] .nueva-oposicion {
+  background-color: #854d0e !important; /* dorado oscuro */
+  color: #fef4c7 !important;
+  box-shadow: 0 0 10px rgba(250, 204, 21, 0.4);
+}
+
+html[data-theme="dark"] .badge-nuevo {
+  background-color: #facc15;
+  color: #1f2933;
+}
+
+html[data-theme="dark"] .visitada-oposicion {
+  background-color: #0f172a !important;
+  color: #e5e7eb !important;
+}
+
+html[data-theme="dark"] .badge-visitada {
+  background-color: #3b82f6;
+  color: #fff;
+}
+
+/* Enlaces en modo oscuro */
+html[data-theme="dark"] a {
+  color: #60a5fa;
+}
+
+html[data-theme="dark"] a:hover {
+  color: #93c5fd;
+}
+
+/* Footer en oscuro */
+html[data-theme="dark"] .mi-footer {
+  background-color: #020617;
+  color: #e5e7eb;
+}
+/* =========================================
+   MODO OSCURO - TABLAS, LISTAS, TEXTOS
+   (forzar contraste en todas las páginas)
+   ========================================= */
+
+/* Fondo general oscuro y texto claro */
+html[data-theme="dark"] body {
+  background: #020617;        /* casi negro azulado */
+  color: #e5e7eb;             /* texto claro */
+}
+
+/* Contenedor principal: asegurar contraste */
+html[data-theme="dark"] .contenido-principal {
+  background-color: #020617;
+  color: #e5e7eb;
+}
+
+/* Títulos y textos dentro del main */
+html[data-theme="dark"] .contenido-principal h1,
+html[data-theme="dark"] .contenido-principal h2,
+html[data-theme="dark"] .contenido-principal h3,
+html[data-theme="dark"] .contenido-principal h4,
+html[data-theme="dark"] .contenido-principal h5,
+html[data-theme="dark"] .contenido-principal h6,
+html[data-theme="dark"] .contenido-principal p,
+html[data-theme="dark"] .contenido-principal label,
+html[data-theme="dark"] .contenido-principal .form-label,
+html[data-theme="dark"] .contenido-principal span,
+html[data-theme="dark"] .contenido-principal li {
+  color: #e5e7eb;
+}
+
+/* -------- TABLAS (todas) -------- */
+html[data-theme="dark"] .table,
+html[data-theme="dark"] .table > :not(caption) > * > * {
+  background-color: #020617 !important;
+  color: #e5e7eb !important;
+  border-color: #1f2937 !important;
+}
+
+/* Hover de filas */
+html[data-theme="dark"] .table-hover > tbody > tr:hover > * {
+  background-color: #111827 !important;
+}
+
+/* Thead en responsive (por si en móvil se oculta) */
+html[data-theme="dark"] .table thead {
+  background-color: #020617 !important;
+  color: #e5e7eb !important;
+}
+
+/* Textos "muted" que en oscuro se ven apagados */
+html[data-theme="dark"] .text-muted,
+html[data-theme="dark"] .small,
+html[data-theme="dark"] small {
+  color: #9ca3af !important;  /* gris clarito legible */
+}
+
+/* -------- LISTAS (por si usas list-group) -------- */
+html[data-theme="dark"] .list-group-item {
+  background-color: #020617;
+  color: #e5e7eb;
+  border-color: #1f2937;
+}
+
+/* -------- FORMULARIOS / FILTROS -------- */
+html[data-theme="dark"] .form-control,
+html[data-theme="dark"] .form-select {
+  background-color: #020617;
+  color: #e5e7eb;
+  border-color: #374151;
+}
+
+html[data-theme="dark"] .form-control::placeholder {
+  color: #6b7280;
+}
+
+/* -------- ENLACES EN CONTENIDO PRINCIPAL -------- */
+html[data-theme="dark"] .contenido-principal a {
+  color: #60a5fa;
+}
+
+html[data-theme="dark"] .contenido-principal a:hover {
+  color: #93c5fd;
+}
+
+/* -------- BADGES / ESTADOS ESPECIALES -------- */
+/* Mantener los badges llamativos en oscuro */
+html[data-theme="dark"] .badge-nuevo {
+  background-color: #facc15;
+  color: #111827;
+}
+
+html[data-theme="dark"] .badge-visitada {
+  background-color: #3b82f6;
+  color: #f9fafb;
+}
+
+/* La fila visitada que antes era azul claro, ahora un azul oscuro suave */
+html[data-theme="dark"] .visitada-oposicion {
+  background-color: #0b1120 !important;
+  color: #e5e7eb !important;
+  box-shadow: 0 0 8px rgba(37, 99, 235, 0.4);
+}
