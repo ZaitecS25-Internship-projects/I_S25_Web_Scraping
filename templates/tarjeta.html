@@ -71,11 +71,11 @@ Incluye botón de retorno a la página principal y paginación.
       <table class="table table-striped table-bordered align-middle">
         <thead class="table-dark">
           <tr>
-            <th>Identificador</th>
-            <th>Título</th>
-            <th>Control</th>
-            <th>PDF</th>
-            <th>Fecha</th>
+            <th class="col-id">Identificador</th>
+            <th class="col-titulo">Título</th>
+            <th class="col-control">Control</th>
+            <th class="col-pdf">PDF</th>
+            <th class="col-fecha">Fecha</th>
           </tr>
         </thead>
         <tbody>
@@ -84,8 +84,8 @@ Incluye botón de retorno a la página principal y paginación.
                 {% if row['fecha'] == hoy %}nueva-oposicion{% endif %}
                 {% if row['id'] in visitadas %} visitada-oposicion{% endif %}
             ">
-              <td>{{ row['identificador'] }}</td>
-              <td>
+              <td class="col-id">{{ row['identificador'] }}</td>
+              <td class="col-titulo">
                 {% if user.is_authenticated %}
                 <span style="float: right; margin-left: 10px;">
                     <button type="button" 
@@ -104,13 +104,13 @@ Incluye botón de retorno a la página principal y paginación.
                 {{ row['titulo'] }}
                 
                 {% if row['fecha'] == hoy %}
-                  <span class="badge-nuevo">🟡 Nuevo</span>
+                  <span class="badge-nuevo">🟡 Nuevo</span> 
                 {% endif %}
                 {% if row['id'] in visitadas %}
                   <span class="badge-visitada">🔵 Visitada</span>
                {% endif %}
               </td>
-              <td>{{ row['control'] }}</td>
+              <td class="col-control">{{ row['control'] }}</td>
               <td>
                 {% if row['url_pdf'] %}
                   <a href="{{ row['url_pdf'] }}" target="_blank" 
@@ -120,7 +120,7 @@ Incluye botón de retorno a la página principal y paginación.
                   </a>
                 {% endif %}
               </td>
-              <td>{{ row['fecha']|format_date }}</td>
+              <td class="col-fecha">{{ row['fecha']|format_date }}</td>
             </tr>
           {% else %}
             <tr>
