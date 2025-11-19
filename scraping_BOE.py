@@ -793,49 +793,8 @@ def oposiciones_favoritas():
     )
 
 
-# Ruta para cambiar la contraseña
-@app.route("/change_password", methods=["POST"])
-@login_required
-def change_password():
-    db = get_db()
-    user_id = current_user.id
-    
-    current_password = request.form.get("current_password")
-    new_password = request.form.get("new_password")
-    confirm_password = request.form.get("confirm_password")
 
-    # Validaciones básicas
-    if not current_password or not new_password or not confirm_password:
-        flash("Por favor, rellena todos los campos.", "danger")
-        return redirect(url_for("configuracion_cuenta"))
-
-    if new_password != confirm_password:
-        flash("Las nuevas contraseñas no coinciden.", "danger")
-        return redirect(url_for("configuracion_cuenta"))
-
-    # Obtener el hash actual de la base de datos para verificar
-    row = db.execute("SELECT password_hash FROM users WHERE id = ?", (user_id,)).fetchone()
-    if not row:
-        flash("Usuario no encontrado.", "danger")
-        return redirect(url_for("index"))
-    
-    stored_hash = row["password_hash"]
-
-    # Verificar que la contraseña actual sea correcta
-    if not check_password_hash(stored_hash, current_password):
-        flash("La contraseña actual es incorrecta.", "danger")
-        return redirect(url_for("configuracion_cuenta"))
-
-    # Generar nuevo hash y actualizar en DB
-    new_hash = generate_password_hash(new_password)
-    db.execute("UPDATE users SET password_hash = ? WHERE id = ?", (new_hash, user_id))
-    db.commit()
-
-    flash("¡Contraseña actualizada correctamente!", "success")
-    return redirect(url_for("configuracion_cuenta"))
-
-
-# Ruta para cambiar la contraseña
+# 🆕 Ruta para cambiar la contraseña
 @app.route("/change_password", methods=["POST"])
 @login_required
 def change_password():
