@@ -454,6 +454,7 @@ def mostrar_departamento(nombre):
     provincia = request.args.get("provincia", "")
     fecha_desde = request.args.get("fecha_desde", "")
     fecha_hasta = request.args.get("fecha_hasta", "")
+    orden = request.args.get("orden", "desc")
     page = int(request.args.get("page", 1))
     por_pagina = 10
     offset = (page - 1) * por_pagina
@@ -474,7 +475,8 @@ def mostrar_departamento(nombre):
         sql += " AND fecha <= ?"
         params.append(fecha_hasta.replace("-", ""))
 
-    sql += " ORDER BY fecha DESC LIMIT ? OFFSET ?"
+    order_direction = "DESC" if orden == "desc" else "ASC"
+    sql += f" ORDER BY fecha {order_direction} LIMIT ? OFFSET ?"
     params += [por_pagina, offset]
 
     rows = db.execute(sql, params).fetchall()
@@ -518,6 +520,7 @@ def mostrar_departamento(nombre):
         provincias=provincias,
         busqueda=busqueda,
         provincia_filtro=provincia,
+        orden=orden,
         fecha_desde=fecha_desde,
         fecha_hasta=fecha_hasta,
         hoy=hoy,
@@ -627,6 +630,9 @@ def oposiciones_vigentes():
     provincia = request.args.get("provincia", "")
     fecha_desde = request.args.get("fecha_desde", "")
     fecha_hasta = request.args.get("fecha_hasta", "")
+    orden = request.args.get("orden", "desc")
+    page = int(request.args.get("page", 1))
+    por_pagina = 20
 
     sql = "SELECT * FROM oposiciones WHERE fecha >= ?"
     params = [desde]
@@ -654,7 +660,17 @@ def oposiciones_vigentes():
         sql += " AND fecha <= ?"
         params.append(fecha_hasta.replace("-", ""))
 
-    sql += " ORDER BY fecha DESC"
+    # Contar el total de registros para la paginación
+    count_sql = sql.replace("SELECT *", "SELECT COUNT(*)")
+    total = db.execute(count_sql, params).fetchone()[0]
+    total_pages = (total + por_pagina - 1) // por_pagina
+
+    # Añadir ordenamiento y paginación a la consulta
+    order_direction = "DESC" if orden == "desc" else "ASC"
+    sql += f" ORDER BY fecha {order_direction} LIMIT ? OFFSET ?"
+    offset = (page - 1) * por_pagina
+    params.extend([por_pagina, offset])
+    
     oposiciones = db.execute(sql, params).fetchall()
 
     provincias = db.execute(
@@ -673,6 +689,10 @@ def oposiciones_vigentes():
         provincia_filtro=provincia,
         fecha_desde=fecha_desde,
         fecha_hasta=fecha_hasta,
+        orden=orden,
+        page=page,
+        total_pages=total_pages,
+        total=total,
     )
 
 
