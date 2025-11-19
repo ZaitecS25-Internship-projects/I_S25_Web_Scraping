@@ -1,31 +1,25 @@
-"""scraping_boe.py
-
+"""
 Aplicación Flask para Web Scraping del BOE (Boletín Oficial del Estado)
 con sistema de usuarios (sign up / login) y notificación por email de
 nuevas oposiciones detectadas.
-
-Autor original: franSM, Cristóbal Delgado Romero
-Ampliado con auth + email: 2025
+prueba de la guia
 """
 
-from datetime import datetime, date
-from datetime import datetime, date
 import os
 import re
 import sqlite3
-from datetime import datetime, timedelta
+from datetime import datetime, date, timedelta
 
 import requests
-from flask import (
-    Flask, request, g, redirect, url_for, render_template, session, flash
-)
 from bs4 import BeautifulSoup
+from flask import (
+    Flask, request, g, redirect, url_for, render_template, session, flash, jsonify
+)
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_mail import Mail, Message
 from flask_login import (
     LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 )
-from flask import jsonify
 
 DB_PATH = os.getenv('DB_PATH', 'oposiciones.db')
 app = Flask(__name__)
@@ -33,9 +27,32 @@ app.secret_key = os.getenv('SECRET_KEY', 'cambia-esto-en-produccion')
 
 login_manager = LoginManager()
 login_manager.init_app(app)
-login_manager.login_view = "login"  # redirige a /login si no hay sesión
+login_manager.login_view = "login"
+
+# ============ TEMA CLARO / OSCURO ============
+
+@app.before_request
+def ensure_theme():
+    """Si no hay tema en la sesión, se establece 'light' por defecto."""
+    if 'theme' not in session:
+        session['theme'] = 'light'
 
 
+@app.context_processor
+def inject_theme():
+    """Hace disponible la variable 'theme' en todas las plantillas."""
+    return {'theme': session.get('theme', 'light')}
+
+
+@app.route('/toggle_theme')
+def toggle_theme():
+    """Alterna entre modo claro y modo oscuro y redirige a la página anterior."""
+    current = session.get('theme', 'light')
+    session['theme'] = 'dark' if current == 'light' else 'light'
+    return redirect(request.referrer or url_for('index'))
+
+
+# ================== USER / AUTH ==================
 
 class User(UserMixin):
     def __init__(self, id, email, name, apellidos, age, genero):
@@ -46,18 +63,22 @@ class User(UserMixin):
         self.age = age
         self.genero = genero
 
-
     @staticmethod
     def get(user_id):
         db = get_db()
         row = db.execute(
-            
-            "SELECT id, email, name, apellidos, age, genero FROM users WHERE id = ?", (user_id,)
-    ).fetchone()
-
+            "SELECT id, email, name, apellidos, age, genero FROM users WHERE id = ?",
+            (user_id,)
+        ).fetchone()
         if row:
-            return User(row["id"], row["email"], row["name"], row["apellidos"], row["age"], row["genero"]
-    )
+            return User(
+                row["id"],
+                row["email"],
+                row["name"],
+                row["apellidos"],
+                row["age"],
+                row["genero"],
+            )
         return None
 
 
@@ -74,18 +95,18 @@ app.config['MAIL_USE_SSL'] = os.getenv('MAIL_USE_SSL', '0') == '1'
 app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
 app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
 app.config['MAIL_DEFAULT_SENDER'] = os.getenv(
-    'MAIL_DEFAULT_SENDER', app.config.get('MAIL_USERNAME'))
+    'MAIL_DEFAULT_SENDER', app.config.get('MAIL_USERNAME')
+)
 
 mail = Mail(app)
+
 
 # --------------------
 # filtros Jinja2
 # --------------------
 
-
 @app.template_filter('format_date')
 def format_date_filter(date_str):
-    """Convierte YYYYMMDD a DD/MM/YYYY si corresponde."""
     if not date_str or len(date_str) != 8 or not date_str.isdigit():
         return date_str
     try:
@@ -97,15 +118,8 @@ def format_date_filter(date_str):
         return date_str
 
 
-# 🟡 Filtro Jinja: marca como recientes las oposiciones de los últimos x días
-
-
 @app.template_filter('es_reciente')
 def es_reciente(fecha_str, dias=0):
-    """
-    Devuelve True si la fecha de la oposición está dentro de los últimos `dias`.
-    Usa formato 'YYYYMMDD' del BOE.
-    """
     try:
         f = datetime.strptime(fecha_str, "%Y%m%d").date()
         return (date.today() - f).days <= dias
@@ -133,9 +147,6 @@ def close_connection(exception):
 
 
 def init_db():
-    """Crea las tablas necesarias (idempotente).
-    Incluye la columna 'provincia' desde el inicio.
-    """
     db = get_db()
     db.execute("""
         CREATE TABLE IF NOT EXISTS oposiciones (
@@ -171,42 +182,52 @@ def init_db():
             UNIQUE(user_id, oposicion_id)
         )
     """)
+    db.execute("""
+        CREATE TABLE IF NOT EXISTS favoritas (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            oposicion_id INTEGER NOT NULL,
+            fecha_favorito TEXT NOT NULL,
+            UNIQUE(user_id, oposicion_id),
+            FOREIGN KEY (user_id) REFERENCES users(id),
+            FOREIGN KEY (oposicion_id) REFERENCES oposiciones(id)
+        )
+    """)
     db.commit()
+
 
 # --------------------
 # Helpers Auth
 # --------------------
 
-
 def create_user(email, password, name, apellidos, age, genero):
     db = get_db()
     password_hash = generate_password_hash(password)
     db.execute(
-        "INSERT INTO users (email, password_hash, name, apellidos, age, genero) VALUES (?, ?, ?, ?, ?, ?)",
+        "INSERT INTO users (email, password_hash, name, apellidos, age, genero) "
+        "VALUES (?, ?, ?, ?, ?, ?)",
         (email.lower(), password_hash, name, apellidos, age, genero)
     )
     db.commit()
 
+
 def find_user_by_email(email):
     db = get_db()
-    return db.execute("SELECT * FROM users WHERE email = ?", (email.lower(),)).fetchone()
+    return db.execute(
+        "SELECT * FROM users WHERE email = ?",
+        (email.lower(),)
+    ).fetchone()
+
 
 # --------------------
 # Extraer provincia
 # --------------------
 
-
 def extraer_provincia(texto):
-    """Intenta extraer la provincia de un texto con patrones comunes.
-    Retorna el nombre de la provincia en mayúsculas o None.
-    La heurística busca palabras en mayúscula con longitud razonable
-    o coincidencias con una lista corta de provincias comunes.
-    """
     if not texto:
         return None
     texto = re.sub(r"\s+", " ", texto).strip()
 
-    # Lista abreviada y simple de provincias (puede ampliarse)
     provincias = [
         'Madrid', 'Barcelona', 'Valencia', 'Sevilla', 'Zaragoza', 'Málaga', 'Murcia',
         'Alicante', 'Córdoba', 'Granada', 'Burgos', 'Palencia', 'A Coruña', 'Cantabria',
@@ -215,22 +236,17 @@ def extraer_provincia(texto):
         if re.search(rf"\b{re.escape(p)}\b", texto, re.IGNORECASE):
             return p
 
-    # Buscar palabra en mayúsculas (ej: 'SEVILLA') de longitud entre 4 y 15
     caps = re.findall(r"\b[A-ZÑ]{4,15}\b", texto)
     if caps:
-        # Devolver la primera que parezca razonable
         return caps[0].capitalize()
-
     return None
+
 
 # --------------------
 # Email (Notificación)
 # --------------------
 
-
 def send_new_oposiciones_email(recipients, oposiciones):
-    """Envía email HTML con la lista de nuevas oposiciones.
-    """
     if not recipients or not oposiciones:
         return
 
@@ -244,7 +260,8 @@ def send_new_oposiciones_email(recipients, oposiciones):
         pdf_html = f' | <a href="{url_pdf}">PDF</a>' if url_pdf else ''
         dept_html = f' — {dept}' if dept else ''
         filas.append(
-            f'<li><strong>{titulo}</strong> — {fecha} — <a href="{url_html}">HTML</a>{pdf_html}{dept_html}</li>'
+            f'<li><strong>{titulo}</strong> — {fecha} — '
+            f'<a href="{url_html}">HTML</a>{pdf_html}{dept_html}</li>'
         )
 
     lista_html = ''.join(filas)
@@ -252,7 +269,9 @@ def send_new_oposiciones_email(recipients, oposiciones):
         '<h3>Nuevas oposiciones publicadas</h3>'
         f'<p>Se han detectado {len(oposiciones)} nuevas oposiciones:</p>'
         f'<ul>{lista_html}</ul>'
-        '<p style="font-size:12px;color:#666">Este es un mensaje automático, por favor no responda.</p>'
+        '<p style="font-size:12px;color:#666">'
+        'Este es un mensaje automático, por favor no responda.'
+        '</p>'
     )
 
     subject = f"{len(oposiciones)} nuevas oposiciones publicadas"
@@ -264,17 +283,12 @@ def all_user_emails():
     db = get_db()
     return [r['email'] for r in db.execute("SELECT email FROM users").fetchall()]
 
+
 # --------------------
 # Scraper BOE
 # --------------------
 
-
 def scrape_boe():
-    """Busca en la API de datos abiertos del BOE y guarda nuevas oposiciones.
-
-    Retorna:
-        list[dict]: lista de oposiciones NUEVAS insertadas (cada item es un dict)
-    """
     init_db()
     db = get_db()
 
@@ -299,7 +313,6 @@ def scrape_boe():
     else:
         return []
 
-    # Intentar parsear XML
     try:
         soup = BeautifulSoup(r.content, 'lxml-xml')
     except Exception:
@@ -326,16 +339,26 @@ def scrape_boe():
         url_pdf = url_pdf_tag.text.strip() if url_pdf_tag else None
 
         dept_parent = item.find_parent('departamento')
-        departamento = dept_parent.get(
-            'nombre') if dept_parent and dept_parent.has_attr('nombre') else None
+        departamento = (
+            dept_parent.get('nombre')
+            if dept_parent and dept_parent.has_attr('nombre')
+            else None
+        )
 
         provincia = extraer_provincia(titulo) or extraer_provincia(control)
 
         try:
-            db.execute('''
-                INSERT INTO oposiciones (identificador, control, titulo, url_html, url_pdf, departamento, fecha, provincia)
+            db.execute(
+                '''
+                INSERT INTO oposiciones (
+                    identificador, control, titulo, url_html, url_pdf,
+                    departamento, fecha, provincia
+                )
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            ''', (identificador, control, titulo, url_html, url_pdf, departamento, hoy, provincia))
+                ''',
+                (identificador, control, titulo, url_html, url_pdf,
+                 departamento, hoy, provincia)
+            )
             db.commit()
 
             newly_inserted.append({
@@ -349,28 +372,54 @@ def scrape_boe():
                 'provincia': provincia,
             })
         except sqlite3.IntegrityError:
-            # duplicado por url_html (UNIQUE), ignorar
             continue
 
     return newly_inserted
 
+
 # --------------------
 # Registrar oposiciones vistas
 # --------------------
-# 🆕 Función para registrar una visita
-
 
 def registrar_visita(user_id, oposicion_id):
     db = get_db()
     fecha = datetime.utcnow().isoformat()
     try:
         db.execute(
-            "INSERT OR REPLACE INTO visitas (user_id, oposicion_id, fecha_visita) VALUES (?, ?, ?)",
+            "INSERT OR REPLACE INTO visitas (user_id, oposicion_id, fecha_visita) "
+            "VALUES (?, ?, ?)",
             (user_id, oposicion_id, fecha)
         )
         db.commit()
     except Exception as e:
         print(f"Error al registrar visita: {e}")
+
+
+# --------------------
+# Gestionar favoritos
+# --------------------
+
+def toggle_favorito(user_id, oposicion_id):
+    db = get_db()
+    fecha = datetime.utcnow().isoformat()
+    try:
+        cursor = db.execute(
+            "DELETE FROM favoritas WHERE user_id = ? AND oposicion_id = ?",
+            (user_id, oposicion_id)
+        )
+        if cursor.rowcount > 0:
+            db.commit()
+            return False
+        db.execute(
+            "INSERT INTO favoritas (user_id, oposicion_id, fecha_favorito) "
+            "VALUES (?, ?, ?)",
+            (user_id, oposicion_id, fecha)
+        )
+        db.commit()
+        return True
+    except Exception as e:
+        print(f"Error al gestionar favorito: {e}")
+        return False
 
 
 # --------------------
@@ -381,16 +430,16 @@ def registrar_visita(user_id, oposicion_id):
 def index():
     init_db()
     db = get_db()
-
-    # Fecha de hoy en formato YYYYMMDD
     hoy = datetime.today().strftime('%Y%m%d')
-
-    # Departamentos con oposiciones publicadas hoy
     deps = db.execute(
-        'SELECT DISTINCT departamento FROM oposiciones WHERE departamento IS NOT NULL AND fecha = ? ORDER BY departamento',
+        '''
+        SELECT DISTINCT departamento
+        FROM oposiciones
+        WHERE departamento IS NOT NULL AND fecha = ?
+        ORDER BY departamento
+        ''',
         (hoy,)
     ).fetchall()
-
     return render_template('index.html', departamentos=deps, user=current_user)
 
 
@@ -398,12 +447,9 @@ def index():
 def mostrar_departamento(nombre):
     db = get_db()
 
-    # 🔹 Fecha actual para marcar las oposiciones nuevas
     hoy = datetime.today().strftime("%Y%m%d")
-
     user = current_user
-    user_id = user.id if user else None
-
+    user_id = user.id if user.is_authenticated else None
     busqueda = request.args.get("busqueda", "")
     provincia = request.args.get("provincia", "")
     fecha_desde = request.args.get("fecha_desde", "")
@@ -434,35 +480,32 @@ def mostrar_departamento(nombre):
     rows = db.execute(sql, params).fetchall()
 
     total = db.execute(
-        "SELECT COUNT(*) FROM oposiciones WHERE departamento = ?", (nombre,)
+        "SELECT COUNT(*) FROM oposiciones WHERE departamento = ?",
+        (nombre,)
     ).fetchone()[0]
     total_pages = (total + por_pagina - 1) // por_pagina
 
     provincias = db.execute(
-        "SELECT DISTINCT provincia FROM oposiciones WHERE provincia IS NOT NULL ORDER BY provincia"
+        "SELECT DISTINCT provincia FROM oposiciones "
+        "WHERE provincia IS NOT NULL ORDER BY provincia"
     ).fetchall()
 
-    # 🔵 Obtener las oposiciones visitadas por el usuario actual
     visitadas = []
-    user = current_user
+    favoritas = []
 
-    if user:
-        db.execute("""
-            CREATE TABLE IF NOT EXISTS visitas (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                user_id INTEGER,
-                oposicion_id INTEGER,
-                fecha_visita TEXT,
-                UNIQUE(user_id, oposicion_id)
-            )
-        """)
-        db.commit()
-
+    if user.is_authenticated:
         visitadas = [
             row["oposicion_id"]
             for row in db.execute(
-                "SELECT oposicion_id FROM visitas WHERE user_id = ?", (
-                    user.id,)
+                "SELECT oposicion_id FROM visitas WHERE user_id = ?",
+                (user.id,)
+            ).fetchall()
+        ]
+        favoritas = [
+            row["oposicion_id"]
+            for row in db.execute(
+                "SELECT oposicion_id FROM favoritas WHERE user_id = ?",
+                (user.id,)
             ).fetchall()
         ]
 
@@ -479,6 +522,7 @@ def mostrar_departamento(nombre):
         fecha_hasta=fecha_hasta,
         hoy=hoy,
         visitadas=visitadas,
+        favoritas=favoritas,
         user=user,
     )
 
@@ -488,6 +532,7 @@ def do_scrape():
     init_db()
     try:
         new_items = scrape_boe()
+        # si quieres volver a activar emails, aquí usar send_new_oposiciones_email(...)
     except Exception as e:
         flash(f"Error al hacer scraping: {e}", "danger")
     return redirect(url_for('index'))
@@ -504,8 +549,15 @@ def login():
         user = find_user_by_email(email)
         if not user or not check_password_hash(user['password_hash'], password):
             flash("Credenciales inválidas.", "danger")
-            return redirect(url_for('login'))  # 🔹 redirect limpio
-        login_user(User(user["id"], user["email"], user["name"]))
+            return redirect(url_for('login'))
+        login_user(User(
+            user["id"],
+            user["email"],
+            user["name"],
+            user["apellidos"],
+            user["age"],
+            user["genero"],
+        ))
         flash("Sesión iniciada.", "success")
         next_url = request.args.get('next') or url_for('index')
         return redirect(next_url)
@@ -528,9 +580,9 @@ def register():
         password = (request.form.get('password') or '')
         name = (request.form.get('nombre') or '')
         apellidos = (request.form.get('apellidos') or '')
-        age = (request.form.get ('edad') or '')
+        age = (request.form.get('edad') or '')
         genero = (request.form.get('genero') or '')
-        if not email or not password or not name or not apellidos or not age or not genero:
+        if not all([email, password, name, apellidos, age, genero]):
             flash("¡Rellena todos los campos!", "danger")
             return render_template('register.html', user=current_user)
         if find_user_by_email(email):
@@ -538,7 +590,14 @@ def register():
             return render_template('register.html', user=current_user)
         create_user(email, password, name, apellidos, age, genero)
         user = find_user_by_email(email)
-        login_user(User(user["id"], user["email"], user["name"], user["apellidos"], user["age"], user["genero"]))
+        login_user(User(
+            user["id"],
+            user["email"],
+            user["name"],
+            user["apellidos"],
+            user["age"],
+            user["genero"],
+        ))
         flash("Registro correcto. Sesión iniciada.", "success")
         return redirect(url_for('index'))
     return render_template('register.html', user=current_user)
@@ -548,13 +607,14 @@ def register():
 @login_required
 def user():
     return render_template("user.html", user=current_user)
+
+
 @app.route("/user_oposiciones")
 @login_required
 def oposiciones_vigentes():
     db = get_db()
     desde = (datetime.today() - timedelta(days=30)).strftime("%Y%m%d")
 
-    # 🔹 Obtener todos los departamentos con oposiciones recientes
     departamentos = db.execute('''
         SELECT DISTINCT departamento 
         FROM oposiciones 
@@ -562,7 +622,6 @@ def oposiciones_vigentes():
         ORDER BY departamento
     ''', (desde,)).fetchall()
 
-    # --- Filtros ---
     selected_departamentos = request.args.getlist("departamentos")
     busqueda = request.args.get("busqueda", "")
     provincia = request.args.get("provincia", "")
@@ -574,7 +633,8 @@ def oposiciones_vigentes():
 
     if selected_departamentos:
         sql += " AND departamento IN ({})".format(
-            ",".join(["?"] * len(selected_departamentos)))
+            ",".join(["?"] * len(selected_departamentos))
+        )
         params.extend(selected_departamentos)
 
     if busqueda:
@@ -598,7 +658,8 @@ def oposiciones_vigentes():
     oposiciones = db.execute(sql, params).fetchall()
 
     provincias = db.execute(
-        "SELECT DISTINCT provincia FROM oposiciones WHERE provincia IS NOT NULL ORDER BY provincia"
+        "SELECT DISTINCT provincia FROM oposiciones "
+        "WHERE provincia IS NOT NULL ORDER BY provincia"
     ).fetchall()
 
     return render_template(
@@ -618,27 +679,92 @@ def oposiciones_vigentes():
 @app.route("/user_alertas")
 @login_required
 def newsletter_prefs():
-    """Sección para gestionar alertas por correo / newsletter."""
-    # En el futuro: formulario para suscribirse a departamentos concretos.
     return render_template("user_newsletter.html", user=current_user)
 
 
 @app.route("/user_configuracion")
 @login_required
 def configuracion_cuenta():
-    """Panel de configuración de perfil del usuario."""
-    # En el futuro: formularios de perfil, seguridad, etc.
     return render_template("user_configuracion.html", user=current_user)
 
 
 @app.route("/marcar_visitada/<int:oposicion_id>", methods=["POST"])
 @login_required
 def marcar_visitada(oposicion_id):
-    user = current_user
-    print(
-        f"🟢 Registro de visita recibido: user={user['id']}, oposicion_id={oposicion_id}")
-    registrar_visita(user["id"], oposicion_id)
+    user_id = current_user.id
+    registrar_visita(user_id, oposicion_id)
+    print(f"🟢 Registro de visita recibido: user={user_id}, oposicion_id={oposicion_id}")
     return jsonify({"ok": True})
+
+
+@app.route("/estadisticas")
+@login_required
+def estadisticas():
+    db = get_db()
+    stats = db.execute("""
+        SELECT o.departamento, COUNT(v.id) AS total_visitas
+        FROM visitas v
+        JOIN oposiciones o ON v.oposicion_id = o.id
+        GROUP BY o.departamento
+        ORDER BY total_visitas DESC
+    """).fetchall()
+
+    labels = [row["departamento"] for row in stats]
+    values = [row["total_visitas"] for row in stats]
+
+    return render_template(
+        "estadisticas.html",
+        stats=stats,
+        labels=labels,
+        values=values,
+        user=current_user
+    )
+
+
+@app.route("/toggle_favorito/<int:oposicion_id>", methods=["POST"])
+@login_required
+def toggle_favorito_route(oposicion_id):
+    user = current_user
+    is_favorite = toggle_favorito(user.id, oposicion_id)
+    return jsonify({"ok": True, "is_favorite": is_favorite})
+
+
+@app.route("/user_favoritas")
+@login_required
+def oposiciones_favoritas():
+    db = get_db()
+    user = current_user
+
+    oposiciones = db.execute('''
+        SELECT o.*, f.fecha_favorito
+        FROM oposiciones o
+        JOIN favoritas f ON o.id = f.oposicion_id
+        WHERE f.user_id = ?
+        ORDER BY f.fecha_favorito DESC
+    ''', (user.id,)).fetchall()
+
+    visitadas = [
+        row["oposicion_id"]
+        for row in db.execute(
+            "SELECT oposicion_id FROM visitas WHERE user_id = ?",
+            (user.id,)
+        ).fetchall()
+    ]
+
+    return render_template(
+        "user_oposiciones.html",
+        user=user,
+        oposiciones=oposiciones,
+        departamentos=[],
+        selected_departamentos=[],
+        provincias=[],
+        busqueda="",
+        provincia_filtro="",
+        fecha_desde="",
+        fecha_hasta="",
+        visitadas=visitadas,
+        favoritas=[o['id'] for o in oposiciones],
+    )
 
 
 if __name__ == '__main__':
