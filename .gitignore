@@ -12,4 +12,19 @@ oposiciones.db
 .env
 
 oposiciones.db
+# Bases de datos
+oposiciones.db
+
+# Carpetas temporales
+I_S25_Web_Scraping-1/
+I_S25_Web_Scraping-2/
+I_S25_Web_Scraping-3/
+I_S25_Web_Scraping-4/
+
+# Entornos virtuales
+venv/
 .venv/
+
+# Archivos automáticos
+__pycache__/
+*.pyc
