@@ -21,7 +21,6 @@ Define la estructura general de la aplicación:
 
 <body class="bg-light d-flex flex-column min-vh-100">
 
-  <!-- Barra de navegación -->
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm mi-navbar animated-navbar">
     <div class="container">
       <a class="navbar-brand fs-4" href="{{ url_for('index') }}">📜 Oposiciones BOE</a>
@@ -34,7 +33,6 @@ Define la estructura general de la aplicación:
       <div class="collapse navbar-collapse" id="navbarContent">
         <ul class="navbar-nav ms-auto align-items-center">
           {% if user.is_authenticated %}
-          <!-- Menú usuario -->
           <li class="nav-item dropdown me-2">
             <a class="nav-link dropdown-toggle text-white px-2" href="#" id="userMenuDropdown" role="button"
                data-bs-toggle="dropdown" aria-expanded="false">
@@ -44,6 +42,11 @@ Define la estructura general de la aplicación:
               <li>
                 <a class="dropdown-item" href="{{ url_for('oposiciones_vigentes') }}">
                   Oposiciones vigentes
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item" href="{{ url_for('oposiciones_favoritas') }}">
+                  Mis Favoritas ⭐
                 </a>
               </li>
               <li>
@@ -60,28 +63,12 @@ Define la estructura general de la aplicación:
             </ul>
           </li>
 
-          <!-- Favoritas -->
-          <li class="nav-item me-2">
-            <a class="nav-link text-warning" href="{{ url_for('oposiciones_favoritas') }}">
-              Mis Favoritas ⭐
-            </a>
-          </li>
-
-          <!-- Estadísticas -->
-          <li class="nav-item me-2">
-            <a href="{{ url_for('estadisticas') }}" class="btn btn-outline-warning btn-sm">
-              📊 Estadísticas
-            </a>
-          </li>
-
-          <!-- Logout -->
           <li class="nav-item me-2">
             <a href="{{ url_for('logout') }}" class="btn btn-sm btn-danger">
               Salir
             </a>
           </li>
           {% else %}
-          <!-- No autenticado -->
           <li class="nav-item me-2">
             <a href="{{ url_for('login') }}" class="btn btn-outline-light btn-sm">
               Iniciar sesión
@@ -94,7 +81,6 @@ Define la estructura general de la aplicación:
           </li>
           {% endif %}
 
-          <!-- Botón de modo oscuro / claro (siempre visible) -->
           <li class="nav-item">
             <a href="{{ url_for('toggle_theme') }}" class="btn btn-outline-light btn-sm">
               {% if theme == 'dark' %}☀️ Modo claro{% else %}🌙 Modo oscuro{% endif %}
@@ -107,7 +93,6 @@ Define la estructura general de la aplicación:
 
   {% block hero %}{% endblock %}
 
-  <!-- Contenido principal -->
   <main class="container mt-4 contenido-principal flex-grow-1">
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
@@ -119,12 +104,10 @@ Define la estructura general de la aplicación:
     {% block content %}{% endblock %}
   </main>
 
-  <!-- Footer -->
   <footer class="mi-footer">
     <p>© 2025 Oposiciones BOE</p>
   </footer>
 
-  <!-- Rellenar select edad si existe -->
   <script>
     const select = document.getElementById("edad");
     if (select) {
