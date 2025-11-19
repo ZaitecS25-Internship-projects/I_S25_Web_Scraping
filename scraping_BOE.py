@@ -31,6 +31,7 @@ login_manager.login_view = "login"
 
 # ============ TEMA CLARO / OSCURO ============
 
+
 @app.before_request
 def ensure_theme():
     """Si no hay tema en la sesión, se establece 'light' por defecto."""
@@ -42,6 +43,16 @@ def ensure_theme():
 def inject_theme():
     """Hace disponible la variable 'theme' en todas las plantillas."""
     return {'theme': session.get('theme', 'light')}
+
+
+@app.context_processor
+def inject_user():
+    """Hace disponible la variable 'user' (current_user) en todas las plantillas.
+
+    Así los templates pueden usar `user` en vez de `current_user` y no hace falta
+    pasarlo explícitamente en cada `render_template`.
+    """
+    return {'user': current_user}
 
 
 @app.route('/toggle_theme')
@@ -444,7 +455,7 @@ def index():
         ''',
         (hoy,)
     ).fetchall()
-    return render_template('index.html', departamentos=deps, user=current_user)
+    return render_template('index.html', departamentos=deps)
 
 
 @app.route("/departamento/<nombre>")
@@ -530,7 +541,6 @@ def mostrar_departamento(nombre):
         hoy=hoy,
         visitadas=visitadas,
         favoritas=favoritas,
-        user=user,
     )
 
 
@@ -568,7 +578,7 @@ def login():
         flash("Sesión iniciada.", "success")
         next_url = request.args.get('next') or url_for('index')
         return redirect(next_url)
-    return render_template('login.html', user=current_user)
+    return render_template('login.html')
 
 
 @app.route('/logout')
@@ -591,7 +601,7 @@ def register():
         genero = (request.form.get('genero') or '')
         if not all([email, password, name, apellidos, age, genero]):
             flash("¡Rellena todos los campos!", "danger")
-            return render_template('register.html', user=current_user)
+            return render_template('register.html')
         if find_user_by_email(email):
             flash("Ese email ya está registrado.", "warning")
             return render_template('register.html', user=current_user)
@@ -607,13 +617,13 @@ def register():
         ))
         flash("Registro correcto. Sesión iniciada.", "success")
         return redirect(url_for('index'))
-    return render_template('register.html', user=current_user)
+    return render_template('register.html')
 
 
 @app.route("/user", methods=["GET", "POST"])
 @login_required
 def user():
-    return render_template("user.html", user=current_user)
+    return render_template("user.html")
 
 
 @app.route("/user_oposiciones")
@@ -706,10 +716,9 @@ def oposiciones_vigentes():
 
     return render_template(
         "user_oposiciones.html",
-        user=user,
         departamentos=departamentos,
         # Pasamos los filtros seleccionados para mantenerlos en la paginación
-        selected_departamentos=selected_departamentos, 
+        selected_departamentos=selected_departamentos,
         oposiciones=oposiciones,
         provincias=provincias,
         busqueda=busqueda,
@@ -728,13 +737,13 @@ def oposiciones_vigentes():
 @app.route("/user_alertas")
 @login_required
 def newsletter_prefs():
-    return render_template("user_newsletter.html", user=current_user)
+    return render_template("user_newsletter.html")
 
 
 @app.route("/user_configuracion")
 @login_required
 def configuracion_cuenta():
-    return render_template("user_configuracion.html", user=current_user)
+    return render_template("user_configuracion.html")
 
 
 @app.route("/marcar_visitada/<int:oposicion_id>", methods=["POST"])
@@ -742,8 +751,32 @@ def configuracion_cuenta():
 def marcar_visitada(oposicion_id):
     user_id = current_user.id
     registrar_visita(user_id, oposicion_id)
-    print(f"🟢 Registro de visita recibido: user={user_id}, oposicion_id={oposicion_id}")
+    print(
+        f"🟢 Registro de visita recibido: user={user_id}, oposicion_id={oposicion_id}")
     return jsonify({"ok": True})
+
+
+@app.route("/estadisticas")
+@login_required
+def estadisticas():
+    db = get_db()
+    stats = db.execute("""
+        SELECT o.departamento, COUNT(v.id) AS total_visitas
+        FROM visitas v
+        JOIN oposiciones o ON v.oposicion_id = o.id
+        GROUP BY o.departamento
+        ORDER BY total_visitas DESC
+    """).fetchall()
+
+    labels = [row["departamento"] for row in stats]
+    values = [row["total_visitas"] for row in stats]
+
+    return render_template(
+        "estadisticas.html",
+        stats=stats,
+        labels=labels,
+        values=values,
+    )
 
 
 @app.route("/toggle_favorito/<int:oposicion_id>", methods=["POST"])
@@ -778,7 +811,6 @@ def oposiciones_favoritas():
 
     return render_template(
         "user_oposiciones.html",
-        user=user,
         oposiciones=oposiciones,
         departamentos=[],
         selected_departamentos=[],
@@ -797,14 +829,13 @@ def oposiciones_favoritas():
     )
 
 
-
 # 🆕 Ruta para cambiar la contraseña
 @app.route("/change_password", methods=["POST"])
 @login_required
 def change_password():
     db = get_db()
     user_id = current_user.id
-    
+
     current_password = request.form.get("current_password")
     new_password = request.form.get("new_password")
     confirm_password = request.form.get("confirm_password")
@@ -819,11 +850,12 @@ def change_password():
         return redirect(url_for("configuracion_cuenta"))
 
     # Obtener el hash actual de la base de datos para verificar
-    row = db.execute("SELECT password_hash FROM users WHERE id = ?", (user_id,)).fetchone()
+    row = db.execute(
+        "SELECT password_hash FROM users WHERE id = ?", (user_id,)).fetchone()
     if not row:
         flash("Usuario no encontrado.", "danger")
         return redirect(url_for("index"))
-    
+
     stored_hash = row["password_hash"]
 
     # Verificar que la contraseña actual sea correcta
@@ -833,7 +865,8 @@ def change_password():
 
     # Generar nuevo hash y actualizar en DB
     new_hash = generate_password_hash(new_password)
-    db.execute("UPDATE users SET password_hash = ? WHERE id = ?", (new_hash, user_id))
+    db.execute("UPDATE users SET password_hash = ? WHERE id = ?",
+               (new_hash, user_id))
     db.commit()
 
     flash("¡Contraseña actualizada correctamente!", "success")
