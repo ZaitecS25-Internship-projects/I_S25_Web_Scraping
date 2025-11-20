@@ -726,7 +726,6 @@ def oposiciones_vigentes():
     return render_template(
         "user_oposiciones.html",
         departamentos=departamentos,
-        # Pasamos los filtros seleccionados para mantenerlos en la paginación
         selected_departamentos=selected_departamentos,
         oposiciones=oposiciones,
         provincias=provincias,
@@ -734,13 +733,13 @@ def oposiciones_vigentes():
         provincia_filtro=provincia,
         fecha_desde=fecha_desde,
         fecha_hasta=fecha_hasta,
-        # Variables de paginación
         page=page,
         total_pages=total_pages,
         visitadas=visitadas,
         favoritas=favoritas,
-        hoy=datetime.today().strftime("%Y%m%d")
-    )
+        hoy=datetime.today().strftime("%Y%m%d"),
+        titulo_pagina=f"📢 Oposiciones Vigentes"    
+        )
 
 
 @app.route("/user_alertas", methods=["GET", "POST"])
@@ -869,7 +868,8 @@ def oposiciones_favoritas():
         total=len(oposiciones),
         page=1,
         total_pages=1,
-        orden="desc"
+        orden="desc",
+        titulo_pagina=f"⭐ Oposiciones Favoritas de {user.name} {user.apellidos}"
     )
 
 
