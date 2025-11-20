@@ -44,16 +44,32 @@ pip-wheel-metadata/
 # Python wheel cache
 wheelhouse/
 
-# Python
-__pycache__/
-*.pyc
+# Test / typecheck caches
+.pytest_cache/
+.mypy_cache/
+.cache/
+
+# Coverage
+.coverage
+coverage.xml
+htmlcov/
+
+# SQLite temporary files
+*.db-wal
+*.db-shm
+*.db-journal
+*.sqlite3-journal
+
+# Alternate virtualenv names
 .venv/
 
-# DB local
-oposiciones.db
-*.sqlite3
+# pyenv
+.python-version
 
-# Entornos/IDE
-.env
+# Local env files
+.env.*
 
-oposiciones.db
+# Eggs / packaging extras
+*.egg
+*.egg-info/
+pip-log.txt
