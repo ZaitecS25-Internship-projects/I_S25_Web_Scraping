@@ -45,16 +45,6 @@ def inject_theme():
     return {'theme': session.get('theme', 'light')}
 
 
-@app.context_processor
-def inject_user():
-    """Hace disponible la variable 'user' (current_user) en todas las plantillas.
-
-    Así los templates pueden usar `user` en vez de `current_user` y no hace falta
-    pasarlo explícitamente en cada `render_template`.
-    """
-    return {'user': current_user}
-
-
 @app.route('/toggle_theme')
 def toggle_theme():
     """Alterna entre modo claro y modo oscuro y redirige a la página anterior."""
@@ -64,6 +54,16 @@ def toggle_theme():
 
 
 # ================== USER / AUTH ==================
+
+@app.context_processor
+def inject_user():
+    """Hace disponible la variable 'user' (current_user) en todas las plantillas.
+
+    Así los templates pueden usar `user` en vez de `current_user` y no hace falta
+    pasarlo explícitamente en cada `render_template`.
+    """
+    return {'user': current_user}
+
 
 class User(UserMixin):
     def __init__(self, id, email, name, apellidos, age, genero):
@@ -103,9 +103,9 @@ app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
 app.config['MAIL_USE_SSL'] = False
-app.config['MAIL_USERNAME'] = 'notificaciones.scraper@gmail.com'  
-app.config['MAIL_PASSWORD'] = 'sqoj zfue ovcf dlhz'     
-app.config['MAIL_DEFAULT_SENDER'] = 'notificaciones.scraper@gmail.com' 
+app.config['MAIL_USERNAME'] = 'notificaciones.scraper@gmail.com'
+app.config['MAIL_PASSWORD'] = 'sqoj zfue ovcf dlhz'
+app.config['MAIL_DEFAULT_SENDER'] = 'notificaciones.scraper@gmail.com'
 # ============================================
 
 mail = Mail(app)
@@ -766,18 +766,21 @@ def newsletter_prefs():
         return redirect(url_for("newsletter_prefs"))
 
     # 2. Cargar preferencias actuales (GET)
-    prefs = db.execute("SELECT * FROM suscripciones WHERE user_id = ?", (user_id,)).fetchone()
+    prefs = db.execute(
+        "SELECT * FROM suscripciones WHERE user_id = ?", (user_id,)).fetchone()
 
     # Si no tiene preferencias guardadas, creamos un diccionario por defecto
     if not prefs:
-        prefs = {"alerta_diaria": 0, "alerta_favoritos": 0, "departamento_filtro": "Todos"}
+        prefs = {"alerta_diaria": 0, "alerta_favoritos": 0,
+                 "departamento_filtro": "Todos"}
 
     # 3. Cargar lista de departamentos para el select
-    dept_rows = db.execute("SELECT DISTINCT departamento FROM oposiciones WHERE departamento IS NOT NULL ORDER BY departamento").fetchall()
+    dept_rows = db.execute(
+        "SELECT DISTINCT departamento FROM oposiciones WHERE departamento IS NOT NULL ORDER BY departamento").fetchall()
     departamentos = [d["departamento"] for d in dept_rows]
 
     return render_template(
-        "user_newsletter.html", 
+        "user_newsletter.html",
         user=current_user,
         prefs=prefs,
         departamentos=departamentos
@@ -925,15 +928,16 @@ def enviar_resumen_ahora():
     user = current_user
 
     # 1. Obtener preferencias guardadas del usuario
-    prefs = db.execute("SELECT * FROM suscripciones WHERE user_id = ?", (user.id,)).fetchone()
-    
+    prefs = db.execute(
+        "SELECT * FROM suscripciones WHERE user_id = ?", (user.id,)).fetchone()
+
     # Si no ha guardado nada, asumimos "Todos"
     # Nota: sqlite3.Row permite acceso por índice prefs['columna'] pero no .get()
     dept_filter = prefs["departamento_filtro"] if prefs and prefs["departamento_filtro"] else "Todos"
 
     # 2. Buscar oposiciones recientes (últimos 7 días para asegurar que haya contenido)
     fecha_limite = (datetime.now() - timedelta(days=7)).strftime("%Y%m%d")
-    
+
     sql = "SELECT * FROM oposiciones WHERE fecha >= ?"
     params = [fecha_limite]
 
@@ -943,7 +947,7 @@ def enviar_resumen_ahora():
         params.append(dept_filter)
 
     sql += " ORDER BY fecha DESC LIMIT 20"
-    rows = db.execute(sql, params).fetchall() # Obtenemos filas SQL
+    rows = db.execute(sql, params).fetchall()  # Obtenemos filas SQL
 
     # 🔴 PASO CLAVE: Convertir las filas SQL a diccionarios normales
     # Esto es necesario porque send_new_oposiciones_email usa .get(), que las filas SQL no tienen.
@@ -953,16 +957,20 @@ def enviar_resumen_ahora():
     if oposiciones:
         try:
             send_new_oposiciones_email([user.email], oposiciones)
-            flash(f"✅ Email enviado correctamente a {user.email} con {len(oposiciones)} oposiciones recientes.", "success")
+            flash(
+                f"✅ Email enviado correctamente a {user.email} con {len(oposiciones)} oposiciones recientes.", "success")
         except Exception as e:
             # Imprimir el error completo en consola para depurar mejor
             import traceback
             traceback.print_exc()
-            flash(f"❌ Error al enviar email (revisa la configuración SMTP): {e}", "danger")
+            flash(
+                f"❌ Error al enviar email (revisa la configuración SMTP): {e}", "danger")
     else:
-        flash(f"⚠️ No se encontraron oposiciones recientes (últimos 7 días) para el departamento: {dept_filter}", "warning")
+        flash(
+            f"⚠️ No se encontraron oposiciones recientes (últimos 7 días) para el departamento: {dept_filter}", "warning")
 
     return redirect(url_for("newsletter_prefs"))
+
 
 if __name__ == '__main__':
     with app.app_context():
