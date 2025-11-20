@@ -1,4 +1,4 @@
-# 📢 BOE Oposiciones – Web Scraping y Portal de Usuarios
+# 📚 BOE Oposiciones – Web Scraping y Portal de Usuarios
 
 [![Python](https://img.shields.io/badge/Python-3.11+-blue.svg)](https://www.python.org/)
 [![Flask](https://img.shields.io/badge/Flask-3.0.2-green.svg)](https://flask.palletsprojects.com/)
@@ -10,7 +10,7 @@ Aplicación Flask que sincroniza diariamente la sección 2B del BOE (oposiciones
 
 ## 📑 Tabla de Contenidos
 
-- [📢 BOE Oposiciones – Web Scraping y Portal de Usuarios](#-boe-oposiciones--web-scraping-y-portal-de-usuarios)
+- [📚 BOE Oposiciones – Web Scraping y Portal de Usuarios](#-boe-oposiciones--web-scraping-y-portal-de-usuarios)
   - [📑 Tabla de Contenidos](#-tabla-de-contenidos)
   - [✨ Características principales](#-características-principales)
   - [📋 Requisitos previos](#-requisitos-previos)
