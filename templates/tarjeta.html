@@ -1,11 +1,3 @@
-<!--
-Plantilla de departamento - Vista detallada
-
-Muestra todas las oposiciones de un departamento específico
-en formato de tabla con enlaces a los PDFs oficiales.
-Incluye botón de retorno a la página principal y paginación.
--->
-
 {% extends "base.html" %}
 {% block title %}Oposiciones del día - BOE{% endblock %}
 
@@ -71,22 +63,11 @@ Incluye botón de retorno a la página principal y paginación.
       <table class="table table-striped table-bordered align-middle">
         <thead class="table-dark">
           <tr>
-            <th class="col-id">Identificador</th>
-            <th class="col-titulo">Título</th>
-            <th class="col-control">Control</th>
-            <th class="col-pdf">PDF</th>
-            <th class="col-fecha">
-              Fecha
-              <a href="{{ url_for('mostrar_departamento', nombre=departamento, orden='asc' if orden == 'desc' else 'desc', busqueda=busqueda, provincia=provincia_filtro, fecha_desde=fecha_desde, fecha_hasta=fecha_hasta, page=page) }}" 
-                 class="text-white ms-2" 
-                 title="Ordenar por fecha">
-                  {% if orden == 'desc' %}
-                      <i class="bi bi-sort-down"></i>
-                  {% else %}
-                      <i class="bi bi-sort-up"></i>
-                  {% endif %}
-              </a>
-            </th>
+            <th>Identificador</th>
+            <th>Título</th>
+            <th>Control</th>
+            <th>PDF</th>
+            <th>Fecha</th>
           </tr>
         </thead>
         <tbody>
@@ -105,11 +86,11 @@ Incluye botón de retorno a la página principal y paginación.
                     <span style="margin-left: 10px;">
                         <button type="button" 
                                 class="toggle-favorito-btn" 
-                                data-oposicion-id="{{ row.id }}" 
+                                data-oposicion-id="{{ row['id'] }}" 
                                 aria-label="Marcar como favorito"
                                 style="border: none; background: none; cursor: pointer; color: orange;">
-                            <i class="bi {% if row.id in favoritas %}bi-star-fill{% else %}bi-star{% endif %}"
-                               title="{% if row.id in favoritas %}Quitar de Favoritos{% else %}Marcar como Favorito{% endif %}">
+                            <i class="bi {% if row['id'] in favoritas %}bi-star-fill{% else %}bi-star{% endif %}"
+                               title="{% if row['id'] in favoritas %}Quitar de Favoritos{% else %}Marcar como Favorito{% endif %}">
                             </i>
                         </button>
                     </span>
@@ -151,7 +132,7 @@ Incluye botón de retorno a la página principal y paginación.
     <nav aria-label="Paginación de oposiciones" class="mt-4">
       <ul class="pagination justify-content-center">
         <li class="page-item {% if page <= 1 %}disabled{% endif %}">
-          <a class="page-link" href="{{ url_for('mostrar_departamento', nombre=departamento, page=page-1, orden=orden, busqueda=busqueda, provincia=provincia_filtro, fecha_desde=fecha_desde, fecha_hasta=fecha_hasta) }}">←</a>
+          <a class="page-link" href="{{ url_for('mostrar_departamento', nombre=departamento, page=page-1) }}">←</a>
         </li>
 
         {% set start_page = page - 2 if page > 3 else 1 %}
@@ -159,7 +140,7 @@ Incluye botón de retorno a la página principal y paginación.
 
         {% if start_page > 1 %}
           <li class="page-item">
-            <a class="page-link" href="{{ url_for('mostrar_departamento', nombre=departamento, page=1, orden=orden, busqueda=busqueda, provincia=provincia_filtro, fecha_desde=fecha_desde, fecha_hasta=fecha_hasta) }}">1</a>
+            <a class="page-link" href="{{ url_for('mostrar_departamento', nombre=departamento, page=1) }}">1</a>
           </li>
           {% if start_page > 2 %}
             <li class="page-item disabled"><span class="page-link">…</span></li>
@@ -168,7 +149,7 @@ Incluye botón de retorno a la página principal y paginación.
 
         {% for p in range(start_page, end_page + 1) %}
           <li class="page-item {% if p == page %}active{% endif %}">
-            <a class="page-link" href="{{ url_for('mostrar_departamento', nombre=departamento, page=p, orden=orden, busqueda=busqueda, provincia=provincia_filtro, fecha_desde=fecha_desde, fecha_hasta=fecha_hasta) }}">{{ p }}</a>
+            <a class="page-link" href="{{ url_for('mostrar_departamento', nombre=departamento, page=p) }}">{{ p }}</a>
           </li>
         {% endfor %}
 
@@ -177,20 +158,18 @@ Incluye botón de retorno a la página principal y paginación.
             <li class="page-item disabled"><span class="page-link">…</span></li>
           {% endif %}
           <li class="page-item">
-            <a class="page-link" href="{{ url_for('mostrar_departamento', nombre=departamento, page=total_pages, orden=orden, busqueda=busqueda, provincia=provincia_filtro, fecha_desde=fecha_desde, fecha_hasta=fecha_hasta) }}">{{ total_pages }}</a>
+            <a class="page-link" href="{{ url_for('mostrar_departamento', nombre=departamento, page=total_pages) }}">{{ total_pages }}</a>
           </li>
         {% endif %}
 
         <li class="page-item {% if page >= total_pages %}disabled{% endif %}">
-          <a class="page-link" href="{{ url_for('mostrar_departamento', nombre=departamento, page=page+1, orden=orden, busqueda=busqueda, provincia=provincia_filtro, fecha_desde=fecha_hasta, fecha_hasta=fecha_hasta) }}">→</a>
+          <a class="page-link" href="{{ url_for('mostrar_departamento', nombre=departamento, page=page+1) }}">→</a>
         </li>
       </ul>
     </nav>
     {% endif %}
   </div>
 
-
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <script>
   document.addEventListener('DOMContentLoaded', () => {
 
@@ -198,14 +177,17 @@ Incluye botón de retorno a la página principal y paginación.
     document.querySelectorAll('.toggle-favorito-btn').forEach(button => {
         button.addEventListener('click', function() {
             const oposicionId = this.dataset.oposicionId;
+            if (!oposicionId) return;
+
             const url = `/toggle_favorito/${oposicionId}`;
             const icon = this.querySelector('i');
 
+            icon.style.transform = "scale(1.2)";
+            setTimeout(() => icon.style.transform = "scale(1)", 200);
+
             fetch(url, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'application/json' },
             })
             .then(response => response.json())
             .then(data => {
@@ -223,85 +205,40 @@ Incluye botón de retorno a la página principal y paginación.
                     alert("Error al actualizar favoritos.");
                 }
             })
-            .catch(error => {
-                console.error('Error:', error);
-                alert("Error de conexión al servidor.");
-            });
+            .catch(error => console.error('Error:', error));
         });
     });
     
     // --- Lógica del botón PDF (Marcar como visitada) ---
     document.querySelectorAll('.btn-pdf').forEach(btn => {
       btn.addEventListener('click', function (e) {
-        e.preventDefault(); // evitamos la navegación automática
-
         const id = this.dataset.id;
         const pdfUrl = this.getAttribute('href');
-        const tr = this.closest('tr');
-
+        
+        // 1) Enviar petición sin bloquear
         const beaconUrl = `/marcar_visitada/${id}`;
-        let beaconSent = false;
-
-      // 1) Intentamos usar sendBeacon
-      try {
         if (navigator.sendBeacon) {
-          const payload = JSON.stringify({ts: new Date().toISOString()});
-          const blob = new Blob([payload], { type: 'application/json' });
-          beaconSent = navigator.sendBeacon(beaconUrl, blob);
-        }
-      } catch (err) {
-        console.warn('sendBeacon falló:', err);
-        beaconSent = false;
-      }
-
-        if (!beaconSent) {
-          fetch(beaconUrl, {
-            method: 'POST',
-            headers: { 'X-Requested-With': 'XMLHttpRequest', 'Content-Type': 'application/json' },
-            body: JSON.stringify({ts: new Date().toISOString()})
-          }).then(resp => {
-            if (!resp.ok) console.warn('marcar_visitada respondió', resp.status);
-          }).catch(err => console.warn('Error fetch marcar_visitada:', err));
+            const payload = JSON.stringify({ts: new Date().toISOString()});
+            const blob = new Blob([payload], { type: 'application/json' });
+            navigator.sendBeacon(beaconUrl, blob);
+        } else {
+            fetch(beaconUrl, { method: 'POST' }).catch(err => console.warn(err));
         }
 
-        // Actualizar UI inmediatamente (añadir clase y badge)
+        // 2) Actualizar UI
+        const tr = this.closest('tr');
         if (tr) {
           tr.classList.add('visitada-oposicion');
-          
-          // Buscamos el div donde están los badges (el que tiene flex-column)
           const badgesDiv = tr.querySelector('td:nth-child(2) .d-flex.flex-column');
-
           if (badgesDiv && !badgesDiv.querySelector('.badge-visitada')) {
             const span = document.createElement('span');
-            span.className = 'badge-visitada'; // Usamos tu clase CSS original
+            span.className = 'badge-visitada';
             span.textContent = '🔵 Visitada';
             badgesDiv.appendChild(span);
           }
         }
-
-    // --- Lógica del enlace del título (Marcar como visitada al hacer clic) ---
-    document.querySelectorAll('.titulo-oposicion').forEach(link => {
-      link.addEventListener('click', function (e) {
-        const id = this.dataset.id;
-        const tr = this.closest('tr');
-        marcarComoVisitada(id, tr);
-        // El enlace se abre normalmente por el comportamiento por defecto del navegador
-      });
-    });
-
-    // --- Lógica del botón PDF (Marcar como visitada) ---
-    document.querySelectorAll('.btn-pdf').forEach(btn => {
-      btn.addEventListener('click', function (e) {
-        e.preventDefault(); 
-
-        const id = this.dataset.id;
-        const pdfUrl = this.getAttribute('href');
-        const tr = this.closest('tr');
-
-        // Marcar como visitada
-        marcarComoVisitada(id, tr);
-
-        // Abrir PDF en nueva pestaña (no bloqueante)
+        
+        // 3) Abrir PDF
         try {
           window.open(pdfUrl, '_blank');
         } catch (err) {

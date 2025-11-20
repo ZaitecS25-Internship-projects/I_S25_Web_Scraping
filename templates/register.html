@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% block content %}
+<<<<<<< HEAD
 <div class="container py-4">
   <div class="row justify-content-center">
     <div class="col-lg-8">
@@ -191,10 +192,47 @@
           </form>
         </div>
       </div>
+=======
+<h2 class="titulo-registro">Registrarse</h2>
+<form method="post" class="form-register mt-3" novalidate>
+  <label class="form-label">Nombre</label>
+  <input class="form-control" type="text" name="nombre" required>
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Apellidos</label>
+    <input class="form-control" type="text" name="apellidos" required>
+  </div>
+  <div>
+    <label for="edad">Edad:</label>
+    <select id="edad" name="edad" required>
+      <option value="" disabled selected>Selecciona tu edad</option>
+    </select>
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Género</label>
+    <input type="radio" name="genero" value="hombre" required> Hombre
+    <input type="radio" name="genero" value="mujer" required> Mujer
+    <input type="radio" name="genero" value="otro" required> Otro
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label">Email</label>
+    <input class="form-control" type="email" name="email" required>
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Contraseña</label>
+    <div class="input-group">
+      <input class="form-control" type="password" name="password" id="password-register" minlength="6" required>
+      <button class="btn btn-outline-secondary" type="button" id="togglePassword-register"
+        onclick="togglePasswordVisibility('register')">
+        <i class="bi bi-eye" id="eye-icon-register"></i>
+      </button>
+>>>>>>> Demo
     </div>
   </div>
 </div>
 
+<<<<<<< HEAD
 <script>
 // Generar opciones de edad (16-80 años)
 const selectEdad = document.getElementById('edad');
@@ -271,3 +309,7 @@ discapacidadRadios.forEach(radio => {
 });
 </script>
 {% endblock %}
+=======
+
+{% endblock %}
+>>>>>>> Demo
