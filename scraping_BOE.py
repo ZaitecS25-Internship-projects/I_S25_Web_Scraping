@@ -688,7 +688,6 @@ def register():
         name = (request.form.get('nombre') or '').strip()
         apellidos = (request.form.get('apellidos') or '').strip()
         age = (request.form.get('edad') or '')
-<<<<<<< HEAD
         genero = (request.form.get('genero') or '').strip()
         
         # Campos obligatorios profesionales
@@ -715,12 +714,6 @@ def register():
             flash("¡Rellena todos los campos obligatorios!", "danger")
             return render_template('register.html', user=current_user)
         
-=======
-        genero = (request.form.get('genero') or '')
-        if not all([email, password, name, apellidos, age, genero]):
-            flash("¡Rellena todos los campos!", "danger")
-            return render_template('register.html')
->>>>>>> Demo
         if find_user_by_email(email):
             flash("Ese email ya está registrado.", "warning")
             return render_template('register.html', user=current_user)
@@ -1191,9 +1184,5 @@ def enviar_resumen_ahora():
 if __name__ == '__main__':
     with app.app_context():
         init_db()
-<<<<<<< HEAD
         migrate_db()
     app.run(debug=True)
-=======
-    app.run(debug=True)
->>>>>>> Demo

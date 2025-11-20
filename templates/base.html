@@ -40,7 +40,6 @@ Define la estructura general de la aplicación:
         <ul class="navbar-nav ms-auto align-items-center">
           {% if user.is_authenticated %}
           <li class="nav-item dropdown me-2">
-<<<<<<< HEAD
             <a class="nav-link dropdown-toggle text-white px-2 d-flex align-items-center" href="#" id="userMenuDropdown" role="button"
                data-bs-toggle="dropdown" aria-expanded="false">
               {% if user.foto_perfil %}
@@ -49,11 +48,6 @@ Define la estructura general de la aplicación:
                 👤
               {% endif %}
               <span class="ms-1">{{ user.name or 'Mi panel' }}</span>
-=======
-            <a class="nav-link dropdown-toggle text-white px-2" href="#" id="userMenuDropdown" role="button"
-              data-bs-toggle="dropdown" aria-expanded="false">
-              🏠 Mi panel
->>>>>>> Demo
             </a>
             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenuDropdown">
               <li>
