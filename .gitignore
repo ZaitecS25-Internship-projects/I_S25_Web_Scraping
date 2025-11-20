@@ -1,3 +1,48 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Virtual environment
+venv/
+ENV/
+env/
+.env
+
+# SQLite databases (do not commit local DB files)
+*.db
+*.sqlite3
+usuarios.db
+oposiciones.db
+
+# Static uploads (user-generated content)
+static/uploads/
+
+# Editor directories and files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+pip-wheel-metadata/
+
+# Logs
+*.log
+
+# Python wheel cache
+wheelhouse/
 
 # Python
 __pycache__/
