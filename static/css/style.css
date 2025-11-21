@@ -591,6 +591,146 @@ h2.titulo-registro + form .btn-success:hover {
   white-space: nowrap;
 }
 
+/* ------------------ CONFIGURACIÓN – ESTILOS GENERALES ------------------ */
+
+*.contenido-principal {
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Título */
+.hero-title {
+    font-weight: 700;
+    color: #002b5b;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+
+/* ------------------ MENÚ LATERAL ------------------ */
+
+.list-group {
+    border-radius: 14px;
+    overflow: hidden;
+}
+
+.list-group-item {
+    padding: 0.85rem 1rem;
+    font-weight: 500;
+    transition: all 0.25s ease;
+    border: none;
+}
+
+.list-group-item i {
+    color: #004aad;
+    transition: color 0.25s ease;
+}
+
+/* Item activo */
+.list-group-item.active {
+    background: linear-gradient(135deg, #004aad, #002b5b);
+    border: none;
+    color: white;
+    font-weight: 600;
+}
+
+.list-group-item.active i {
+    color: #ffdd55;
+}
+
+/* Hover */
+.list-group-item:hover:not(.active):not(.disabled) {
+    background-color: #f2f6ff;
+    transform: translateX(3px);
+    box-shadow: inset 3px 0 0 #004aad;
+}
+
+/* Deshabilitado */
+.list-group-item.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+
+/* ------------------ TARJETA DE CAMBIAR CONTRASEÑA ------------------ */
+
+.card {
+    border-radius: 14px;
+    border: none;
+}
+
+.card-header {
+    border-bottom: 1px solid #eaeaea;
+}
+
+.card-header h5 {
+    font-weight: 700;
+    color: #004aad;
+}
+
+/* Texto explicativo */
+.card-body p.text-muted {
+    font-size: 0.9rem;
+}
+
+/* ------------------ INPUTS ------------------ */
+
+.input-group-text {
+    background: #f4f7ff;
+    border: 1px solid #ccd8e6;
+    color: #004aad;
+    font-weight: bold;
+}
+
+.form-control {
+    border: 1px solid #ccd8e6;
+    padding: 0.65rem;
+    transition: all 0.25s ease;
+}
+
+.form-control:focus {
+    border-color: #004aad;
+    box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.15);
+}
+
+/* ------------------ BOTÓN GUARDAR ------------------ */
+
+.btn-primary {
+    background: linear-gradient(135deg, #004aad, #002b5b);
+    border: none;
+    padding: 0.65rem 1.5rem;
+    font-weight: 600;
+    border-radius: 10px;
+    transition: all 0.25s ease;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #005ce6, #003b80);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+}
+
+
+/* ------------------ RESPONSIVE ------------------ */
+
+@media (max-width: 768px) {
+    .list-group-item {
+        font-size: 0.9rem;
+    }
+
+    .card-header h5 {
+        font-size: 1rem;
+    }
+
+    .btn-primary {
+        width: 100%;
+    }
+} 
+
+
 
 
 /* =========================================================
@@ -976,6 +1116,54 @@ html[data-theme="dark"] form.form-register button.btn-success:hover {
   background-color: #157347 !important;
   box-shadow: 0 4px 12px rgba(0,0,0,0.4);
 }
+
+/* =========================================
+   CONFIGURACIÓN – OVERRIDES MODO OSCURO
+========================================= */
+
+html[data-theme="dark"] .hero-title {
+  color: #60a5fa;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.4);
+}
+
+/* Sidebar */
+html[data-theme="dark"] .list-group-item {
+  background: var(--bg-card) !important;
+  color: var(--text-main) !important;
+  border-color: var(--border-soft) !important;
+}
+
+html[data-theme="dark"] .list-group-item-action:hover {
+  background: var(--bg-hover) !important;
+}
+
+html[data-theme="dark"] .list-group-item.active {
+  background: var(--accent-blue) !important;
+  color: white !important;
+  border-color: var(--accent-blue) !important;
+}
+
+/* Card */
+html[data-theme="dark"] .card-header {
+  background: var(--bg-card) !important;
+  border-bottom-color: var(--border-soft) !important;
+}
+
+html[data-theme="dark"] .input-group-text {
+  background: #0f172a !important;
+  border-color: var(--border-soft) !important;
+}
+
+html[data-theme="dark"] input.form-control {
+  background: #111418 !important;
+  color: var(--text-main) !important;
+  border-color: #2f3740 !important;
+}
+
+html[data-theme="dark"] input.form-control::placeholder {
+  color: #6b7280 !important;
+}
+
 
 /* -------- TÍTULO CLICKEABLE DE OPOSICIÓN -------- */
 .titulo-oposicion {
