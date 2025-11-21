@@ -23,7 +23,7 @@
 <div class="row g-4">
   {% for dep in departamentos %}
   <div class="col-md-4 col-lg-3">
-    <a href="{{ url_for('mostrar_departamento', nombre=dep['departamento']) }}" class="text-decoration-none">
+    <a href="{{ url_for('main.mostrar_departamento', nombre=dep['departamento']) }}" class="text-decoration-none">
       <div class="card h-100 shadow-sm tarjeta-departamento">
         <img src="{{ url_for('static', filename='img/dept/' + dep['departamento']|replace(' ', '_') + '.avif') }}"
           class="card-img-top" alt="{{ dep['departamento'] }}"

@@ -1,15 +1,17 @@
 {% extends "base.html" %}
+{% block title %}Oposiciones del día - BOE{% endblock %}
+
 {% block content %}
 
 <div class="container py-4 contenido-principal">
-  <a href="{{ url_for('index') }}" class="btn btn-secondary btn-volver mb-3">&larr; Volver</a>
+  <a href="{{ url_for('main.index') }}" class="btn btn-secondary btn-volver mb-3">&larr; Volver</a>
   <h2 class="mb-4 text-center hero-title">Oposiciones - {{ departamento }}</h2>
 
   <div class="card mb-4 shadow-sm">
     <div class="card-body">
       <h5 class="card-title mb-3">Filtros de búsqueda</h5>
 
-      <form method="GET" action="{{ url_for('mostrar_departamento', nombre=departamento) }}">
+      <form method="GET" action="{{ url_for('main.mostrar_departamento', nombre=departamento) }}">
         <div class="row g-3 mb-3">
           <div class="col-md-8">
             <label for="busqueda" class="form-label">Buscar por palabras clave:</label>
@@ -41,7 +43,7 @@
           </div>
           <div class="col-md-4 d-flex align-items-end gap-2">
             <button type="submit" class="btn btn-primary flex-fill">Filtrar</button>
-            <a href="{{ url_for('mostrar_departamento', nombre=departamento) }}"
+            <a href="{{ url_for('main.mostrar_departamento', nombre=departamento) }}"
               class="btn btn-outline-secondary flex-fill">Limpiar</a>
           </div>
         </div>
@@ -57,21 +59,11 @@
     <table class="table table-striped table-bordered align-middle">
       <thead class="table-dark">
         <tr>
-          <th class="col-id">Identificador</th>
-          <th class="col-titulo">Título</th>
-          <th class="col-control">Control</th>
-          <th class="col-pdf">PDF</th>
-          <th class="col-fecha">
-            Fecha
-            <a href="{{ url_for('mostrar_departamento', nombre=departamento, orden='asc' if orden == 'desc' else 'desc', busqueda=busqueda, provincia=provincia_filtro, fecha_desde=fecha_desde, fecha_hasta=fecha_hasta, page=page) }}"
-              class="text-white ms-2" title="Ordenar por fecha">
-              {% if orden == 'desc' %}
-              <i class="bi bi-sort-down"></i>
-              {% else %}
-              <i class="bi bi-sort-up"></i>
-              {% endif %}
-            </a>
-          </th>
+          <th>Identificador</th>
+          <th>Título</th>
+          <th>Control</th>
+          <th>PDF</th>
+          <th>Fecha</th>
         </tr>
       </thead>
       <tbody>
@@ -80,30 +72,36 @@
                 {% if row['fecha'] == hoy %}nueva-oposicion{% endif %}
                 {% if row['id'] in visitadas %} visitada-oposicion{% endif %}
             ">
-          <td class="col-id">{{ row['identificador'] }}</td>
-          <td class="col-titulo">
-            {% if user.is_authenticated %}
-            <span style="float: right; margin-left: 10px;">
-              <button type="button" class="toggle-favorito-btn" data-oposicion-id="{{ row.id }}"
-                aria-label="Marcar como favorito"
-                style="border: none; background: none; cursor: pointer; color: orange;">
-                <i class="bi {% if row.id in favoritas %}bi-star-fill{% else %}bi-star{% endif %}"
-                  title="{% if row.id in favoritas %}Quitar de Favoritos{% else %}Marcar como Favorito{% endif %}">
-                </i>
-              </button>
-            </span>
-            {% endif %}
+          <td>{{ row['identificador'] }}</td>
 
-            {{ row['titulo'] }}
+          <td>
+            <div class="d-flex justify-content-between align-items-start">
+              <span>{{ row['titulo'] }}</span>
 
-            {% if row['fecha'] == hoy %}
-            <span class="badge-nuevo">🟡 Nuevo</span>
-            {% endif %}
-            {% if row['id'] in visitadas %}
-            <span class="badge-visitada">🔵 Visitada</span>
-            {% endif %}
+              {% if user.is_authenticated %}
+              <span style="margin-left: 10px;">
+                <button type="button" class="toggle-favorito-btn" data-oposicion-id="{{ row['id'] }}"
+                  aria-label="Marcar como favorito"
+                  style="border: none; background: none; cursor: pointer; color: orange;">
+                  <i class="bi {% if row['id'] in favoritas %}bi-star-fill{% else %}bi-star{% endif %}"
+                    title="{% if row['id'] in favoritas %}Quitar de Favoritos{% else %}Marcar como Favorito{% endif %}">
+                  </i>
+                </button>
+              </span>
+              {% endif %}
+            </div>
+
+            <div class="mt-2 d-flex flex-column align-items-start gap-1">
+              {% if row['fecha'] == hoy %}
+              <span class="badge-nuevo">🟡 Nuevo</span>
+              {% endif %}
+              {% if row['id'] in visitadas %}
+              <span class="badge-visitada">🔵 Visitada</span>
+              {% endif %}
+            </div>
           </td>
-          <td class="col-control">{{ row['control'] }}</td>
+
+          <td>{{ row['control'] }}</td>
           <td>
             {% if row['url_pdf'] %}
             <a href="{{ row['url_pdf'] }}" target="_blank" class="btn btn-sm btn-primary btn-pdf"
@@ -112,7 +110,7 @@
             </a>
             {% endif %}
           </td>
-          <td class="col-fecha">{{ row['fecha']|format_date }}</td>
+          <td>{{ row['fecha']|format_date }}</td>
         </tr>
         {% else %}
         <tr>
@@ -127,13 +125,13 @@
   <nav aria-label="Paginación de oposiciones" class="mt-4">
     <ul class="pagination justify-content-center">
       <li class="page-item {% if page <= 1 %}disabled{% endif %}">
-        <a class="page-link" href="{{ url_for('mostrar_departamento', nombre=departamento, page=page-1) }}">←</a>
+        <a class="page-link" href="{{ url_for('main.mostrar_departamento', nombre=departamento, page=page-1) }}">←</a>
       </li>
 
       {% set start_page = page - 2 if page > 3 else 1 %}
       {% set end_page = page + 2 if page < total_pages - 2 else total_pages %} {% if start_page> 1 %}
         <li class="page-item">
-          <a class="page-link" href="{{ url_for('mostrar_departamento', nombre=departamento, page=1) }}">1</a>
+          <a class="page-link" href="{{ url_for('main.mostrar_departamento', nombre=departamento, page=1) }}">1</a>
         </li>
         {% if start_page > 2 %}
         <li class="page-item disabled"><span class="page-link">…</span></li>
@@ -142,7 +140,8 @@
 
         {% for p in range(start_page, end_page + 1) %}
         <li class="page-item {% if p == page %}active{% endif %}">
-          <a class="page-link" href="{{ url_for('mostrar_departamento', nombre=departamento, page=p) }}">{{ p }}</a>
+          <a class="page-link" href="{{ url_for('main.mostrar_departamento', nombre=departamento, page=p) }}">{{ p
+            }}</a>
         </li>
         {% endfor %}
 
@@ -150,17 +149,97 @@
             class="page-link">…</span></li>
           {% endif %}
           <li class="page-item">
-            <a class="page-link" href="{{ url_for('mostrar_departamento', nombre=departamento, page=total_pages) }}">{{
-              total_pages }}</a>
+            <a class="page-link"
+              href="{{ url_for('main.mostrar_departamento', nombre=departamento, page=total_pages) }}">{{ total_pages
+              }}</a>
           </li>
           {% endif %}
 
           <li class="page-item {% if page >= total_pages %}disabled{% endif %}">
-            <a class="page-link" href="{{ url_for('mostrar_departamento', nombre=departamento, page=page+1) }}">→</a>
+            <a class="page-link"
+              href="{{ url_for('main.mostrar_departamento', nombre=departamento, page=page+1) }}">→</a>
           </li>
     </ul>
   </nav>
   {% endif %}
 </div>
 
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+
+    // --- Lógica del botón FAVORITO (Estrella) ---
+    document.querySelectorAll('.toggle-favorito-btn').forEach(button => {
+      button.addEventListener('click', function () {
+        const oposicionId = this.dataset.oposicionId;
+        if (!oposicionId) return;
+
+        const url = `/toggle_favorito/${oposicionId}`;
+        const icon = this.querySelector('i');
+
+        icon.style.transform = "scale(1.2)";
+        setTimeout(() => icon.style.transform = "scale(1)", 200);
+
+        fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+        })
+          .then(response => response.json())
+          .then(data => {
+            if (data.ok) {
+              if (data.is_favorite) {
+                icon.classList.remove('bi-star');
+                icon.classList.add('bi-star-fill');
+                icon.title = "Quitar de Favoritos";
+              } else {
+                icon.classList.remove('bi-star-fill');
+                icon.classList.add('bi-star');
+                icon.title = "Marcar como Favorito";
+              }
+            } else {
+              alert("Error al actualizar favoritos.");
+            }
+          })
+          .catch(error => console.error('Error:', error));
+      });
+    });
+
+    // --- Lógica del botón PDF (Marcar como visitada) ---
+    document.querySelectorAll('.btn-pdf').forEach(btn => {
+      btn.addEventListener('click', function (e) {
+        const id = this.dataset.id;
+        const pdfUrl = this.getAttribute('href');
+
+        // 1) Enviar petición sin bloquear
+        const beaconUrl = `/marcar_visitada/${id}`;
+        if (navigator.sendBeacon) {
+          const payload = JSON.stringify({ ts: new Date().toISOString() });
+          const blob = new Blob([payload], { type: 'application/json' });
+          navigator.sendBeacon(beaconUrl, blob);
+        } else {
+          fetch(beaconUrl, { method: 'POST' }).catch(err => console.warn(err));
+        }
+
+        // 2) Actualizar UI
+        const tr = this.closest('tr');
+        if (tr) {
+          tr.classList.add('visitada-oposicion');
+          const badgesDiv = tr.querySelector('td:nth-child(2) .d-flex.flex-column');
+          if (badgesDiv && !badgesDiv.querySelector('.badge-visitada')) {
+            const span = document.createElement('span');
+            span.className = 'badge-visitada';
+            span.textContent = '🔵 Visitada';
+            badgesDiv.appendChild(span);
+          }
+        }
+
+        // 3) Abrir PDF
+        try {
+          window.open(pdfUrl, '_blank');
+        } catch (err) {
+          window.location.href = pdfUrl;
+        }
+      });
+    });
+  });
+</script>
 {% endblock %}

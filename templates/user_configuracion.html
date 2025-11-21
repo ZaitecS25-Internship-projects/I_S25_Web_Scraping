@@ -8,67 +8,479 @@
   <div class="row">
     <div class="col-md-3 mb-4">
       <div class="list-group shadow-sm">
-        <a href="#" class="list-group-item list-group-item-action active" aria-current="true">
+        <a href="#perfil" class="list-group-item list-group-item-action active" data-bs-toggle="list">
+          <i class="bi bi-person-badge me-2"></i> Perfil
+        </a>
+        <a href="#seguridad" class="list-group-item list-group-item-action" data-bs-toggle="list">
           <i class="bi bi-shield-lock me-2"></i> Seguridad
-        </a>
-        <a href="{{ url_for('newsletter_prefs') }}" class="list-group-item list-group-item-action">
-          <i class="bi bi-envelope me-2"></i> Alertas / Email
-        </a>
-        <a href="#" class="list-group-item list-group-item-action disabled">
-          <i class="bi bi-person-badge me-2"></i> Perfil (Próximamente)
         </a>
       </div>
     </div>
 
     <div class="col-md-9">
-      <div class="card shadow-sm">
-        <div class="card-header bg-white py-3">
-          <h5 class="mb-0 text-primary">Cambiar Contraseña</h5>
+      <div class="tab-content">
+        <!-- Pestaña Perfil -->
+        <div class="tab-pane fade show active" id="perfil">
+          <div class="card shadow-sm">
+            <div class="card-header bg-white py-3">
+              <h5 class="mb-0 text-primary">Mi Perfil</h5>
+            </div>
+            <div class="card-body">
+              <form action="{{ url_for('user.update_profile') }}" method="POST" enctype="multipart/form-data">
+
+                <!-- Foto de perfil -->
+                <div class="text-center mb-4">
+                  <div class="position-relative d-inline-block">
+                    {% if user.foto_perfil %}
+                    <img src="{{ user.foto_perfil }}" alt="Foto de perfil" class="rounded-circle"
+                      style="width: 120px; height: 120px; object-fit: cover; border: 3px solid #0d6efd;">
+                    {% else %}
+                    <div class="rounded-circle d-flex align-items-center justify-content-center bg-primary text-white"
+                      style="width: 120px; height: 120px; font-size: 48px; border: 3px solid #0d6efd;">
+                      <i class="bi bi-person-circle"></i>
+                    </div>
+                    {% endif %}
+                  </div>
+                  <div class="mt-3">
+                    <label for="foto_perfil" class="btn btn-sm btn-outline-primary">
+                      <i class="bi bi-camera"></i> Cambiar foto
+                    </label>
+                    <input type="file" class="d-none" id="foto_perfil" name="foto_perfil" accept="image/*">
+                    <small class="d-block text-muted mt-2">Formatos: JPG, PNG, GIF, WEBP</small>
+                  </div>
+                </div>
+
+                <hr class="my-4">
+
+                <!-- Nombre y Apellidos -->
+                <div class="row g-3 mb-3">
+                  <div class="col-md-6">
+                    <label for="name" class="form-label fw-bold">Nombre <span class="text-danger">*</span></label>
+                    <div class="input-group">
+                      <span class="input-group-text"><i class="bi bi-person"></i></span>
+                      <input type="text" class="form-control" id="name" name="name" value="{{ user.name or '' }}"
+                        required>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <label for="apellidos" class="form-label fw-bold">Apellidos <span
+                        class="text-danger">*</span></label>
+                    <div class="input-group">
+                      <span class="input-group-text"><i class="bi bi-person-lines-fill"></i></span>
+                      <input type="text" class="form-control" id="apellidos" name="apellidos"
+                        value="{{ user.apellidos or '' }}" required>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Email (solo lectura) -->
+                <div class="mb-3">
+                  <label for="email" class="form-label fw-bold">Correo Electrónico</label>
+                  <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                    <input type="email" class="form-control" id="email" value="{{ user.email }}" disabled>
+                  </div>
+                  <small class="text-muted">El email no se puede modificar</small>
+                </div>
+
+                <!-- Teléfono y Género -->
+                <div class="row g-3 mb-3">
+                  <div class="col-md-6">
+                    <label for="telefono" class="form-label fw-bold">Teléfono <span
+                        class="text-muted">(opcional)</span></label>
+                    <div class="input-group">
+                      <span class="input-group-text"><i class="bi bi-telephone"></i></span>
+                      <input type="tel" class="form-control" id="telefono" name="telefono"
+                        value="{{ user.telefono or '' }}" placeholder="+34 600 000 000">
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <label for="genero" class="form-label fw-bold">Género</label>
+                    <div class="input-group">
+                      <span class="input-group-text"><i class="bi bi-gender-ambiguous"></i></span>
+                      <select class="form-select" id="genero" name="genero">
+                        <option value="Hombre" {% if user.genero=='Hombre' %}selected{% endif %}>Hombre</option>
+                        <option value="Mujer" {% if user.genero=='Mujer' %}selected{% endif %}>Mujer</option>
+                        <option value="Otro" {% if user.genero not in ['Hombre', 'Mujer' , 'Prefiero no decirlo' , '' ,
+                          None] %}selected{% endif %}>Otro</option>
+                        <option value="Prefiero no decirlo" {% if user.genero=='Prefiero no decirlo' %}selected{% endif
+                          %}>Prefiero no decirlo</option>
+                      </select>
+                    </div>
+                    <div id="otroGeneroContainer" class="mt-2" style="display: none;">
+                      <input type="text" class="form-control" id="otroGenero" name="otro_genero"
+                        placeholder="Especifica tu género"
+                        value="{% if user.genero not in ['Hombre', 'Mujer', 'Prefiero no decirlo', '', None] %}{{ user.genero }}{% endif %}">
+                    </div>
+                  </div>
+                </div>
+
+                <hr class="my-4">
+                <h6 class="text-secondary mb-3"><i class="bi bi-card-text"></i> Documentación Personal</h6>
+
+                <!-- DNI y Fecha de Nacimiento -->
+                <div class="row g-3 mb-3">
+                  <div class="col-md-6">
+                    <label for="dni" class="form-label fw-bold">DNI/NIE <span class="text-danger">*</span></label>
+                    <div class="input-group">
+                      <span class="input-group-text"><i class="bi bi-card-heading"></i></span>
+                      <input type="text" class="form-control" id="dni" name="dni" value="{{ user.dni or '' }}"
+                        placeholder="12345678X" required>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <label for="fecha_nacimiento" class="form-label fw-bold">Fecha de Nacimiento <span
+                        class="text-danger">*</span></label>
+                    <div class="input-group">
+                      <span class="input-group-text"><i class="bi bi-calendar-event"></i></span>
+                      <input type="date" class="form-control" id="fecha_nacimiento" name="fecha_nacimiento"
+                        value="{{ user.fecha_nacimiento or '' }}" required>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Nacionalidad -->
+                <div class="mb-3">
+                  <label for="nacionalidad" class="form-label fw-bold">Nacionalidad <span
+                      class="text-danger">*</span></label>
+                  <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-flag"></i></span>
+                    <input type="text" class="form-control" id="nacionalidad" name="nacionalidad"
+                      value="{{ user.nacionalidad or '' }}" placeholder="Española" required>
+                  </div>
+                </div>
+
+                <hr class="my-4">
+                <h6 class="text-secondary mb-3"><i class="bi bi-geo-alt"></i> Dirección <span
+                    class="text-muted small">(Opcional)</span></h6>
+
+                <!-- Dirección -->
+                <div class="mb-3">
+                  <label for="direccion" class="form-label fw-bold">Dirección Completa</label>
+                  <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-house"></i></span>
+                    <input type="text" class="form-control" id="direccion" name="direccion"
+                      value="{{ user.direccion or '' }}" placeholder="Calle, número, piso, puerta">
+                  </div>
+                </div>
+
+                <!-- Código Postal, Ciudad y Provincia -->
+                <div class="row g-3 mb-3">
+                  <div class="col-md-4">
+                    <label for="codigo_postal" class="form-label fw-bold">Código Postal</label>
+                    <input type="text" class="form-control" id="codigo_postal" name="codigo_postal"
+                      value="{{ user.codigo_postal or '' }}" placeholder="28001">
+                  </div>
+                  <div class="col-md-4">
+                    <label for="ciudad" class="form-label fw-bold">Ciudad</label>
+                    <input type="text" class="form-control" id="ciudad" name="ciudad" value="{{ user.ciudad or '' }}"
+                      placeholder="Madrid">
+                  </div>
+                  <div class="col-md-4">
+                    <label for="provincia" class="form-label fw-bold">Provincia</label>
+                    <input type="text" class="form-control" id="provincia" name="provincia"
+                      value="{{ user.provincia or '' }}" placeholder="Madrid">
+                  </div>
+                </div>
+
+                <hr class="my-4">
+                <h6 class="text-secondary mb-3"><i class="bi bi-mortarboard"></i> Formación Académica</h6>
+
+                <!-- Nivel de Estudios y Titulación -->
+                <div class="row g-3 mb-3">
+                  <div class="col-md-6">
+                    <label for="nivel_estudios" class="form-label fw-bold">Nivel de Estudios <span
+                        class="text-danger">*</span></label>
+                    <div class="input-group">
+                      <span class="input-group-text"><i class="bi bi-book"></i></span>
+                      <select class="form-select" id="nivel_estudios" name="nivel_estudios" required>
+                        <option value="">Selecciona...</option>
+                        <option value="ESO" {% if user.nivel_estudios=='ESO' %}selected{% endif %}>ESO</option>
+                        <option value="Bachillerato" {% if user.nivel_estudios=='Bachillerato' %}selected{% endif %}>
+                          Bachillerato</option>
+                        <option value="FP Grado Medio" {% if user.nivel_estudios=='FP Grado Medio' %}selected{% endif
+                          %}>FP Grado Medio</option>
+                        <option value="FP Grado Superior" {% if user.nivel_estudios=='FP Grado Superior' %}selected{%
+                          endif %}>FP Grado Superior</option>
+                        <option value="Grado Universitario" {% if user.nivel_estudios=='Grado Universitario'
+                          %}selected{% endif %}>Grado Universitario</option>
+                        <option value="Máster" {% if user.nivel_estudios=='Máster' %}selected{% endif %}>Máster</option>
+                        <option value="Doctorado" {% if user.nivel_estudios=='Doctorado' %}selected{% endif %}>Doctorado
+                        </option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <label for="titulacion" class="form-label fw-bold">Titulación</label>
+                    <div class="input-group">
+                      <span class="input-group-text"><i class="bi bi-award"></i></span>
+                      <input type="text" class="form-control" id="titulacion" name="titulacion"
+                        value="{{ user.titulacion or '' }}" placeholder="Ej: Grado en Derecho">
+                    </div>
+                  </div>
+                </div>
+
+                <hr class="my-4">
+                <h6 class="text-secondary mb-3"><i class="bi bi-briefcase"></i> Situación Laboral</h6>
+
+                <!-- Situación Laboral -->
+                <div class="mb-3">
+                  <label for="situacion_laboral" class="form-label fw-bold">Situación Actual <span
+                      class="text-danger">*</span></label>
+                  <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-person-workspace"></i></span>
+                    <select class="form-select" id="situacion_laboral" name="situacion_laboral" required>
+                      <option value="">Selecciona...</option>
+                      <option value="Empleado" {% if user.situacion_laboral=='Empleado' %}selected{% endif %}>Empleado
+                      </option>
+                      <option value="Desempleado" {% if user.situacion_laboral=='Desempleado' %}selected{% endif %}>
+                        Desempleado</option>
+                      <option value="Estudiante" {% if user.situacion_laboral=='Estudiante' %}selected{% endif %}>
+                        Estudiante</option>
+                      <option value="Autónomo" {% if user.situacion_laboral=='Autónomo' %}selected{% endif %}>Autónomo
+                      </option>
+                      <option value="Funcionario" {% if user.situacion_laboral=='Funcionario' %}selected{% endif %}>
+                        Funcionario</option>
+                    </select>
+                  </div>
+                </div>
+
+                <hr class="my-4">
+                <h6 class="text-secondary mb-3"><i class="bi bi-translate"></i> Idiomas</h6>
+
+                <!-- Idiomas -->
+                <div class="mb-3">
+                  <label class="form-label fw-bold">Idiomas que dominas</label>
+                  <div class="row g-2">
+                    {% set idiomas_usuario = (user.idiomas or '').split(', ') %}
+                    <div class="col-md-3">
+                      <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="idiomas" value="Español"
+                          id="idiomaEspanol" {% if 'Español' in idiomas_usuario %}checked{% endif %}>
+                        <label class="form-check-label" for="idiomaEspanol">Español</label>
+                      </div>
+                    </div>
+                    <div class="col-md-3">
+                      <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="idiomas" value="Inglés" id="idiomaIngles"
+                          {% if 'Inglés' in idiomas_usuario %}checked{% endif %}>
+                        <label class="form-check-label" for="idiomaIngles">Inglés</label>
+                      </div>
+                    </div>
+                    <div class="col-md-3">
+                      <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="idiomas" value="Francés"
+                          id="idiomaFrances" {% if 'Francés' in idiomas_usuario %}checked{% endif %}>
+                        <label class="form-check-label" for="idiomaFrances">Francés</label>
+                      </div>
+                    </div>
+                    <div class="col-md-3">
+                      <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="idiomas" value="Alemán" id="idiomaAleman"
+                          {% if 'Alemán' in idiomas_usuario %}checked{% endif %}>
+                        <label class="form-check-label" for="idiomaAleman">Alemán</label>
+                      </div>
+                    </div>
+                    <div class="col-md-3">
+                      <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="idiomas" value="Italiano"
+                          id="idiomaItaliano" {% if 'Italiano' in idiomas_usuario %}checked{% endif %}>
+                        <label class="form-check-label" for="idiomaItaliano">Italiano</label>
+                      </div>
+                    </div>
+                    <div class="col-md-3">
+                      <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="idiomas" value="Portugués"
+                          id="idiomaPortugues" {% if 'Portugués' in idiomas_usuario %}checked{% endif %}>
+                        <label class="form-check-label" for="idiomaPortugues">Portugués</label>
+                      </div>
+                    </div>
+                    <div class="col-md-3">
+                      <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="idiomas" value="Catalán"
+                          id="idiomaCatalan" {% if 'Catalán' in idiomas_usuario %}checked{% endif %}>
+                        <label class="form-check-label" for="idiomaCatalan">Catalán</label>
+                      </div>
+                    </div>
+                    <div class="col-md-3">
+                      <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="idiomas" value="Euskera"
+                          id="idiomaEuskera" {% if 'Euskera' in idiomas_usuario %}checked{% endif %}>
+                        <label class="form-check-label" for="idiomaEuskera">Euskera</label>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="mt-2">
+                    <input type="text" class="form-control form-control-sm" name="otros_idiomas"
+                      placeholder="Otros idiomas (separados por comas)">
+                  </div>
+                </div>
+
+                <hr class="my-4">
+                <h6 class="text-secondary mb-3"><i class="bi bi-heart-pulse"></i> Información Adicional</h6>
+
+                <!-- Discapacidad -->
+                <div class="mb-3">
+                  <label class="form-label fw-bold">¿Tienes discapacidad reconocida?</label>
+                  <div class="form-check">
+                    <input class="form-check-input" type="radio" name="discapacidad" value="no" id="discapacidadNo" {%
+                      if not user.discapacidad %}checked{% endif %}>
+                    <label class="form-check-label" for="discapacidadNo">No</label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="radio" name="discapacidad" value="si" id="discapacidadSi" {%
+                      if user.discapacidad %}checked{% endif %}>
+                    <label class="form-check-label" for="discapacidadSi">Sí</label>
+                  </div>
+                </div>
+
+                <!-- Porcentaje de Discapacidad -->
+                <div id="porcentajeDiscapacidadContainer" class="mb-3" style="display: none;">
+                  <label for="porcentaje_discapacidad" class="form-label fw-bold">Porcentaje de Discapacidad (%)</label>
+                  <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-percent"></i></span>
+                    <input type="number" class="form-control" id="porcentaje_discapacidad"
+                      name="porcentaje_discapacidad" min="0" max="100" value="{{ user.porcentaje_discapacidad or '' }}"
+                      placeholder="Ej: 33">
+                  </div>
+                  <small class="text-muted">Importante para cupos reservados en oposiciones</small>
+                </div>
+
+                <div class="mt-4 d-flex justify-content-end">
+                  <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-check-lg"></i> Guardar Cambios
+                  </button>
+                </div>
+
+              </form>
+            </div>
+          </div>
         </div>
-        <div class="card-body">
-          <p class="text-muted small mb-4">
-            Para proteger tu cuenta, te pediremos tu contraseña actual antes de realizar cambios.
-          </p>
 
-          <form action="{{ url_for('change_password') }}" method="POST">
-            
-            <div class="mb-3">
-              <label for="current_password" class="form-label fw-bold">Contraseña Actual</label>
-              <div class="input-group">
-                <span class="input-group-text"><i class="bi bi-key"></i></span>
-                <input type="password" class="form-control" id="current_password" name="current_password" required>
-              </div>
+        <!-- Pestaña Seguridad -->
+        <div class="tab-pane fade" id="seguridad">
+          <div class="card shadow-sm">
+            <div class="card-header bg-white py-3">
+              <h5 class="mb-0 text-primary">Cambiar Contraseña</h5>
             </div>
+            <div class="card-body">
+              <p class="text-muted small mb-4">
+                Para proteger tu cuenta, te pediremos tu contraseña actual antes de realizar cambios.
+              </p>
 
-            <hr class="my-4">
+              <form action="{{ url_for('auth.change_password') }}" method="POST">
 
-            <div class="row g-3">
-              <div class="col-md-6">
-                <label for="new_password" class="form-label fw-bold">Nueva Contraseña</label>
-                <div class="input-group">
-                  <span class="input-group-text"><i class="bi bi-lock"></i></span>
-                  <input type="password" class="form-control" id="new_password" name="new_password" required minlength="6">
+                <div class="mb-3">
+                  <label for="current_password" class="form-label fw-bold">Contraseña Actual</label>
+                  <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-key"></i></span>
+                    <input type="password" class="form-control" id="current_password" name="current_password" required>
+                  </div>
                 </div>
-              </div>
-              <div class="col-md-6">
-                <label for="confirm_password" class="form-label fw-bold">Confirmar Nueva</label>
-                <div class="input-group">
-                  <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
-                  <input type="password" class="form-control" id="confirm_password" name="confirm_password" required minlength="6">
+
+                <hr class="my-4">
+
+                <div class="row g-3">
+                  <div class="col-md-6">
+                    <label for="new_password" class="form-label fw-bold">Nueva Contraseña</label>
+                    <div class="input-group">
+                      <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                      <input type="password" class="form-control" id="new_password" name="new_password" required
+                        minlength="6">
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <label for="confirm_password" class="form-label fw-bold">Confirmar Nueva</label>
+                    <div class="input-group">
+                      <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
+                      <input type="password" class="form-control" id="confirm_password" name="confirm_password" required
+                        minlength="6">
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
 
-            <div class="mt-4 d-flex justify-content-end">
-              <button type="submit" class="btn btn-primary">
-                <i class="bi bi-check-lg"></i> Actualizar Contraseña
-              </button>
-            </div>
+                <div class="mt-4 d-flex justify-content-end">
+                  <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-check-lg"></i> Actualizar Contraseña
+                  </button>
+                </div>
 
-          </form>
+              </form>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   </div>
 </div>
+
+<script>
+  // Previsualizar foto de perfil antes de subir
+  document.getElementById('foto_perfil').addEventListener('change', function (e) {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function (event) {
+        const container = document.querySelector('.position-relative');
+        const img = container.querySelector('img');
+        const placeholder = container.querySelector('.rounded-circle.d-flex');
+
+        if (img) {
+          img.src = event.target.result;
+        } else if (placeholder) {
+          placeholder.outerHTML = `<img src="${event.target.result}" alt="Foto de perfil" class="rounded-circle" style="width: 120px; height: 120px; object-fit: cover; border: 3px solid #0d6efd;">`;
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+
+  // Mostrar/ocultar campo de texto cuando se selecciona "Otro" en género
+  const generoSelect = document.getElementById('genero');
+  const otroGeneroContainer = document.getElementById('otroGeneroContainer');
+  const otroGeneroInput = document.getElementById('otroGenero');
+
+  function toggleOtroGenero() {
+    if (generoSelect.value === 'Otro') {
+      otroGeneroContainer.style.display = 'block';
+      otroGeneroInput.required = true;
+    } else {
+      otroGeneroContainer.style.display = 'none';
+      otroGeneroInput.required = false;
+      otroGeneroInput.value = '';
+    }
+  }
+
+  // Ejecutar al cargar la página
+  toggleOtroGenero();
+
+  // Ejecutar cuando cambie la selección
+  generoSelect.addEventListener('change', toggleOtroGenero);
+
+  // Mostrar/ocultar campo de porcentaje cuando se selecciona "Sí" en discapacidad
+  const discapacidadRadios = document.querySelectorAll('input[name="discapacidad"]');
+  const porcentajeContainer = document.getElementById('porcentajeDiscapacidadContainer');
+  const porcentajeInput = document.getElementById('porcentaje_discapacidad');
+
+  function togglePorcentajeDiscapacidad() {
+    const discapacidadSi = document.getElementById('discapacidadSi').checked;
+    if (discapacidadSi) {
+      porcentajeContainer.style.display = 'block';
+      porcentajeInput.required = true;
+    } else {
+      porcentajeContainer.style.display = 'none';
+      porcentajeInput.required = false;
+      porcentajeInput.value = '';
+    }
+  }
+
+  // Ejecutar al cargar la página
+  togglePorcentajeDiscapacidad();
+
+  // Ejecutar cuando cambie la selección
+  discapacidadRadios.forEach(radio => {
+    radio.addEventListener('change', togglePorcentajeDiscapacidad);
+  });
+</script>
+
 {% endblock %}

@@ -26,8 +26,9 @@ Define la estructura general de la aplicación:
 
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm mi-navbar animated-navbar">
     <div class="container">
-      <a class="navbar-brand fs-4 d-flex align-items-center gap-2" href="{{ url_for('index') }}">
-        <img src="{{ url_for('static', filename='img/logo-navbar.png') }}" alt="Oposiciones BOE" width="50" height="50" style="object-fit: contain;">
+      <a class="navbar-brand fs-4 d-flex align-items-center gap-2" href="{{ url_for('main.index') }}">
+        <img src="{{ url_for('static', filename='img/logo-navbar.png') }}" alt="Oposiciones BOE" width="50" height="50"
+          style="object-fit: contain;">
         Oposiciones BOE
       </a>
 
@@ -40,31 +41,37 @@ Define la estructura general de la aplicación:
         <ul class="navbar-nav ms-auto align-items-center">
           {% if user.is_authenticated %}
           <li class="nav-item dropdown me-2">
-            <a class="nav-link dropdown-toggle text-white px-2" href="#" id="userMenuDropdown" role="button"
-              data-bs-toggle="dropdown" aria-expanded="false">
-              🏠 Mi panel
+            <a class="nav-link dropdown-toggle text-white px-2 d-flex align-items-center" href="#" id="userMenuDropdown"
+              role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              {% if user.foto_perfil %}
+              <img src="{{ user.foto_perfil }}" alt="Perfil" class="rounded-circle me-2"
+                style="width: 30px; height: 30px; object-fit: cover; border: 2px solid white;">
+              {% else %}
+              👤
+              {% endif %}
+              <span class="ms-1">{{ user.name or 'Mi panel' }}</span>
             </a>
             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenuDropdown">
               <li>
-                <a class="dropdown-item" href="{{ url_for('oposiciones_vigentes') }}">
+                <a class="dropdown-item" href="{{ url_for('user.oposiciones_vigentes') }}">
                   📚 Oposiciones vigentes
                 </a>
               </li>
               <li>
-                <a class="dropdown-item" href="{{ url_for('oposiciones_favoritas') }}">
-                ⭐ Mis Favoritas 
+                <a class="dropdown-item" href="{{ url_for('user.oposiciones_favoritas') }}">
+                  ⭐ Mis Favoritas
                 </a>
               </li>
               <li>
-                <a class="dropdown-item" href="{{ url_for('newsletter_prefs') }}">
-                🔔 Alertas por correo
+                <a class="dropdown-item" href="{{ url_for('user.newsletter_prefs') }}">
+                  🔔 Alertas por correo
                 </a>
               </li>
               <li>
                 <hr class="dropdown-divider">
               </li>
               <li>
-                <a class="dropdown-item" href="{{ url_for('configuracion_cuenta') }}">
+                <a class="dropdown-item" href="{{ url_for('user.configuracion_cuenta') }}">
                   ⚙️ Configuración
                 </a>
               </li>
@@ -72,18 +79,18 @@ Define la estructura general de la aplicación:
           </li>
 
           <li class="nav-item me-2">
-            <a href="{{ url_for('logout') }}" class="btn btn-sm btn-danger">
+            <a href="{{ url_for('auth.logout') }}" class="btn btn-sm btn-danger">
               🔓 Salir
             </a>
           </li>
           {% else %}
           <li class="nav-item me-2">
-            <a href="{{ url_for('login') }}" class="btn btn-outline-light btn-sm">
+            <a href="{{ url_for('auth.login') }}" class="btn btn-outline-light btn-sm">
               Iniciar sesión
             </a>
           </li>
           <li class="nav-item me-2">
-            <a href="{{ url_for('register') }}" class="btn btn-success btn-sm">
+            <a href="{{ url_for('auth.register') }}" class="btn btn-success btn-sm">
               Registrarse
             </a>
           </li>
