@@ -180,9 +180,9 @@
                   <label for="current_password" class="form-label fw-bold">Contraseña Actual</label>
                   <div class="input-group">
                     <span class="input-group-text"><i class="bi bi-key"></i></span>
-                    <input type="password" class="form-control" id="current_password" name="current_password" required>
-                    <button type="button" class="btn btn-outline-secondary" onclick="togglePasswordVisibility('current')">
-                      <i class="bi bi-eye" id="eye-icon-current"></i>
+                    <input type="password" class="form-control pe-5" id="current_password" name="current_password" required>
+                    <button type="button" class="btn position-absolute top-50 end-0 translate-middle-y border-0 bg-transparent" onclick="togglePasswordVisibility('current')" style="z-index: 10;">
+                      <i class="bi bi-eye text-muted" id="eye-icon-current"></i>
                     </button>
                   </div>
                 </div>
@@ -194,10 +194,10 @@
                     <label for="new_password" class="form-label fw-bold">Nueva Contraseña</label>
                     <div class="input-group">
                       <span class="input-group-text"><i class="bi bi-lock"></i></span>
-                      <input type="password" class="form-control" id="new_password" name="new_password" required
+                      <input type="password" class="form-control pe-5" id="new_password" name="new_password" required
                         minlength="6">
-                      <button type="button" class="btn btn-outline-secondary" onclick="togglePasswordVisibility('new')">
-                        <i class="bi bi-eye" id="eye-icon-new"></i>
+                      <button type="button" class="btn position-absolute top-50 end-0 translate-middle-y border-0 bg-transparent" onclick="togglePasswordVisibility('new')" style="z-index: 10;">
+                        <i class="bi bi-eye text-muted" id="eye-icon-new"></i>
                       </button>
                     </div>
                   </div>
@@ -205,10 +205,10 @@
                     <label for="confirm_password" class="form-label fw-bold">Confirmar Nueva</label>
                     <div class="input-group">
                       <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
-                      <input type="password" class="form-control" id="confirm_password" name="confirm_password" required
+                      <input type="password" class="form-control pe-5" id="confirm_password" name="confirm_password" required
                         minlength="6">
-                      <button type="button" class="btn btn-outline-secondary" onclick="togglePasswordVisibility('confirm')">
-                        <i class="bi bi-eye" id="eye-icon-confirm"></i>
+                      <button type="button" class="btn position-absolute top-50 end-0 translate-middle-y border-0 bg-transparent" onclick="togglePasswordVisibility('confirm')" style="z-index: 10;">
+                        <i class="bi bi-eye text-muted" id="eye-icon-confirm"></i>
                       </button>
                     </div>
                   </div>

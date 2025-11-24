@@ -123,11 +123,11 @@
 
             <div class="mb-3">
               <label class="form-label fw-bold">Contraseña <span class="text-danger">*</span></label>
-              <div class="input-group">
-                <input class="form-control" type="password" name="password" id="password-register" minlength="6"
+              <div class="position-relative">
+                <input class="form-control pe-5" type="password" name="password" id="password-register" minlength="6"
                   required>
-                <button class="btn btn-outline-secondary" type="button" onclick="togglePasswordVisibility('register')">
-                  <i class="bi bi-eye" id="eye-icon-register"></i>
+                <button class="btn position-absolute top-50 end-0 translate-middle-y border-0 bg-transparent" type="button" onclick="togglePasswordVisibility('register')" style="z-index: 10;">
+                  <i class="bi bi-eye text-muted" id="eye-icon-register"></i>
                 </button>
               </div>
               <small class="form-text text-muted">Mínimo 6 caracteres</small>

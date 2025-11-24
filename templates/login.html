@@ -8,11 +8,11 @@
   </div>
   <div class="mb-3">
     <label class="form-label">Contraseña</label>
-    <div class="input-group">
-      <input class="form-control" type="password" name="password" id="password-login" required>
-      <button class="btn btn-outline-secondary" type="button" id="togglePassword-login"
-        onclick="togglePasswordVisibility('login')">
-        <i class="bi bi-eye" id="eye-icon-login"></i>
+    <div class="position-relative">
+      <input class="form-control pe-5" type="password" name="password" id="password-login" required>
+      <button class="btn position-absolute top-50 end-0 translate-middle-y border-0 bg-transparent" type="button" id="togglePassword-login"
+        onclick="togglePasswordVisibility('login')" style="z-index: 10;">
+        <i class="bi bi-eye text-muted" id="eye-icon-login"></i>
       </button>
     </div>
   </div>
