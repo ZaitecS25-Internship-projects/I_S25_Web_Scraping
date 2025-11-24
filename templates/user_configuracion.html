@@ -101,16 +101,7 @@
                       <select class="form-select" id="genero" name="genero">
                         <option value="Hombre" {% if user.genero=='Hombre' %}selected{% endif %}>Hombre</option>
                         <option value="Mujer" {% if user.genero=='Mujer' %}selected{% endif %}>Mujer</option>
-                        <option value="Otro" {% if user.genero not in ['Hombre', 'Mujer' , 'Prefiero no decirlo' , '' ,
-                          None] %}selected{% endif %}>Otro</option>
-                        <option value="Prefiero no decirlo" {% if user.genero=='Prefiero no decirlo' %}selected{% endif
-                          %}>Prefiero no decirlo</option>
                       </select>
-                    </div>
-                    <div id="otroGeneroContainer" class="mt-2" style="display: none;">
-                      <input type="text" class="form-control" id="otroGenero" name="otro_genero"
-                        placeholder="Especifica tu género"
-                        value="{% if user.genero not in ['Hombre', 'Mujer', 'Prefiero no decirlo', '', None] %}{{ user.genero }}{% endif %}">
                     </div>
                   </div>
                 </div>
@@ -180,8 +171,11 @@
                   <label for="current_password" class="form-label fw-bold">Contraseña Actual</label>
                   <div class="input-group">
                     <span class="input-group-text"><i class="bi bi-key"></i></span>
-                    <input type="password" class="form-control pe-5" id="current_password" name="current_password" required>
-                    <button type="button" class="btn position-absolute top-50 end-0 translate-middle-y border-0 bg-transparent" onclick="togglePasswordVisibility('current')" style="z-index: 10;">
+                    <input type="password" class="form-control pe-5" id="current_password" name="current_password"
+                      required>
+                    <button type="button"
+                      class="btn position-absolute top-50 end-0 translate-middle-y border-0 bg-transparent"
+                      onclick="togglePasswordVisibility('current')" style="z-index: 10;">
                       <i class="bi bi-eye text-muted" id="eye-icon-current"></i>
                     </button>
                   </div>
@@ -196,7 +190,9 @@
                       <span class="input-group-text"><i class="bi bi-lock"></i></span>
                       <input type="password" class="form-control pe-5" id="new_password" name="new_password" required
                         minlength="6">
-                      <button type="button" class="btn position-absolute top-50 end-0 translate-middle-y border-0 bg-transparent" onclick="togglePasswordVisibility('new')" style="z-index: 10;">
+                      <button type="button"
+                        class="btn position-absolute top-50 end-0 translate-middle-y border-0 bg-transparent"
+                        onclick="togglePasswordVisibility('new')" style="z-index: 10;">
                         <i class="bi bi-eye text-muted" id="eye-icon-new"></i>
                       </button>
                     </div>
@@ -205,9 +201,11 @@
                     <label for="confirm_password" class="form-label fw-bold">Confirmar Nueva</label>
                     <div class="input-group">
                       <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
-                      <input type="password" class="form-control pe-5" id="confirm_password" name="confirm_password" required
-                        minlength="6">
-                      <button type="button" class="btn position-absolute top-50 end-0 translate-middle-y border-0 bg-transparent" onclick="togglePasswordVisibility('confirm')" style="z-index: 10;">
+                      <input type="password" class="form-control pe-5" id="confirm_password" name="confirm_password"
+                        required minlength="6">
+                      <button type="button"
+                        class="btn position-absolute top-50 end-0 translate-middle-y border-0 bg-transparent"
+                        onclick="togglePasswordVisibility('confirm')" style="z-index: 10;">
                         <i class="bi bi-eye text-muted" id="eye-icon-confirm"></i>
                       </button>
                     </div>

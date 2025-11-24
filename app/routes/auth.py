@@ -152,12 +152,7 @@ def register():
                 name,
                 apellidos,
                 age,
-                genero,
-                dni,
-                fecha_nacimiento,
-                nacionalidad,
                 nivel_estudios,
-                situacion_laboral,
             ]
         ):
             flash("¡Rellena todos los campos obligatorios!", "danger")
@@ -175,14 +170,8 @@ def register():
             age,
             genero,
             telefono,
-            dni,
-            fecha_nacimiento,
-            nacionalidad,
             nivel_estudios,
             titulacion,
-            situacion_laboral,
-            discapacidad,
-            porcentaje_discapacidad,
         )
 
         user = find_user_by_email(email)
@@ -222,19 +211,8 @@ def register():
                 user["genero"],
                 user["telefono"],
                 user["foto_perfil"],
-                user["dni"],
-                user["fecha_nacimiento"],
-                user["nacionalidad"],
-                user["direccion"],
-                user["codigo_postal"],
-                user["ciudad"],
-                user["provincia"],
                 user["nivel_estudios"],
                 user["titulacion"],
-                user["situacion_laboral"],
-                user["idiomas"],
-                user["discapacidad"],
-                user["porcentaje_discapacidad"],
             )
         )
         flash("Registro correcto. Sesión iniciada.", "success")
