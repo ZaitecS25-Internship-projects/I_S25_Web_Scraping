@@ -1,284 +1,279 @@
 {% extends "base.html" %}
-{% block title %}Oposiciones Vigentes - Mis Oposiciones{% endblock %}
+{% block title %}Oposiciones - BOE{% endblock %}
 
 {% block content %}
 
-<div class="container py-4 contenido-principal">
-  <h2 class="mb-4 text-center hero-title">{{ titulo_pagina }}</h2>
+  <div class="container py-4 contenido-principal">
+    <h2 class="mb-4 text-center hero-title">{{ titulo_pagina }}</h2>
 
-  <div class="card mb-4 shadow-sm">
-    <div class="card-header bg-white">
-      <h5 class="card-title mb-0"><i class="bi bi-funnel"></i> Filtros de búsqueda</h5>
-    </div>
-    <div class="card-body">
-      <form method="GET" action="{{ url_for('user.oposiciones_vigentes') }}">
-
-        <div class="row g-3 mb-3">
-          <div class="col-md-8">
-            <label for="busqueda" class="form-label">Palabras clave:</label>
-            <input type="text" class="form-control" id="busqueda" name="busqueda" value="{{ busqueda or '' }}"
-              placeholder="Ej: Auxiliar, Administrativo, Informática...">
-          </div>
-          <div class="col-md-4">
-            <label for="provincia" class="form-label">Provincia:</label>
-            <select class="form-select" id="provincia" name="provincia">
-              <option value="">Todas las provincias</option>
-              {% for prov in provincias %}
-              <option value="{{ prov['provincia'] }}" {% if provincia_filtro==prov['provincia'] %}selected{% endif %}>
-                {{ prov['provincia'] }}
-              </option>
-              {% endfor %}
-            </select>
-          </div>
-        </div>
-
-        <div class="mb-3">
-          <label class="form-label">Filtrar por Departamento:</label>
-          <div class="border rounded p-2 dept-box" style="max-height: 150px; overflow-y: auto;" >
-            {% for dept in departamentos %}
-            <div class="form-check">
-              <input class="form-check-input" type="checkbox" name="departamentos" value="{{ dept['departamento'] }}"
-                id="dept_{{ loop.index }}" {% if dept['departamento'] in selected_departamentos %}checked{% endif %}>
-              <label class="form-check-label small" for="dept_{{ loop.index }}">
-                {{ dept['departamento'] }}
-              </label>
+    <div class="card mb-4 shadow-sm">
+      <div class="card-header bg-white">
+        <h5 class="card-title mb-0"><i class="bi bi-funnel"></i> Filtros de búsqueda</h5>
+      </div>
+      <div class="card-body">
+        <form method="GET" action="{{ url_for('user.oposiciones_vigentes') }}">
+          
+          <div class="row g-3 mb-3">
+            <div class="col-md-8">
+              <label for="busqueda" class="form-label">Palabras clave:</label>
+              <input type="text" class="form-control" id="busqueda" name="busqueda"
+                     value="{{ busqueda or '' }}"
+                     placeholder="Ej: Auxiliar, Administrativo, Informática...">
             </div>
-            {% endfor %}
+            <div class="col-md-4">
+              <label for="provincia" class="form-label">Provincia:</label>
+              <select class="form-select" id="provincia" name="provincia">
+                <option value="">Todas las provincias</option>
+                {% for prov in provincias %}
+                  <option value="{{ prov['provincia'] }}"
+                          {% if provincia_filtro == prov['provincia'] %}selected{% endif %}>
+                    {{ prov['provincia'] }}
+                  </option>
+                {% endfor %}
+              </select>
+            </div>
           </div>
-          <small class="text-muted">Puedes seleccionar varios departamentos.</small>
-        </div>
 
-        <div class="row g-3">
-          <div class="col-md-3">
-            <label for="fecha_desde" class="form-label">Publicado desde:</label>
-            <input type="date" class="form-control" id="fecha_desde" name="fecha_desde" value="{{ fecha_desde or '' }}">
+          <div class="mb-3">
+            <label class="form-label">Filtrar por Departamento:</label>
+            <div class="border rounded p-2" style="max-height: 150px; overflow-y: auto; background: #f8f9fa;">
+                {% for dept in departamentos %}
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" 
+                           name="departamentos" 
+                           value="{{ dept['departamento'] }}" 
+                           id="dept_{{ loop.index }}"
+                           {% if dept['departamento'] in selected_departamentos %}checked{% endif %}>
+                    <label class="form-check-label small" for="dept_{{ loop.index }}">
+                        {{ dept['departamento'] }}
+                    </label>
+                </div>
+                {% endfor %}
+            </div>
+            <small class="text-muted">Puedes seleccionar varios departamentos.</small>
           </div>
-          <div class="col-md-3">
-            <label for="fecha_hasta" class="form-label">Hasta:</label>
-            <input type="date" class="form-control" id="fecha_hasta" name="fecha_hasta" value="{{ fecha_hasta or '' }}">
-          </div>
-          <div class="col-md-6 d-flex align-items-end gap-2">
-            <button type="submit" class="btn btn-primary flex-fill"><i class="bi bi-search"></i> Filtrar</button>
-            <a href="{{ url_for('user.oposiciones_vigentes') }}" class="btn btn-outline-secondary flex-fill">Limpiar</a>
-          </div>
-        </div>
-      </form>
 
-      <div class="mt-3 text-end">
-        <small class="text-muted badge bg-light text-dark border">
-          Página {{ page }} de {{ total_pages }}
-        </small>
+          <div class="row g-3">
+            <div class="col-md-3">
+              <label for="fecha_desde" class="form-label">Desde:</label>
+              <input type="date" class="form-control" id="fecha_desde" name="fecha_desde"
+                     value="{{ fecha_desde or '' }}">
+            </div>
+            <div class="col-md-3">
+              <label for="fecha_hasta" class="form-label">Hasta:</label>
+              <input type="date" class="form-control" id="fecha_hasta" name="fecha_hasta"
+                     value="{{ fecha_hasta or '' }}">
+            </div>
+            <div class="col-md-6 d-flex align-items-end gap-2">
+              <button type="submit" class="btn btn-primary flex-fill"><i class="bi bi-search"></i> Filtrar</button>
+              <a href="{{ url_for('user.oposiciones_vigentes') }}" class="btn btn-outline-secondary flex-fill">Limpiar</a>
+            </div>
+          </div>
+        </form>
+        
+        <div class="mt-3 text-end">
+          <small class="text-muted badge bg-light text-dark border">
+             Página {{ page }} de {{ total_pages }} | Total: {{ oposiciones|length }}
+          </small>
+        </div>
       </div>
     </div>
-  </div>
 
-  <div class="table-responsive shadow-sm">
-    <table class="table table-striped table-bordered align-middle table-hover opos-table">
-      <thead class="table-dark">
-        <tr>
-          <th>Identificador</th>
-          <th>Título / Descripción</th>
-          <th>Departamento / Control</th>
-          <th style="width: 130px;">Enlaces</th>
-          <th style="width: 110px;">
-            Fecha
-            <a href="{{ url_for('user.oposiciones_vigentes', busqueda=busqueda, provincia=provincia, fecha_desde=fecha_desde, fecha_hasta=fecha_hasta, departamentos=selected_departamentos, orden='fecha_asc') }}" 
-               class="text-white text-decoration-none ms-1" title="Ordenar ascendente">
-              <i class="bi bi-arrow-up{% if orden == 'fecha_asc' %} fw-bold{% endif %}"></i>
-            </a>
-            <a href="{{ url_for('user.oposiciones_vigentes', busqueda=busqueda, provincia=provincia, fecha_desde=fecha_desde, fecha_hasta=fecha_hasta, departamentos=selected_departamentos, orden='fecha_desc') }}" 
-               class="text-white text-decoration-none" title="Ordenar descendente">
-              <i class="bi bi-arrow-down{% if orden == 'fecha_desc' %} fw-bold{% endif %}"></i>
-            </a>
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for row in oposiciones %}
-        <tr class="
+    <div class="table-responsive shadow-sm">
+      <table class="table table-striped table-bordered align-middle table-hover">
+        <thead class="table-dark">
+          <tr>
+            <th>Identificador</th>
+            <th>Título</th>
+            <th>Departamento</th>
+            <th>Control</th>
+            <th>PDF</th>
+            <th>Fecha</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in oposiciones %}
+            <tr class="
                 {% if row['fecha'] == hoy %}nueva-oposicion{% endif %}
                 {% if row['id'] in visitadas %} visitada-oposicion{% endif %}
             ">
-          <td class="text-nowrap">{{ row['identificador'] }}</td>
+              <td>{{ row['identificador'] }}</td>
+              
+              <td>
+                <div class="d-flex justify-content-between align-items-start">
+                    {% if row['url_html'] %}
+                        <a href="{{ row['url_html'] }}" target="_blank" 
+                           class="text-decoration-none text-dark link-visitada" 
+                           data-id="{{ row['id'] }}"
+                           title="Ver en la web del BOE">
+                            {{ row['titulo'] }} <i class="bi bi-box-arrow-up-right text-muted small ms-1"></i>
+                        </a>
+                    {% else %}
+                        <span>{{ row['titulo'] }}</span>
+                    {% endif %}
+                    
+                    <span style="margin-left: 10px;">
+                        <button type="button" 
+                                class="toggle-favorito-btn" 
+                                data-oposicion-id="{{ row['id'] }}" 
+                                aria-label="Marcar como favorito"
+                                style="border: none; background: none; cursor: pointer; color: orange;">
+                            <i class="bi {% if row['id'] in favoritas %}bi-star-fill{% else %}bi-star{% endif %}"
+                               title="{% if row['id'] in favoritas %}Quitar de Favoritos{% else %}Marcar como Favorito{% endif %}">
+                            </i>
+                        </button>
+                    </span>
+                </div>
 
-          <td>
-            <div class="d-flex justify-content-between align-items-start">
-              <div class="flex-grow-1">
-                {% if row['url_html'] %}
-                <a href="{{ row['url_html'] }}" target="_blank" class="text-decoration-none text-dark d-block" 
-                   title="Ver en el BOE">
-                  {{ row['titulo']|resaltar_titulo|safe }}
-                  <i class="bi bi-box-arrow-up-right ms-1 text-muted small"></i>
-                </a>
-                {% else %}
-                {{ row['titulo']|resaltar_titulo|safe }}
+                <div class="mt-2 d-flex flex-column align-items-start gap-1">
+                  {% if row['fecha'] == hoy %}
+                    <span class="badge-nuevo">🟡 Nuevo</span>
+                  {% endif %}
+                  {% if row['id'] in visitadas %}
+                    <span class="badge-visitada">🔵 Visitada</span>
+                  {% endif %}
+                </div>
+              </td>
+
+              <td><small class="fw-bold text-primary">{{ row['departamento'] }}</small></td>
+
+              <td>{{ row['control'] }}</td>
+
+              <td>
+                {% if row['url_pdf'] %}
+                  <a href="{{ row['url_pdf'] }}" target="_blank" 
+                    class="btn btn-sm btn-primary btn-pdf text-nowrap" 
+                    data-id="{{ row['id'] }}">
+                    Ver PDF
+                  </a>
                 {% endif %}
-              </div>
+              </td>
 
-              <button type="button" class="toggle-favorito-btn ms-2" data-oposicion-id="{{ row['id'] }}"
-                style="border: none; background: none; cursor: pointer; color: orange; min-width: 24px;">
-                <i class="bi {% if row['id'] in favoritas %}bi-star-fill{% else %}bi-star{% endif %}"
-                  title="{% if row['id'] in favoritas %}Quitar de Favoritos{% else %}Marcar como Favorito{% endif %}">
-                </i>
-              </button>
-            </div>
-            <div class="mt-2 d-flex flex-column align-items-start gap-1">
-              {% if row['fecha'] == hoy %}
-              <span class="badge bg-warning text-dark border border-warning">🟡 Nuevo</span>
-              {% endif %}
-              {% if row['id'] in visitadas %}
-              <span class="badge bg-info text-dark border border-info badge-visitada">🔵 Visitada</span>
-              {% endif %}
-            </div>
-          </td>
+              <td>{{ row['fecha']|format_date }}</td>
+            </tr>
+          {% else %}
+            <tr>
+              <td colspan="6" class="text-center py-4">No hay oposiciones disponibles con estos filtros.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
 
-          <td>
-            <small class="d-block fw-bold text-primary">{{ row['departamento'] }}</small>
-            <small class="text-muted">{{ row['control'] }}</small>
-          </td>
-
-          <td class="text-center">
-            <div class="d-flex flex-column gap-2">
-              {% if row['url_html'] %}
-              <a href="{{ row['url_html'] }}" target="_blank" class="btn btn-sm btn-outline-primary w-100"
-                title="Ver en web oficial del BOE">
-                <i class="bi bi-globe"></i> Ver BOE
-              </a>
-              {% endif %}
-
-              {% if row['url_pdf'] %}
-              <a href="{{ row['url_pdf'] }}" target="_blank" class="btn btn-sm btn-danger btn-pdf w-100"
-                data-id="{{ row['id'] }}" title="Descargar PDF oficial">
-                <i class="bi bi-file-earmark-pdf"></i> PDF
-              </a>
-              {% else %}
-              <span class="text-muted small">Sin PDF</span>
-              {% endif %}
-            </div>
-          </td>
-
-          <td class="text-center">{{ row['fecha']|format_date }}</td>
-        </tr>
-        {% else %}
-        <tr>
-          <td colspan="5" class="text-center py-4">
-            <i class="bi bi-search fs-3 text-muted"></i><br>
-            No se encontraron oposiciones con estos filtros.
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
-
-  {% if total_pages > 1 %}
-  <nav aria-label="Paginación de oposiciones" class="mt-4">
-    <ul class="pagination justify-content-center">
-      <li class="page-item {% if page <= 1 %}disabled{% endif %}">
-        <a class="page-link"
-          href="{{ url_for('user.oposiciones_vigentes', page=page-1, busqueda=busqueda, provincia=provincia, fecha_desde=fecha_desde, fecha_hasta=fecha_hasta, departamentos=selected_departamentos, orden=orden) }}">←</a>
-      </li>
-
-      {% set start_page = page - 2 if page > 3 else 1 %}
-      {% set end_page = page + 2 if page < total_pages - 2 else total_pages %} {% if start_page> 1 %}
-        <li class="page-item">
-          <a class="page-link"
-            href="{{ url_for('user.oposiciones_vigentes', page=1, busqueda=busqueda, provincia=provincia, fecha_desde=fecha_desde, fecha_hasta=fecha_hasta, departamentos=selected_departamentos, orden=orden) }}">1</a>
+    {% if total_pages > 1 %}
+    <nav aria-label="Paginación de oposiciones" class="mt-4">
+      <ul class="pagination justify-content-center">
+        <li class="page-item {% if page <= 1 %}disabled{% endif %}">
+          <a class="page-link" href="{{ url_for('user.oposiciones_vigentes', page=page-1, busqueda=busqueda, provincia=provincia, fecha_desde=fecha_desde, fecha_hasta=fecha_hasta, departamentos=selected_departamentos) }}">←</a>
         </li>
-        {% if start_page > 2 %}
-        <li class="page-item disabled"><span class="page-link">…</span></li>
-        {% endif %}
+
+        {% set start_page = page - 2 if page > 3 else 1 %}
+        {% set end_page = page + 2 if page < total_pages - 2 else total_pages %}
+
+        {% if start_page > 1 %}
+          <li class="page-item">
+            <a class="page-link" href="{{ url_for('user.oposiciones_vigentes', page=1, busqueda=busqueda, provincia=provincia, fecha_desde=fecha_desde, fecha_hasta=fecha_hasta, departamentos=selected_departamentos) }}">1</a>
+          </li>
+          {% if start_page > 2 %}
+            <li class="page-item disabled"><span class="page-link">…</span></li>
+          {% endif %}
         {% endif %}
 
         {% for p in range(start_page, end_page + 1) %}
-        <li class="page-item {% if p == page %}active{% endif %}">
-          <a class="page-link"
-            href="{{ url_for('user.oposiciones_vigentes', page=p, busqueda=busqueda, provincia=provincia, fecha_desde=fecha_desde, fecha_hasta=fecha_hasta, departamentos=selected_departamentos, orden=orden) }}">{{
-            p }}</a>
-        </li>
+          <li class="page-item {% if p == page %}active{% endif %}">
+            <a class="page-link" href="{{ url_for('user.oposiciones_vigentes', page=p, busqueda=busqueda, provincia=provincia, fecha_desde=fecha_desde, fecha_hasta=fecha_hasta, departamentos=selected_departamentos) }}">{{ p }}</a>
+          </li>
         {% endfor %}
 
-        {% if end_page < total_pages %} {% if end_page < total_pages - 1 %} <li class="page-item disabled"><span
-            class="page-link">…</span></li>
+        {% if end_page < total_pages %}
+          {% if end_page < total_pages - 1 %}
+            <li class="page-item disabled"><span class="page-link">…</span></li>
           {% endif %}
           <li class="page-item">
-            <a class="page-link"
-              href="{{ url_for('user.oposiciones_vigentes', page=total_pages, busqueda=busqueda, provincia=provincia, fecha_desde=fecha_desde, fecha_hasta=fecha_hasta, departamentos=selected_departamentos, orden=orden) }}">{{
-              total_pages }}</a>
+            <a class="page-link" href="{{ url_for('user.oposiciones_vigentes', page=total_pages, busqueda=busqueda, provincia=provincia, fecha_desde=fecha_desde, fecha_hasta=fecha_hasta, departamentos=selected_departamentos) }}">{{ total_pages }}</a>
           </li>
-          {% endif %}
+        {% endif %}
 
-          <li class="page-item {% if page >= total_pages %}disabled{% endif %}">
-            <a class="page-link"
-              href="{{ url_for('user.oposiciones_vigentes', page=page+1, busqueda=busqueda, provincia=provincia, fecha_desde=fecha_desde, fecha_hasta=fecha_hasta, departamentos=selected_departamentos, orden=orden) }}">→</a>
-          </li>
-    </ul>
-  </nav>
-  {% endif %}
+        <li class="page-item {% if page >= total_pages %}disabled{% endif %}">
+          <a class="page-link" href="{{ url_for('user.oposiciones_vigentes', page=page+1, busqueda=busqueda, provincia=provincia, fecha_desde=fecha_desde, fecha_hasta=fecha_hasta, departamentos=selected_departamentos) }}">→</a>
+        </li>
+      </ul>
+    </nav>
+    {% endif %}
 
-</div>
+  </div>
 
-<script>
+  <script>
   document.addEventListener('DOMContentLoaded', () => {
-    // ... tus scripts personalizados ...
-    // --- Lógica del botón FAVORITO (Estrella) ---
+
+    // Favoritos
     document.querySelectorAll('.toggle-favorito-btn').forEach(button => {
-      button.addEventListener('click', function () {
-        const oposicionId = this.dataset.oposicionId;
-        if (!oposicionId) return;
+        button.addEventListener('click', function() {
+            const oposicionId = this.dataset.oposicionId;
+            if (!oposicionId) return;
 
-        const url = `/toggle_favorito/${oposicionId}`;
-        const icon = this.querySelector('i');
+            const url = `/toggle_favorito/${oposicionId}`;
+            const icon = this.querySelector('i');
 
-        icon.style.transform = "scale(1.2)";
-        setTimeout(() => icon.style.transform = "scale(1)", 200);
+            icon.style.transform = "scale(1.2)";
+            setTimeout(() => icon.style.transform = "scale(1)", 200);
 
-        fetch(url, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-        })
-          .then(response => response.json())
-          .then(data => {
-            if (data.ok) {
-              if (data.is_favorite) {
-                icon.classList.remove('bi-star');
-                icon.classList.add('bi-star-fill');
-                icon.title = "Quitar de Favoritos";
-              } else {
-                icon.classList.remove('bi-star-fill');
-                icon.classList.add('bi-star');
-                icon.title = "Marcar como Favorito";
-              }
-            } else {
-              alert("Error al actualizar favoritos.");
-            }
-          })
-          .catch(error => console.error('Error:', error));
-      });
+            fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.ok) {
+                    if (data.is_favorite) {
+                        icon.classList.remove('bi-star');
+                        icon.classList.add('bi-star-fill'); 
+                        icon.title = "Quitar de Favoritos";
+                    } else {
+                        icon.classList.remove('bi-star-fill');
+                        icon.classList.add('bi-star');
+                        icon.title = "Marcar como Favorito";
+                    }
+                } else {
+                    alert("Error al actualizar favoritos.");
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
     });
-
-    // --- Lógica del botón PDF (Marcar como visitada) ---
-    document.querySelectorAll('.btn-pdf').forEach(btn => {
-      btn.addEventListener('click', function (e) {
+    
+    // 🔴 CAMBIO AQUÍ: Lógica unificada para botón PDF y Enlace del Título
+    // Seleccionamos tanto .btn-pdf como .link-visitada
+    document.querySelectorAll('.btn-pdf, .link-visitada').forEach(element => {
+      element.addEventListener('click', function (e) {
+        // NO usamos preventDefault() porque queremos que el enlace se abra (target="_blank")
+        
         const id = this.dataset.id;
+        // Encontrar la fila (tr) más cercana para modificarla
         const tr = this.closest('tr');
-
+        
         const beaconUrl = `/marcar_visitada/${id}`;
+        
+        // 1) Enviar petición sin bloquear (Beacon es ideal para cuando se cambia de página)
         if (navigator.sendBeacon) {
-          const payload = JSON.stringify({ ts: new Date().toISOString() });
-          const blob = new Blob([payload], { type: 'application/json' });
-          navigator.sendBeacon(beaconUrl, blob);
+            const payload = JSON.stringify({ts: new Date().toISOString()});
+            const blob = new Blob([payload], { type: 'application/json' });
+            navigator.sendBeacon(beaconUrl, blob);
         } else {
-          fetch(beaconUrl, { method: 'POST' }).catch(err => console.warn(err));
+            fetch(beaconUrl, { method: 'POST' }).catch(err => console.warn(err));
         }
 
+        // 2) Actualizar UI inmediatamente (añadir clase y badge)
         if (tr) {
           tr.classList.add('visitada-oposicion');
+          
+          // Buscamos el div donde están los badges (el que tiene flex-column)
+          // Está en la segunda columna (td:nth-child(2))
           const badgesDiv = tr.querySelector('td:nth-child(2) .d-flex.flex-column');
-
+          
           if (badgesDiv && !badgesDiv.querySelector('.badge-visitada')) {
             const span = document.createElement('span');
-            span.className = 'badge bg-info text-dark border border-info badge-visitada';
+            span.className = 'badge-visitada'; // Usamos la clase CSS global
             span.textContent = '🔵 Visitada';
             badgesDiv.appendChild(span);
           }
@@ -286,5 +281,5 @@
       });
     });
   });
-</script>
+  </script>
 {% endblock %}

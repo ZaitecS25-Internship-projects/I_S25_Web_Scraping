@@ -533,3 +533,12 @@ html[data-theme="dark"] .table .badge-visitada {
     background-color: #3b82f6 !important;
     color: #fff !important;
 }
+
+.badge-visitada {
+    background-color: #0b69ff;
+    color: #fff;
+    font-weight: 700;
+    border-radius: 8px;
+    padding: 3px 8px;
+    font-size: 0.8rem;
+    margin-left: 6px;
