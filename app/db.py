@@ -60,19 +60,8 @@ def init_users_db():
             genero TEXT,
             telefono TEXT,
             foto_perfil TEXT,
-            dni TEXT,
-            fecha_nacimiento TEXT,
-            nacionalidad TEXT,
-            direccion TEXT,
-            codigo_postal TEXT,
-            ciudad TEXT,
-            provincia TEXT,
             nivel_estudios TEXT,
-            titulacion TEXT,
-            situacion_laboral TEXT,
-            idiomas TEXT,
-            discapacidad INTEGER,
-            porcentaje_discapacidad INTEGER
+            titulacion TEXT
         )
     """)
     db.execute("""
@@ -114,19 +103,8 @@ def migrate_users_db():
         nuevas_columnas = [
             ("telefono", "TEXT"),
             ("foto_perfil", "TEXT"),
-            ("dni", "TEXT"),
-            ("fecha_nacimiento", "TEXT"),
-            ("nacionalidad", "TEXT"),
-            ("direccion", "TEXT"),
-            ("codigo_postal", "TEXT"),
-            ("ciudad", "TEXT"),
-            ("provincia", "TEXT"),
             ("nivel_estudios", "TEXT"),
             ("titulacion", "TEXT"),
-            ("situacion_laboral", "TEXT"),
-            ("idiomas", "TEXT"),
-            ("discapacidad", "INTEGER"),
-            ("porcentaje_discapacidad", "INTEGER"),
         ]
 
         for columna, tipo in nuevas_columnas:

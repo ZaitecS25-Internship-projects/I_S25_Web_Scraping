@@ -51,20 +51,19 @@
                   <option value="" disabled selected>Selecciona tu edad</option>
                 </select>
               </div>
-              <div class="col-md-6">
+              <!-- <div class="col-md-6">
                 <label class="form-label fw-bold">Género <span class="text-danger">*</span></label>
                 <div class="d-flex gap-3 mt-2">
                   <div class="form-check">
-                    <input class="form-check-input" type="radio" name="genero" value="Hombre" id="generoHombre"
-                      required>
+                    <input class="form-check-input" type="radio" name="genero" value="Hombre" id="generoHombre">
                     <label class="form-check-label" for="generoHombre">Hombre</label>
                   </div>
                   <div class="form-check">
-                    <input class="form-check-input" type="radio" name="genero" value="Mujer" id="generoMujer" required>
+                    <input class="form-check-input" type="radio" name="genero" value="Mujer" id="generoMujer">
                     <label class="form-check-label" for="generoMujer">Mujer</label>
                   </div>
                   <div class="form-check">
-                    <input class="form-check-input" type="radio" name="genero" value="Otro" id="generoOtro" required>
+                    <input class="form-check-input" type="radio" name="genero" value="Otro" id="generoOtro">
                     <label class="form-check-label" for="generoOtro">Otro</label>
                   </div>
                 </div>
@@ -72,7 +71,7 @@
                   <input type="text" class="form-control" id="otroGeneroReg" name="otro_genero"
                     placeholder="Especifica tu género">
                 </div>
-              </div>
+              </div> -->
             </div>
 
             <hr class="my-4">
@@ -188,23 +187,24 @@
     }
   }
 
-  // Mostrar/ocultar campo de "Otro género"
-  const generoRadios = document.querySelectorAll('input[name="genero"]');
-  const otroGeneroContainerReg = document.getElementById('otroGeneroContainerReg');
-  const otroGeneroInputReg = document.getElementById('otroGeneroReg');
+  // // Mostrar/ocultar campo de "Otro género"
+  // const generoRadios = document.querySelectorAll('input[name="genero"]');
+  // const otroGeneroContainerReg = document.getElementById('otroGeneroContainerReg');
+  // const otroGeneroInputReg = document.getElementById('otroGeneroReg');
 
-  generoRadios.forEach(radio => {
-    radio.addEventListener('change', function () {
-      if (document.getElementById('generoOtro').checked) {
-        otroGeneroContainerReg.style.display = 'block';
-        otroGeneroInputReg.required = true;
-      } else {
-        otroGeneroContainerReg.style.display = 'none';
-        otroGeneroInputReg.required = false;
-        otroGeneroInputReg.value = '';
-      }
-    });
-  });
+  // generoRadios.forEach(radio => {
+  //   radio.addEventListener('change', function () {
+  //     if (document.getElementById('generoOtro').checked) {
+  //       otroGeneroContainerReg.style.display = 'block';
+  //       otroGeneroInputReg.required = true;
+  //     } else {
+  //       otroGeneroContainerReg.style.display = 'none';
+  //       otroGeneroInputReg.required = false;
+  //       otroGeneroInputReg.value = '';
+  //     }
+  //   });
+  // }); 
 
 </script>
+
 {% endblock %}
