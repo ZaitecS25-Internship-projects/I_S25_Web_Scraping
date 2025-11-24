@@ -77,27 +77,6 @@
 
             <hr class="my-4">
 
-            <!-- Documentación Personal -->
-            <h5 class="text-primary mb-3"><i class="bi bi-card-text"></i> Documentación Personal</h5>
-
-            <div class="row g-3 mb-3">
-              <div class="col-md-6">
-                <label class="form-label fw-bold">DNI/NIE <span class="text-danger">*</span></label>
-                <input class="form-control" type="text" name="dni" placeholder="12345678X" required>
-              </div>
-              <div class="col-md-6">
-                <label class="form-label fw-bold">Fecha de Nacimiento <span class="text-danger">*</span></label>
-                <input class="form-control" type="date" name="fecha_nacimiento" required>
-              </div>
-            </div>
-
-            <div class="mb-3">
-              <label class="form-label fw-bold">Nacionalidad <span class="text-danger">*</span></label>
-              <input class="form-control" type="text" name="nacionalidad" placeholder="Española" required>
-            </div>
-
-            <hr class="my-4">
-
             <!-- Formación Académica -->
             <h5 class="text-primary mb-3"><i class="bi bi-mortarboard"></i> Formación Académica</h5>
 
@@ -121,18 +100,6 @@
               </div>
             </div>
 
-            <div class="mb-3">
-              <label class="form-label fw-bold">Situación Laboral <span class="text-danger">*</span></label>
-              <select class="form-select" name="situacion_laboral" required>
-                <option value="">Selecciona...</option>
-                <option value="Empleado">Empleado</option>
-                <option value="Desempleado">Desempleado</option>
-                <option value="Estudiante">Estudiante</option>
-                <option value="Autónomo">Autónomo</option>
-                <option value="Funcionario">Funcionario</option>
-              </select>
-            </div>
-
             <hr class="my-4">
 
             <!-- Información Adicional Opcional -->
@@ -142,27 +109,6 @@
             <div class="mb-3">
               <label class="form-label fw-bold">Teléfono</label>
               <input class="form-control" type="tel" name="telefono" placeholder="+34 600 000 000">
-            </div>
-
-            <div class="mb-3">
-              <label class="form-label fw-bold">¿Tienes discapacidad reconocida?</label>
-              <div class="d-flex gap-3">
-                <div class="form-check">
-                  <input class="form-check-input" type="radio" name="discapacidad" value="no" id="discapacidadNoReg"
-                    checked>
-                  <label class="form-check-label" for="discapacidadNoReg">No</label>
-                </div>
-                <div class="form-check">
-                  <input class="form-check-input" type="radio" name="discapacidad" value="si" id="discapacidadSiReg">
-                  <label class="form-check-label" for="discapacidadSiReg">Sí</label>
-                </div>
-              </div>
-            </div>
-
-            <div id="porcentajeDiscapacidadContainerReg" class="mb-3" style="display: none;">
-              <label class="form-label fw-bold">Porcentaje de Discapacidad (%)</label>
-              <input type="number" class="form-control" id="porcentaje_discapacidadReg" name="porcentaje_discapacidad"
-                min="0" max="100" placeholder="Ej: 33">
             </div>
 
             <hr class="my-4">
@@ -177,11 +123,11 @@
 
             <div class="mb-3">
               <label class="form-label fw-bold">Contraseña <span class="text-danger">*</span></label>
-              <div class="input-group">
-                <input class="form-control" type="password" name="password" id="password-register" minlength="6"
+              <div class="position-relative">
+                <input class="form-control pe-5" type="password" name="password" id="password-register" minlength="6"
                   required>
-                <button class="btn btn-outline-secondary" type="button" onclick="togglePasswordVisibility('register')">
-                  <i class="bi bi-eye" id="eye-icon-register"></i>
+                <button class="btn position-absolute top-50 end-0 translate-middle-y border-0 bg-transparent" type="button" onclick="togglePasswordVisibility('register')" style="z-index: 10;">
+                  <i class="bi bi-eye text-muted" id="eye-icon-register"></i>
                 </button>
               </div>
               <small class="form-text text-muted">Mínimo 6 caracteres</small>
@@ -260,22 +206,5 @@
     });
   });
 
-  // Mostrar/ocultar campo de porcentaje de discapacidad
-  const discapacidadRadios = document.querySelectorAll('input[name="discapacidad"]');
-  const porcentajeContainerReg = document.getElementById('porcentajeDiscapacidadContainerReg');
-  const porcentajeInputReg = document.getElementById('porcentaje_discapacidadReg');
-
-  discapacidadRadios.forEach(radio => {
-    radio.addEventListener('change', function () {
-      if (document.getElementById('discapacidadSiReg').checked) {
-        porcentajeContainerReg.style.display = 'block';
-        porcentajeInputReg.required = true;
-      } else {
-        porcentajeContainerReg.style.display = 'none';
-        porcentajeInputReg.required = false;
-        porcentajeInputReg.value = '';
-      }
-    });
-  });
 </script>
 {% endblock %}

@@ -8,6 +8,7 @@ from werkzeug.utils import secure_filename
 
 from ..db import get_users_db
 from ..models import User
+from ..email_utils import send_password_reset_email, generate_reset_token, verify_reset_token
 
 auth_bp = Blueprint("auth", __name__)
 
@@ -279,3 +280,71 @@ def change_password():
 
     flash("¡Contraseña actualizada correctamente!", "success")
     return redirect(url_for("user.configuracion_cuenta"))
+
+
+@auth_bp.route("/forgot_password", methods=["GET", "POST"])
+def forgot_password():
+    """Solicitud de recuperación de contraseña"""
+    if request.method == "POST":
+        email = (request.form.get("email") or "").strip().lower()
+        
+        if not email:
+            flash("Por favor, introduce tu correo electrónico.", "danger")
+            return redirect(url_for("auth.forgot_password"))
+        
+        user = find_user_by_email(email)
+        
+        if user:
+            token = generate_reset_token(email)
+            try:
+                send_password_reset_email(email, token)
+                flash("Se ha enviado un correo con instrucciones para restablecer tu contraseña.", "success")
+            except Exception as e:
+                flash("Error al enviar el correo. Por favor, inténtalo más tarde.", "danger")
+        else:
+            # Por seguridad, mostramos el mismo mensaje aunque el email no exista
+            flash("Se ha enviado un correo con instrucciones para restablecer tu contraseña.", "success")
+        
+        return redirect(url_for("auth.login"))
+    
+    return render_template("forgot_password.html")
+
+
+@auth_bp.route("/reset_password/<token>", methods=["GET", "POST"])
+def reset_password(token):
+    """Formulario para establecer nueva contraseña usando el token"""
+    email = verify_reset_token(token)
+    
+    if not email:
+        flash("El enlace de recuperación es inválido o ha expirado.", "danger")
+        return redirect(url_for("auth.forgot_password"))
+    
+    if request.method == "POST":
+        new_password = request.form.get("new_password")
+        confirm_password = request.form.get("confirm_password")
+        
+        if not new_password or not confirm_password:
+            flash("Por favor, rellena todos los campos.", "danger")
+            return redirect(url_for("auth.reset_password", token=token))
+        
+        if len(new_password) < 6:
+            flash("La contraseña debe tener al menos 6 caracteres.", "danger")
+            return redirect(url_for("auth.reset_password", token=token))
+        
+        if new_password != confirm_password:
+            flash("Las contraseñas no coinciden.", "danger")
+            return redirect(url_for("auth.reset_password", token=token))
+        
+        # Actualizar contraseña
+        db = get_users_db()
+        new_hash = generate_password_hash(new_password)
+        db.execute(
+            "UPDATE users SET password_hash = ? WHERE email = ?",
+            (new_hash, email)
+        )
+        db.commit()
+        
+        flash("¡Contraseña restablecida correctamente! Ahora puedes iniciar sesión.", "success")
+        return redirect(url_for("auth.login"))
+    
+    return render_template("reset_password.html", token=token, email=email)

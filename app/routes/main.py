@@ -45,7 +45,7 @@ def mostrar_departamento(nombre):
     user = current_user
     busqueda = request.args.get("busqueda", "")
     provincia = request.args.get("provincia", "")
-    orden = request.args.get("orden", "desc")
+    orden = request.args.get("orden", "fecha_desc")
     page = int(request.args.get("page", 1))
     por_pagina = 10
     offset = (page - 1) * por_pagina
@@ -66,7 +66,14 @@ def mostrar_departamento(nombre):
         params.append(provincia)
 
     # Orden + paginación
-    order_direction = "DESC" if orden == "desc" else "ASC"
+    if orden == "fecha_asc":
+        order_direction = "ASC"
+    elif orden == "fecha_desc":
+        order_direction = "DESC"
+    else:
+        # Compatibilidad con valores antiguos
+        order_direction = "DESC" if orden == "desc" else "ASC"
+    
     sql += f" ORDER BY fecha {order_direction} LIMIT ? OFFSET ?"
     params += [por_pagina, offset]
 

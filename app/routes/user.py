@@ -81,6 +81,7 @@ def oposiciones_vigentes():
     provincia = request.args.get("provincia", "")
     fecha_desde = request.args.get("fecha_desde", "")
     fecha_hasta = request.args.get("fecha_hasta", "")
+    orden = request.args.get("orden", "fecha_desc")
 
     sql_part = "FROM oposiciones WHERE fecha >= ?"
     params = [desde]
@@ -112,7 +113,15 @@ def oposiciones_vigentes():
     total = boe_db.execute(total_query, params).fetchone()[0]
     total_pages = (total + por_pagina - 1) // por_pagina
 
-    data_query = f"SELECT * {sql_part} ORDER BY fecha DESC LIMIT ? OFFSET ?"
+    # Determinar dirección de ordenamiento
+    if orden == "fecha_asc":
+        order_direction = "ASC"
+    elif orden == "fecha_desc":
+        order_direction = "DESC"
+    else:
+        order_direction = "DESC"  # Por defecto
+    
+    data_query = f"SELECT * {sql_part} ORDER BY fecha {order_direction} LIMIT ? OFFSET ?"
     data_params = params + [por_pagina, offset]
     oposiciones = boe_db.execute(data_query, data_params).fetchall()
 
@@ -156,6 +165,7 @@ def oposiciones_vigentes():
         provincia_filtro=provincia,
         fecha_desde=fecha_desde,
         fecha_hasta=fecha_hasta,
+        orden=orden,
         page=page,
         total_pages=total_pages,
         visitadas=visitadas,

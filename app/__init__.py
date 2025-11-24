@@ -84,6 +84,61 @@ def create_app():
         except Exception:
             return False
 
+    @app.template_filter("resaltar_titulo")
+    def resaltar_titulo(titulo):
+        """Resalta palabras clave importantes en el título de las oposiciones"""
+        import re
+        if not titulo:
+            return titulo
+        
+        # Palabras clave a resaltar
+        palabras_clave = [
+            r'\bconvocatoria\b',
+            r'\boposiciones?\b',
+            r'\bplazas?\b',
+            r'\bacceso\b',
+            r'\bproceso selectivo\b',
+            r'\bfuncionarios?\b',
+            r'\bcuerpo\b',
+            r'\bescala\b',
+            r'\bgrupo [A-C][12]?\b',
+            r'\bturnos?\b',
+            r'\blibre\b',
+            r'\bpromoci[oó]n interna\b',
+            r'\bdiscapacidad\b',
+            r'\breserva\b',
+            r'\bnombramientos?\b',
+            r'\bceses?\b',
+            r'\bampliac[ió]n\b',
+            r'\bmodificac[ió]n\b',
+            r'\banulaci[oó]n\b',
+            r'\bcorrecc[ió]n\b',
+            r'\bpresentac[ió]n\b',
+            r'\badmisi[oó]n\b',
+            r'\bexclusi[oó]n\b',
+            r'\blista[s]?\b',
+            r'\bsolicitantes?\b',
+            r'\badmitidos?\b',
+            r'\bexcluidos?\b',
+            r'\btribunal\b',
+            r'\bcalificac[ió]n\b',
+            r'\bpruebas?\b',
+            r'\bejercicio[s]?\b',
+            r'\bexamen\b',
+            r'\bresultados?\b',
+            r'\bpuntuac[ió]n\b',
+            r'\badjudicac[ió]n\b',
+            r'\bdestinos?\b',
+            r'\btraslados?\b'
+        ]
+        
+        # Reemplazar cada palabra clave con versión en negrita
+        resultado = titulo
+        for patron in palabras_clave:
+            resultado = re.sub(patron, lambda m: f'<strong>{m.group()}</strong>', resultado, flags=re.IGNORECASE)
+        
+        return resultado
+
     # Registrar blueprints
     from .routes.main import main_bp
     from .routes.auth import auth_bp

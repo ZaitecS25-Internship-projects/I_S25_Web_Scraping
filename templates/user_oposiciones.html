@@ -80,7 +80,17 @@
           <th>Título / Descripción</th>
           <th>Departamento / Control</th>
           <th style="width: 130px;">Enlaces</th>
-          <th style="width: 110px;">Fecha</th>
+          <th style="width: 110px;">
+            Fecha
+            <a href="{{ url_for('user.oposiciones_vigentes', busqueda=busqueda, provincia=provincia, fecha_desde=fecha_desde, fecha_hasta=fecha_hasta, departamentos=selected_departamentos, orden='fecha_asc') }}" 
+               class="text-white text-decoration-none ms-1" title="Ordenar ascendente">
+              <i class="bi bi-arrow-up{% if orden == 'fecha_asc' %} fw-bold{% endif %}"></i>
+            </a>
+            <a href="{{ url_for('user.oposiciones_vigentes', busqueda=busqueda, provincia=provincia, fecha_desde=fecha_desde, fecha_hasta=fecha_hasta, departamentos=selected_departamentos, orden='fecha_desc') }}" 
+               class="text-white text-decoration-none" title="Ordenar descendente">
+              <i class="bi bi-arrow-down{% if orden == 'fecha_desc' %} fw-bold{% endif %}"></i>
+            </a>
+          </th>
         </tr>
       </thead>
       <tbody>
@@ -93,7 +103,17 @@
 
           <td>
             <div class="d-flex justify-content-between align-items-start">
-              <span>{{ row['titulo'] }}</span>
+              <div class="flex-grow-1">
+                {% if row['url_html'] %}
+                <a href="{{ row['url_html'] }}" target="_blank" class="text-decoration-none text-dark d-block" 
+                   title="Ver en el BOE">
+                  {{ row['titulo']|resaltar_titulo|safe }}
+                  <i class="bi bi-box-arrow-up-right ms-1 text-muted small"></i>
+                </a>
+                {% else %}
+                {{ row['titulo']|resaltar_titulo|safe }}
+                {% endif %}
+              </div>
 
               <button type="button" class="toggle-favorito-btn ms-2" data-oposicion-id="{{ row['id'] }}"
                 style="border: none; background: none; cursor: pointer; color: orange; min-width: 24px;">
@@ -156,14 +176,14 @@
     <ul class="pagination justify-content-center">
       <li class="page-item {% if page <= 1 %}disabled{% endif %}">
         <a class="page-link"
-          href="{{ url_for('user.oposiciones_vigentes', page=page-1, busqueda=busqueda, provincia=provincia, fecha_desde=fecha_desde, fecha_hasta=fecha_hasta, departamentos=selected_departamentos) }}">←</a>
+          href="{{ url_for('user.oposiciones_vigentes', page=page-1, busqueda=busqueda, provincia=provincia, fecha_desde=fecha_desde, fecha_hasta=fecha_hasta, departamentos=selected_departamentos, orden=orden) }}">←</a>
       </li>
 
       {% set start_page = page - 2 if page > 3 else 1 %}
       {% set end_page = page + 2 if page < total_pages - 2 else total_pages %} {% if start_page> 1 %}
         <li class="page-item">
           <a class="page-link"
-            href="{{ url_for('user.oposiciones_vigentes', page=1, busqueda=busqueda, provincia=provincia, fecha_desde=fecha_desde, fecha_hasta=fecha_hasta, departamentos=selected_departamentos) }}">1</a>
+            href="{{ url_for('user.oposiciones_vigentes', page=1, busqueda=busqueda, provincia=provincia, fecha_desde=fecha_desde, fecha_hasta=fecha_hasta, departamentos=selected_departamentos, orden=orden) }}">1</a>
         </li>
         {% if start_page > 2 %}
         <li class="page-item disabled"><span class="page-link">…</span></li>
@@ -173,7 +193,7 @@
         {% for p in range(start_page, end_page + 1) %}
         <li class="page-item {% if p == page %}active{% endif %}">
           <a class="page-link"
-            href="{{ url_for('user.oposiciones_vigentes', page=p, busqueda=busqueda, provincia=provincia, fecha_desde=fecha_desde, fecha_hasta=fecha_hasta, departamentos=selected_departamentos) }}">{{
+            href="{{ url_for('user.oposiciones_vigentes', page=p, busqueda=busqueda, provincia=provincia, fecha_desde=fecha_desde, fecha_hasta=fecha_hasta, departamentos=selected_departamentos, orden=orden) }}">{{
             p }}</a>
         </li>
         {% endfor %}
@@ -183,14 +203,14 @@
           {% endif %}
           <li class="page-item">
             <a class="page-link"
-              href="{{ url_for('user.oposiciones_vigentes', page=total_pages, busqueda=busqueda, provincia=provincia, fecha_desde=fecha_desde, fecha_hasta=fecha_hasta, departamentos=selected_departamentos) }}">{{
+              href="{{ url_for('user.oposiciones_vigentes', page=total_pages, busqueda=busqueda, provincia=provincia, fecha_desde=fecha_desde, fecha_hasta=fecha_hasta, departamentos=selected_departamentos, orden=orden) }}">{{
               total_pages }}</a>
           </li>
           {% endif %}
 
           <li class="page-item {% if page >= total_pages %}disabled{% endif %}">
             <a class="page-link"
-              href="{{ url_for('user.oposiciones_vigentes', page=page+1, busqueda=busqueda, provincia=provincia, fecha_desde=fecha_desde, fecha_hasta=fecha_hasta, departamentos=selected_departamentos) }}">→</a>
+              href="{{ url_for('user.oposiciones_vigentes', page=page+1, busqueda=busqueda, provincia=provincia, fecha_desde=fecha_desde, fecha_hasta=fecha_hasta, departamentos=selected_departamentos, orden=orden) }}">→</a>
           </li>
     </ul>
   </nav>
