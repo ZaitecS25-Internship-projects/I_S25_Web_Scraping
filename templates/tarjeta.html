@@ -35,16 +35,6 @@
           </div>
 
           <div class="row g-3">
-            <div class="col-md-4">
-              <label for="fecha_desde" class="form-label">Fecha desde:</label>
-              <input type="date" class="form-control" id="fecha_desde" name="fecha_desde"
-                     value="{{ fecha_desde or '' }}">
-            </div>
-            <div class="col-md-4">
-              <label for="fecha_hasta" class="form-label">Fecha hasta:</label>
-              <input type="date" class="form-control" id="fecha_hasta" name="fecha_hasta"
-                     value="{{ fecha_hasta or '' }}">
-            </div>
             <div class="col-md-4 d-flex align-items-end gap-2">
               <button type="submit" class="btn btn-primary flex-fill">Filtrar</button>
               <a href="{{ url_for('main.mostrar_departamento', nombre=departamento) }}"
