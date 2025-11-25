@@ -124,15 +124,10 @@ def oposiciones_vigentes():
         order_direction = "DESC"
     else:
         order_direction = "DESC"  # Por defecto
-    
-    data_query = f"SELECT * {sql_part} ORDER BY fecha {order_direction} LIMIT ? OFFSET ?"
-=======
-        order_direction = "DESC"  # Por defecto
 
     data_query = (
         f"SELECT * {sql_part} ORDER BY fecha {order_direction} LIMIT ? OFFSET ?"
     )
->>>>>>> 5135b22a47bc16d5b292114938a1493088e44085
     data_params = params + [por_pagina, offset]
     oposiciones = boe_db.execute(data_query, data_params).fetchall()
 
@@ -321,7 +316,7 @@ def oposiciones_favoritas():
 
     # 🟢 CORRECCIÓN: Obtener datos para los filtros también en Favoritas
     desde = (datetime.today() - timedelta(days=30)).strftime("%Y%m%d")
-    
+
     # Departamentos
     departamentos = boe_db.execute(
         """
@@ -350,15 +345,9 @@ def oposiciones_favoritas():
         return render_template(
             "user_oposiciones.html",
             oposiciones=[],
-<<<<<<< HEAD
-            departamentos=departamentos,
-            selected_departamentos=[],
-            provincias=provincias,
-=======
             departamentos=departamentos,  # 🟢 Pasamos departamentos
             selected_departamentos=[],
             provincias=provincias,  # 🟢 Pasamos provincias
->>>>>>> 5135b22a47bc16d5b292114938a1493088e44085
             busqueda="",
             provincia_filtro="",
             fecha_desde="",
@@ -400,15 +389,9 @@ def oposiciones_favoritas():
     return render_template(
         "user_oposiciones.html",
         oposiciones=oposiciones_ordenadas,
-<<<<<<< HEAD
-        departamentos=departamentos,
-        selected_departamentos=[],
-        provincias=provincias,
-=======
         departamentos=departamentos,  # 🟢 Pasamos departamentos
         selected_departamentos=[],
         provincias=provincias,  # 🟢 Pasamos provincias
->>>>>>> 5135b22a47bc16d5b292114938a1493088e44085
         busqueda="",
         provincia_filtro="",
         fecha_desde="",

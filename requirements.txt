@@ -1,3 +1,4 @@
+# Librerías necesarias para scraping BOE con Flask
 Flask==3.0.2 # principal web
 Flask-Login==0.6.3 # Manejo de sesiones, login, logout, usuarios
 Flask-Mail==0.9.1 # Envío de emails
@@ -8,4 +9,4 @@ lxml==6.0.2 # Parser rápido para BeautifulSoup
 itsdangerous==2.1.2 # Requerido por Flask internamente
 Jinja2==3.1.3 # Motor de plantillas
 click==8.1.7 # Necesario para el CLI de Flask
-MarkupSafe==2.1.5 # Lo usa Jinja2 internamente
+MarkupSafe==2.1.5 # Lo usa Jinja
