@@ -23,6 +23,7 @@ def index():
         print(f"Error al actualizar datos automáticamente: {e}")
     db = get_boe_db()
     hoy = datetime.today().strftime("%Y%m%d")
+    fecha_mostrar = datetime.today().strftime("%d/%m/%Y")
     deps = db.execute(
         """
         SELECT DISTINCT departamento
@@ -32,7 +33,7 @@ def index():
         """,
         (hoy,),
     ).fetchall()
-    return render_template("index.html", departamentos=deps)
+    return render_template("index.html", departamentos=deps, fecha_hoy=fecha_mostrar)
 
 
 @main_bp.route("/departamento/<nombre>")

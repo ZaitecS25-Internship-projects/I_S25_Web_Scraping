@@ -26,7 +26,7 @@ body {
 .mi-navbar, .navbar {
     background: linear-gradient(135deg, #002b5b 0%, #004aad 100%);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    padding: 1rem 0;
+    padding: 0.5rem 0;
     animation: slideDownFade 0.8s ease-out;
 }
 @keyframes slideDownFade {
