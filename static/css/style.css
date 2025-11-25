@@ -490,14 +490,6 @@ html[data-theme="dark"] .btn-outline-secondary:hover {
     color: #1e1e2f !important;
 }
 
-/* MODO OSCURO - COLOR DE TEXTO DE BOTONES*/
-html[data-theme="dark"] .table .btn,
-html[data-theme="dark"] .table button,
-html[data-theme="dark"] .table input[type="submit"],
-html[data-theme="dark"] .btn-limpiar {
-    color: #fff !important;
-}
-
 html[data-theme="dark"] .btn-outline-secondary {
     color: #fff !important;
     border-color: #fff !important;
