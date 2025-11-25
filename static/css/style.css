@@ -726,6 +726,12 @@ html[data-theme="dark"] .btn-primary:hover {
     box-shadow: var(--shadow-hover);
 }
 
+html[data-theme="dark"] .btn-tertiary {
+    background: #2c2f47;
+    border-color: #3b3f54;
+    color: #fff;
+}
+
 html[data-theme="dark"] .btn-success {
     background-color: #16a34a !important;
     color: #fff !important;
@@ -841,6 +847,7 @@ html[data-theme="dark"] form.form-register[style] {
     background-color: #27293d !important;
     color: #e5e7eb !important;
 }
+
 html[data-theme="dark"] form.form-register[style] * {
     color: #e5e7eb !important;
 }
@@ -867,5 +874,14 @@ html[data-theme="dark"] .form-select {
 
 /* Dropdown departamentos modo oscuro ultra-compacto */
 html[data-theme="dark"] .dropdown-menu,
-html[data-theme="dark"] .dropdown-menu[style] { background:#2c2f47 !important; color:#e5e7eb !important; border-color:#3b3f54 !important; }
-html[data-theme="dark"] .dropdown-menu .form-check-input { accent-color:#60a5fa !important; background:transparent !important; border-color:#4b5166 !important; }
+html[data-theme="dark"] .dropdown-menu[style] {
+    background: #2c2f47 !important;
+    color: #e5e7eb !important;
+    border-color: #3b3f54 !important;
+}
+
+html[data-theme="dark"] .dropdown-menu .form-check-input {
+    accent-color: #60a5fa !important;
+    background: transparent !important;
+    border-color: #4b5166 !important;
+}
