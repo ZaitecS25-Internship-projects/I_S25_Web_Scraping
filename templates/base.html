@@ -8,7 +8,7 @@ Define la estructura general de la aplicación:
 -->
 
 <!DOCTYPE html>
-<html lang="es" data-theme="{{ theme }}">   
+<html lang="es" data-theme="{{ theme }}">
 
 <head>
   <meta charset="UTF-8">
@@ -123,6 +123,24 @@ Define la estructura general de la aplicación:
     <p>© 2025 Oposiciones BOE</p>
   </footer>
 
+  <script> // Script para gestionar el filtro de departamentos en las alertas
+    document.addEventListener("DOMContentLoaded", function () {
+      const hiddenInput = document.getElementById("departamento_filtro");
+      const checkboxes = document.querySelectorAll(".dept-check");
+
+      function updateHidden() {
+        const values = [...checkboxes]
+          .filter(c => c.checked)
+          .map(c => c.value);
+
+        hiddenInput.value = JSON.stringify(values);
+      }
+
+      checkboxes.forEach(cb => cb.addEventListener("change", updateHidden));
+
+      updateHidden(); // Inicializar
+    });
+  </script>
   <script>
     const select = document.getElementById("edad");
     if (select) {
@@ -131,22 +149,6 @@ Define la estructura general de la aplicación:
         option.value = i;
         option.textContent = i;
         select.appendChild(option);
-      }
-    }
-  </script>
-  <script>
-    function togglePasswordVisibility(formType) {
-      const passwordInput = document.getElementById('password-' + formType);
-      const eyeIcon = document.getElementById('eye-icon-' + formType);
-
-      if (passwordInput.type === 'password') {
-        passwordInput.type = 'text';
-        eyeIcon.classList.remove('bi-eye');
-        eyeIcon.classList.add('bi-eye-slash');
-      } else {
-        passwordInput.type = 'password';
-        eyeIcon.classList.remove('bi-eye-slash');
-        eyeIcon.classList.add('bi-eye');
       }
     }
   </script>

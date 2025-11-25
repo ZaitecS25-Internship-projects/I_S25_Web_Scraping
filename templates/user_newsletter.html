@@ -3,30 +3,13 @@
 
 {% block content %}
 <div class="col-md-9 mx-auto text-center mb-4">
-  <h2 class= "hero-title">📬 Gestión de Alertas</h2>
-
-  <!-- <div class="row">
-    <div class="col-md-3 mb-4">
-      <div class="list-group shadow-sm">
-        <a href="{{ url_for('user.configuracion_cuenta') }}" class="list-group-item list-group-item-action active"
-          data-bs-toggle="list">
-          <i class="bi bi-person-badge me-2"></i> Perfil
-        </a>
-        <a href="{{ url_for('user.configuracion_cuenta') }}" class="list-group-item list-group-item-action"
-          data-bs-toggle="list">
-          <i class="bi bi-shield-lock me-2"></i> Seguridad
-        </a>
-        <a href="{{ url_for('user.newsletter_prefs') }}" class="list-group-item list-group-item-action">
-          <i class="bi bi-envelope me-2"></i> Alertas / Email
-        </a>
-      </div>
-    </div> -->
+  <h2 class="hero-title">📬 Gestión de Alertas</h2>
 
   <div class="col-md-9 mx-auto">
 
     <div class="card shadow-sm mb-4">
       <div class="card-header bg-white py-3">
-        <h5 class="mb-0 text-primary">Suscripciones por Correo</h5>
+        <h5 class="mb-0 text-primary">Notificaciones por Correo</h5>
       </div>
       <div class="card-body">
         <p class="text-muted">
@@ -43,30 +26,54 @@
             </label>
           </div>
 
+          <hr class="my-4">
+
           <div class="form-check form-switch mb-3">
             <input class="form-check-input" type="checkbox" id="alerta_favoritos" name="alerta_favoritos" {% if
               prefs['alerta_favoritos'] %}checked{% endif %}>
             <label class="form-check-label" for="alerta_favoritos">
               <strong>Cambios en mis favoritas</strong>
-              <div class="text-muted small">Avísame si hay actualizaciones en mis oposiciones guardadas.</div>
+              <div class="text-muted small">Avísame si hay actualizaciones en mis departamentos seleccionados.</div>
             </label>
           </div>
-
-          <hr class="my-4">
-
-          <h6 class="mb-3">Filtrar resumen diario por departamento:</h6>
           <div class="mb-3">
-            <select class="form-select" name="departamento_filtro" aria-label="Seleccionar departamento">
-              <option value="Todos" {% if prefs['departamento_filtro']=='Todos' %}selected{% endif %}>
-                Todos los departamentos
-              </option>
-              {% for dept in departamentos %}
-              <option value="{{ dept }}" {% if prefs['departamento_filtro']==dept %}selected{% endif %}>
-                {{ dept }}
-              </option>
-              {% endfor %}
-            </select>
+            <!-- Botón del dropdown -->
+            <div class="dropdown">
+              <button class="btn btn-outline-secondary dropdown-toggle w-100" type="button" data-bs-toggle="dropdown">
+                Seleccionar departamentos
+              </button>
+
+              <!-- Contenido del dropdown -->
+              <div class="dropdown-menu p-3" style="max-height: 300px; overflow-y: auto;">
+
+                <!-- Checkbox: Todos -->
+                <div class="form-check">
+                  <input class="form-check-input dept-check" type="checkbox" value="Todos" id="dept_todos" {% if 'Todos'
+                    in prefs['departamento_filtro'] %}checked{% endif %}>
+                  <label class="form-check-label" for="dept_todos">
+                    Todos los departamentos
+                  </label>
+                </div>
+
+                <hr>
+
+                <!-- Checkbox por cada departamento -->
+                {% for dept in departamentos %}
+                <div class="form-check">
+                  <input class="form-check-input dept-check" type="checkbox" value="{{ dept }}"
+                    id="dept_{{ loop.index }}" {% if dept in prefs['departamento_filtro'] %}checked{% endif %}>
+                  <label class="form-check-label" for="dept_{{ loop.index }}">
+                    {{ dept }}
+                  </label>
+                </div>
+                {% endfor %}
+
+              </div>
+            </div>
+
             <div class="form-text">Este filtro también se aplica al botón de envío manual de abajo.</div>
+            <!-- Campo oculto para enviar los valores -->
+            <input type="hidden" name="departamento_filtro" id="departamento_filtro">
           </div>
 
           <div class="d-flex justify-content-end">
@@ -81,13 +88,14 @@
     <div class="card shadow-sm border-warning">
       <div class="card-body d-flex align-items-center justify-content-between">
         <div>
-          <h6 class="fw-bold mb-1"><i class="bi bi-send-check text-warning"></i> ¿Quieres probar tus alertas?</h6>
+          <h6 class="fw-bold mb-1"><i class="bi bi-send-check text-warning"></i> ¿Quieres recibir las alertas de hoy?
+          </h6>
           <small class="text-muted">Te enviaremos ahora mismo un resumen con las últimas oposiciones según tu
             filtro.</small>
         </div>
 
         <form method="POST" action="{{ url_for('user.enviar_resumen_ahora') }}">
-          <button type="submit" class="btn btn-outline-dark">
+          <button type="submit" class="btn btn-primary">
             Enviar Email Ahora
           </button>
         </form>
