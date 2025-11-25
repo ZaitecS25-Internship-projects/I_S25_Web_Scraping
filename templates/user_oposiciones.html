@@ -7,20 +7,19 @@
   <h2 class="mb-4 text-center hero-title">{{ titulo_pagina }}</h2>
 
   <div class="card mb-4 shadow-sm">
-    <div class="card-header bg-white">
-      <h5 class="card-title mb-0"><i class="bi bi-funnel"></i> Filtros de búsqueda</h5>
-    </div>
     <div class="card-body">
-      <form method="GET" action="{{ url_for('user.oposiciones_vigentes') }}">
+      <h5 class="card-title mb-3">Filtros de búsqueda</h5>
 
+      <form method="GET" action="{{ url_for('user.oposiciones_vigentes') }}">
         <div class="row g-3 mb-3">
           <div class="col-md-8">
-            <label for="busqueda" class="form-label">Palabras clave:</label>
+            <label for="busqueda" class="form-label">Buscar por palabras clave:</label>
             <input type="text" class="form-control" id="busqueda" name="busqueda" value="{{ busqueda or '' }}"
-              placeholder="Ej: Auxiliar, Administrativo, Informática...">
+              placeholder="Buscar en identificador, título, control...">
+            <small class="text-muted">Busca en: Identificador, Título y Control</small>
           </div>
           <div class="col-md-4">
-            <label for="provincia" class="form-label">Provincia:</label>
+            <label for="provincia" class="form-label">Filtrar por provincia:</label>
             <select class="form-select" id="provincia" name="provincia">
               <option value="">Todas las provincias</option>
               {% for prov in provincias %}
@@ -32,19 +31,6 @@
           </div>
         </div>
 
-          <div class="mb-3">
-            <label for="departamentos" class="form-label">Filtrar por Departamento:</label>
-            <select class="form-select" id="departamentos" name="departamentos">
-                <option value="">Todos los departamentos</option>
-                {% for dept in departamentos %}
-                  <option value="{{ dept['departamento'] }}" 
-                          {% if selected_departamentos and dept['departamento'] in selected_departamentos %}selected{% endif %}>
-                    {{ dept['departamento'] }}
-                  </option>
-                {% endfor %}
-            </select>
-          </div>
-
         <div class="row g-3">
           <div class="col-md-3">
             <label for="fecha_desde" class="form-label">Desde:</label>
@@ -54,17 +40,15 @@
             <label for="fecha_hasta" class="form-label">Hasta:</label>
             <input type="date" class="form-control" id="fecha_hasta" name="fecha_hasta" value="{{ fecha_hasta or '' }}">
           </div>
-          <div class="col-md-6 d-flex align-items-end gap-2">
-            <button type="submit" class="btn btn-primary flex-fill"><i class="bi bi-search"></i> Filtrar</button>
+          <div class="col-md-4 d-flex align-items-end gap-2">
+            <button type="submit" class="btn btn-primary flex-fill">Filtrar</button>
             <a href="{{ url_for('user.oposiciones_vigentes') }}" class="btn btn-outline-secondary flex-fill">Limpiar</a>
           </div>
         </div>
       </form>
 
-      <div class="mt-3 text-end">
-        <small class="text-muted badge bg-light text-dark border">
-          Página {{ page }} de {{ total_pages }} | Oposiciones totales: {{ total }}
-        </small>
+      <div class="mt-3">
+        <small class="text-muted">Total de registros: {{ total }}</small>
       </div>
     </div>
   </div>
@@ -87,35 +71,31 @@
                 {% if row['fecha'] == hoy %}nueva-oposicion{% endif %}
                 {% if row['id'] in visitadas %} visitada-oposicion{% endif %}
             ">
-              <td>{{ row['identificador'] }}</td>
-              
-              <td>
-                <div class="d-flex justify-content-between align-items-start">
-                    {% if row['url_html'] %}
-                        <a href="{{ row['url_html'] }}" target="_blank" 
-                           class="text-decoration-none text-dark link-visitada"
-                           data-id="{{ row['id'] }}"
-                           title="Ver en la web del BOE">
-                            {{ row['titulo'] }} <i class="bi bi-box-arrow-up-right text-muted small ms-1"></i>
-                        </a>
-                    {% else %}
-                        <span>{{ row['titulo'] }}</span>
-                    {% endif %}
-                    
-                    {% if user.is_authenticated %}
-                    <span style="margin-left: 10px;">
-                        <button type="button" 
-                                class="toggle-favorito-btn" 
-                                data-oposicion-id="{{ row['id'] }}" 
-                                aria-label="Marcar como favorito"
-                                style="border: none; background: none; cursor: pointer; color: orange;">
-                            <i class="bi {% if row['id'] in favoritas %}bi-star-fill{% else %}bi-star{% endif %}"
-                               title="{% if row['id'] in favoritas %}Quitar de Favoritos{% else %}Marcar como Favorito{% endif %}">
-                            </i>
-                        </button>
-                    </span>
-                    {% endif %}
-                </div>
+          <td>{{ row['identificador'] }}</td>
+
+          <td>
+            <div class="d-flex justify-content-between align-items-start">
+              {% if row['url_html'] %}
+              <a href="{{ row['url_html'] }}" target="_blank" class="text-decoration-none text-dark link-visitada"
+                data-id="{{ row['id'] }}" title="Ver en la web del BOE">
+                {{ row['titulo'] }} <i class="bi bi-box-arrow-up-right text-muted small ms-1"></i>
+              </a>
+              {% else %}
+              <span>{{ row['titulo'] }}</span>
+              {% endif %}
+
+              {% if user.is_authenticated %}
+              <span style="margin-left: 10px;">
+                <button type="button" class="toggle-favorito-btn" data-oposicion-id="{{ row['id'] }}"
+                  aria-label="Marcar como favorito"
+                  style="border: none; background: none; cursor: pointer; color: orange;">
+                  <i class="bi {% if row['id'] in favoritas %}bi-star-fill{% else %}bi-star{% endif %}"
+                    title="{% if row['id'] in favoritas %}Quitar de Favoritos{% else %}Marcar como Favorito{% endif %}">
+                  </i>
+                </button>
+              </span>
+              {% endif %}
+            </div>
 
             <div class="mt-2 d-flex flex-column align-items-start gap-1">
               {% if row['fecha'] == hoy %}
@@ -127,8 +107,8 @@
             </div>
           </td>
 
-              <td><small class="fw-bold text-primary">{{ row['departamento'] }}</small></td>
-              <td>{{ row['control'] }}</td>
+          <td><small class="fw-bold text-primary">{{ row['departamento'] }}</small></td>
+          <td>{{ row['control'] }}</td>
 
           <td>
             {% if row['url_pdf'] %}
@@ -195,58 +175,58 @@
   </nav>
   {% endif %}
 
-  </div>
+</div>
 
-  <script>
+<!-- <script>
   document.addEventListener('DOMContentLoaded', () => {
     // Favoritos
     document.querySelectorAll('.toggle-favorito-btn').forEach(button => {
-        button.addEventListener('click', function() {
-            const oposicionId = this.dataset.oposicionId;
-            if (!oposicionId) return;
+      button.addEventListener('click', function () {
+        const oposicionId = this.dataset.oposicionId;
+        if (!oposicionId) return;
 
-            const url = `/toggle_favorito/${oposicionId}`;
-            const icon = this.querySelector('i');
-            icon.style.transform = "scale(1.2)";
-            setTimeout(() => icon.style.transform = "scale(1)", 200);
+        const url = `/toggle_favorito/${oposicionId}`;
+        const icon = this.querySelector('i');
+        icon.style.transform = "scale(1.2)";
+        setTimeout(() => icon.style.transform = "scale(1)", 200);
 
-            fetch(url, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.ok) {
-                    if (data.is_favorite) {
-                        icon.classList.remove('bi-star');
-                        icon.classList.add('bi-star-fill'); 
-                        icon.title = "Quitar de Favoritos";
-                    } else {
-                        icon.classList.remove('bi-star-fill');
-                        icon.classList.add('bi-star');
-                        icon.title = "Marcar como Favorito";
-                    }
-                } else {
-                    alert("Error al actualizar favoritos.");
-                }
-            })
-            .catch(error => console.error('Error:', error));
-        });
+        fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+        })
+          .then(response => response.json())
+          .then(data => {
+            if (data.ok) {
+              if (data.is_favorite) {
+                icon.classList.remove('bi-star');
+                icon.classList.add('bi-star-fill');
+                icon.title = "Quitar de Favoritos";
+              } else {
+                icon.classList.remove('bi-star-fill');
+                icon.classList.add('bi-star');
+                icon.title = "Marcar como Favorito";
+              }
+            } else {
+              alert("Error al actualizar favoritos.");
+            }
+          })
+          .catch(error => console.error('Error:', error));
+      });
     });
-    
+
     // PDF y Título (Visitada)
     document.querySelectorAll('.btn-pdf, .link-visitada').forEach(element => {
       element.addEventListener('click', function (e) {
         const id = this.dataset.id;
         const tr = this.closest('tr');
         const beaconUrl = `/marcar_visitada/${id}`;
-        
+
         if (navigator.sendBeacon) {
-            const payload = JSON.stringify({ts: new Date().toISOString()});
-            const blob = new Blob([payload], { type: 'application/json' });
-            navigator.sendBeacon(beaconUrl, blob);
+          const payload = JSON.stringify({ ts: new Date().toISOString() });
+          const blob = new Blob([payload], { type: 'application/json' });
+          navigator.sendBeacon(beaconUrl, blob);
         } else {
-            fetch(beaconUrl, { method: 'POST' }).catch(err => console.warn(err));
+          fetch(beaconUrl, { method: 'POST' }).catch(err => console.warn(err));
         }
 
         if (tr) {
@@ -262,5 +242,5 @@
       });
     });
   });
-  </script>
+</script> -->
 {% endblock %}
