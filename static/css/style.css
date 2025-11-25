@@ -131,14 +131,15 @@ html[data-theme="dark"] .navbar .dropdown-menu .dropdown-item:hover {
    BOTONES
 ========================================================= */
 .btn,
-.btn-volver,
 .btn-success,
-.btn-primary {
+.btn-primary,
+.btn-outline-secondary {
     font-weight: 600;
     border-radius: 10px;
     padding: 0.65rem 1.5rem;
     transition: all 0.3s ease;
     border: none;
+    color: #fff;
 }
 
 .btn-success {
@@ -165,14 +166,13 @@ html[data-theme="dark"] .navbar .dropdown-menu .dropdown-item:hover {
     box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
 }
 
-.btn.btn-outline-secondary {
-    color: #fff;
+.btn-outline-secondary {
     background: linear-gradient(135deg, #517098, #344760);
     border: none;
     padding: 0.65rem 1.5rem;
 }
 
-.btn.btn-outline-secondary:hover {
+.btn-outline-secondary:hover {
     background: linear-gradient(135deg, #688fc2, #516e94);
     transform: translateY(-2px);
     box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
@@ -585,7 +585,6 @@ html[data-theme="dark"] {
     --bg-table-header: #3b3f54;
     --bg-input: #2c2f47;
     --color-text: #e5e7eb;
-    --color-accent: #60a5fa;
     --color-badge-nuevo: #facc15;
     --color-badge-visitada: #3b82f6;
     --color-footer: #e5e7eb;
@@ -806,18 +805,8 @@ html[data-theme="dark"] .table .badge-visitada {
 html[data-theme="dark"] .table .btn,
 html[data-theme="dark"] .table button,
 html[data-theme="dark"] .table input[type="submit"],
-html[data-theme="dark"] .btn-limpiar {
+html[data-theme="dark"] .btn-primary .btn-outline-secondary {
     color: #fff !important;
-}
-
-html[data-theme="dark"] .btn-outline-secondary {
-    color: #fff !important;
-    border-color: #fff !important;
-}
-
-html[data-theme="dark"] .btn-outline-secondary:hover {
-    background: #fff !important;
-    color: #1e1e2f !important;
 }
 
 .badge-visitada {
