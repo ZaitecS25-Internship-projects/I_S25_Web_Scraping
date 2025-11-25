@@ -14,7 +14,6 @@ class User(UserMixin):
         genero,
         telefono=None,
         foto_perfil=None,
-        dni=None,
         fecha_nacimiento=None,
         nacionalidad=None,
         direccion=None,
@@ -36,7 +35,6 @@ class User(UserMixin):
         self.genero = genero
         self.telefono = telefono
         self.foto_perfil = foto_perfil
-        self.dni = dni
         self.fecha_nacimiento = fecha_nacimiento
         self.nacionalidad = nacionalidad
         self.direccion = direccion
@@ -56,7 +54,7 @@ class User(UserMixin):
         row = db.execute(
             """
             SELECT id, email, name, apellidos, age, genero, telefono, foto_perfil,
-                   dni, fecha_nacimiento, nacionalidad, direccion, codigo_postal,
+                   fecha_nacimiento, nacionalidad, direccion, codigo_postal,
                    ciudad, provincia, nivel_estudios, titulacion, situacion_laboral,
                    idiomas, discapacidad, porcentaje_discapacidad
             FROM users WHERE id = ?
@@ -73,7 +71,6 @@ class User(UserMixin):
                 row["genero"],
                 row["telefono"],
                 row["foto_perfil"],
-                row["dni"],
                 row["fecha_nacimiento"],
                 row["nacionalidad"],
                 row["direccion"],
