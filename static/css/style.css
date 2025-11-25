@@ -189,38 +189,12 @@ html[data-theme="dark"] .navbar .dropdown-menu .dropdown-item:hover {
     background: #fff;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
-
-.card:hover {
-    transform: translateY(-10px) scale(1.02);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-}
-
-.card-img-top {
-    width: 100%;
-    height: auto;
-    object-fit: cover;
-    transition: transform 0.3s ease;
-}
-
-.card:hover .card-img-top {
-    transform: scale(1.05);
-}
-
-.card-body {
-    text-align: center;
-    padding: 1.5rem;
-}
-
-.card-title {
-    color: #002b5b;
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-    transition: color 0.3s ease;
-}
-
-.card:hover .card-title {
-    color: #004aad;
-}
+.card:hover { transform: translateY(-10px) scale(1.02); box-shadow: 0 10px 25px rgba(0,0,0,0.2);}
+.card-img-top { width:100%; height:auto; object-fit:cover; transition: transform 0.3s ease; }
+.card:hover .card-img-top { transform: scale(1.05);}
+.card-body { text-align:center; padding:1.5rem;}
+.card-title { color:#002b5b; font-weight:600; margin-bottom:0.5rem; transition:color 0.3s;}
+.card:hover .card-title { color:#004aad; }
 
 /* Espacio entre últimas tarjetas y footer */
 .container,
@@ -845,4 +819,5 @@ html[data-theme="dark"] .btn-outline-secondary:hover {
     border-radius: 8px;
     padding: 3px 8px;
     font-size: 0.8rem;
-    margin-left: 6px;
+    margin-left: 6px ;
+}
