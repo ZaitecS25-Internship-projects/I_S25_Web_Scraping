@@ -172,6 +172,7 @@ def oposiciones_vigentes():
         favoritas=favoritas,
         hoy=datetime.today().strftime("%Y%m%d"),
         titulo_pagina="📢 Oposiciones Vigentes",
+        total=total
     )
 
 

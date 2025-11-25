@@ -23,6 +23,7 @@ def index():
         print(f"Error al actualizar datos automáticamente: {e}")
     db = get_boe_db()
     hoy = datetime.today().strftime("%Y%m%d")
+    fecha_mostrar = datetime.today().strftime("%d/%m/%Y")
     deps = db.execute(
         """
         SELECT DISTINCT departamento
@@ -32,7 +33,7 @@ def index():
         """,
         (hoy,),
     ).fetchall()
-    return render_template("index.html", departamentos=deps)
+    return render_template("index.html", departamentos=deps, fecha_hoy=fecha_mostrar)
 
 
 @main_bp.route("/departamento/<nombre>")
@@ -63,8 +64,8 @@ def mostrar_departamento(nombre):
     # Filtro por provincia (opcional)
     if provincia:
         sql += " AND provincia = ?"
-        params.append(provincia)
-
+        params.append(provincia) 
+        
     # Orden + paginación
     if orden == "fecha_asc":
         order_direction = "ASC"
@@ -126,6 +127,7 @@ def mostrar_departamento(nombre):
         hoy=hoy,
         visitadas=visitadas,
         favoritas=favoritas,
+        total=total
     )
 
 

@@ -27,7 +27,7 @@ body {
 .navbar {
     background: linear-gradient(135deg, #002b5b 0%, #004aad 100%);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    padding: 1rem 0;
+    padding: 0.5rem 0;
     animation: slideDownFade 0.8s ease-out;
 }
 
@@ -43,7 +43,6 @@ body {
     }
 }
 
-/* Dropdown "Mi panel" oscuro compacto */
 html[data-theme="dark"] .navbar .dropdown-menu {
     background-color: #161b22 !important;
     color: #e5e7eb !important;
@@ -54,7 +53,6 @@ html[data-theme="dark"] .navbar .dropdown-menu .dropdown-item:hover {
     background-color: #1f242c !important;
     color: #60a5fa !important;
 }
-
 
 /* =========================================================
    HERO
@@ -138,7 +136,7 @@ html[data-theme="dark"] .navbar .dropdown-menu .dropdown-item:hover {
 .btn-primary {
     font-weight: 600;
     border-radius: 10px;
-    padding: 0.75rem 1.5rem;
+    padding: 0.65rem 1.5rem;
     transition: all 0.3s ease;
     border: none;
 }
@@ -179,7 +177,6 @@ html[data-theme="dark"] .navbar .dropdown-menu .dropdown-item:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
 }
-
 
 /* =========================================================
    TARJETAS
@@ -234,13 +231,13 @@ html[data-theme="dark"] .navbar .dropdown-menu .dropdown-item:hover {
 
 /* Nueva oposición */
 .nueva-oposicion {
-    background-color: #ffde8a !important;
-    transition: background-color 0.3s ease-in-out, transform 0.2s ease, box-shadow 0.3s ease-in-out;
+    background-color: #ffde8a;
     box-shadow: 0 0 10px rgba(255, 193, 7, 0.5);
+    transition: background-color 0.3s, transform 0.2s, box-shadow 0.3s;
 }
 
 .nueva-oposicion:hover {
-    background-color: #ffd54f !important;
+    background-color: #ffd54f;
     transform: scale(1.01);
     box-shadow: 0 0 15px rgba(255, 193, 7, 0.7);
 }
@@ -803,6 +800,42 @@ html[data-theme="dark"] .table .badge-nuevo {
 html[data-theme="dark"] .table .badge-visitada {
     background-color: #3b82f6 !important;
     color: #fff !important;
+}
+
+/* MODO OSCURO - COLOR DE TEXTO DE BOTONES*/
+html[data-theme="dark"] .table .btn,
+html[data-theme="dark"] .table button,
+html[data-theme="dark"] .table input[type="submit"],
+html[data-theme="dark"] .btn-limpiar {
+    color: #fff !important;
+}
+
+html[data-theme="dark"] .btn-outline-secondary {
+    color: #fff !important;
+    border-color: #fff !important;
+}
+
+html[data-theme="dark"] .btn-outline-secondary:hover {
+    background: #fff !important;
+    color: #1e1e2f !important;
+}
+
+/* MODO OSCURO - COLOR DE TEXTO DE BOTONES*/
+html[data-theme="dark"] .table .btn,
+html[data-theme="dark"] .table button,
+html[data-theme="dark"] .table input[type="submit"],
+html[data-theme="dark"] .btn-limpiar {
+    color: #fff !important;
+}
+
+html[data-theme="dark"] .btn-outline-secondary {
+    color: #fff !important;
+    border-color: #fff !important;
+}
+
+html[data-theme="dark"] .btn-outline-secondary:hover {
+    background: #fff !important;
+    color: #1e1e2f !important;
 }
 
 .badge-visitada {
