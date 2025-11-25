@@ -144,29 +144,52 @@ Define la estructura general de la aplicación:
 
 
   <!-- CRIS -->
-  <script> // Script para la gestión de la foto de perfil y visibilidad de contraseñas
-    // Previsualizar foto de perfil antes de subir
-    document.getElementById('foto_perfil').addEventListener('change', function (e) {
-      const file = e.target.files[0];
-      if (file) {
+  <script> // Scripts globales: gestión de fotos de perfil, contraseñas y formularios
+    
+    // ========== FOTO DE PERFIL ==========
+    function setupFotoPerfilPreview(inputId, previewTargetId) {
+      const input = document.getElementById(inputId);
+      if (!input) return;
+
+      input.addEventListener('change', function (e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
         const reader = new FileReader();
         reader.onload = function (event) {
-          const container = document.querySelector('.position-relative');
-          const img = container.querySelector('img');
-          const placeholder = container.querySelector('.rounded-circle.d-flex');
-
-          if (img) {
-            img.src = event.target.result;
-          } else if (placeholder) {
-            placeholder.outerHTML = `<img src="${event.target.result}" alt="Foto de perfil" class="rounded-circle" style="width: 120px; height: 120px; object-fit: cover; border: 3px solid #0d6efd;">`;
+          const imgHTML = `<img src="${event.target.result}" alt="Foto de perfil" class="rounded-circle" 
+                          style="width: 120px; height: 120px; object-fit: cover; border: 3px solid #0d6efd;">`;
+          
+          if (previewTargetId) {
+            // Para register.html con contenedor específico
+            const container = document.getElementById(previewTargetId);
+            if (container) container.innerHTML = imgHTML;
+          } else {
+            // Para user_configuracion.html (buscar en contenedor padre)
+            const container = input.closest('.text-center').querySelector('.position-relative');
+            if (container) {
+              const img = container.querySelector('img');
+              const placeholder = container.querySelector('.rounded-circle.d-flex');
+              
+              if (img) {
+                img.src = event.target.result;
+              } else if (placeholder) {
+                placeholder.outerHTML = imgHTML;
+              }
+            }
           }
         };
         reader.readAsDataURL(file);
-      }
-    });
+      });
+    }
+
+    // Inicializar previsualizaciones
+    setupFotoPerfilPreview('foto_perfil'); // user_configuracion.html
+    setupFotoPerfilPreview('foto_perfil_register', 'previewContainer'); // register.html
 
 
-    // Función universal para mostrar/ocultar contraseñas
+    // ========== VISIBILIDAD DE CONTRASEÑAS ==========
+    
     function togglePasswordVisibility(fieldId) {
       // Soporta múltiples formatos de IDs
       let passwordField = document.getElementById('password-' + fieldId);
@@ -188,35 +211,18 @@ Define la estructura general de la aplicación:
         }
       }
     }
-  </script>
-  <script> // Lógica para el formulario de registro, visibilidad contraseña y foto de perfil
+
+
+    // ========== FORMULARIO DE REGISTRO ==========
     // Generar opciones de edad (18-67 años)
-    const select = document.getElementById("edad");
-    if (select) {
+    const selectEdad = document.getElementById("edad");
+    if (selectEdad) {
       for (let i = 18; i <= 67; i++) {
         const option = document.createElement("option");
         option.value = i;
         option.textContent = i;
-        select.appendChild(option);
+        selectEdad.appendChild(option);
       }
-    }
-
-    // Previsualizar foto de perfil
-    const fotoPerfilInput = document.getElementById('foto_perfil_register');
-    if (fotoPerfilInput) {
-      fotoPerfilInput.addEventListener('change', function (e) {
-        const file = e.target.files[0];
-        if (file) {
-          const reader = new FileReader();
-          reader.onload = function (event) {
-            const previewContainer = document.getElementById('previewContainer');
-            if (previewContainer) {
-              previewContainer.innerHTML = `<img src="${event.target.result}" alt="Preview" class="rounded-circle" style="width: 120px; height: 120px; object-fit: cover; border: 3px solid #0d6efd;">`;
-            }
-          };
-          reader.readAsDataURL(file);
-        }
-      });
     }
   </script>
 
