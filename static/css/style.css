@@ -157,6 +157,10 @@ html[data-theme="dark"] .navbar .dropdown-menu .dropdown-item:hover {
 .card:hover .card-title { color:#004aad; }
 
 
+main, .content-wrapper, .container, .container-fluid {
+    padding-bottom: 40px !important;
+}
+
 /* =========================================================
    NUEVA OPOSICIÓN
 ========================================================= */
