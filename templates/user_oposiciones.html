@@ -15,8 +15,7 @@
           <div class="col-md-8">
             <label for="busqueda" class="form-label">Buscar por palabras clave:</label>
             <input type="text" class="form-control" id="busqueda" name="busqueda" value="{{ busqueda or '' }}"
-              placeholder="Buscar en identificador, título, control...">
-            <small class="text-muted">Busca en: Identificador, Título y Control</small>
+              placeholder="Buscar por identificador, título, control...">
           </div>
           <div class="col-md-4">
             <label for="provincia" class="form-label">Filtrar por provincia:</label>
@@ -40,9 +39,41 @@
             <label for="fecha_hasta" class="form-label">Hasta:</label>
             <input type="date" class="form-control" id="fecha_hasta" name="fecha_hasta" value="{{ fecha_hasta or '' }}">
           </div>
-          <div class="col-md-4 d-flex align-items-end gap-2">
-            <button type="submit" class="btn btn-primary flex-fill">Filtrar</button>
-            <a href="{{ url_for('user.oposiciones_vigentes') }}" class="btn btn-outline-secondary flex-fill">Limpiar</a>
+          <!-- Filtro por departamentos -->
+          <div class="col-md-6">
+            <label class="form-label">Departamentos:</label>
+            <div class="dropup">
+              <button class="btn btn-tertiary  dropdown-toggle w-100 text-start" type="button"
+                id="departamentosFiltroBtn" data-bs-toggle="dropdown" aria-expanded="false">
+                {% if selected_departamentos %}
+                {{ selected_departamentos|length }} seleccionados
+                {% else %}
+                Todos los departamentos
+                {% endif %}
+              </button>
+              <div class="dropdown-menu p-3" aria-labelledby="departamentosFiltroBtn"
+                style="max-height: 190px; overflow-y: auto;">
+                {% for dept in departamentos %}
+                <div class="form-check">
+                  <input class="form-check-input dept-check" type="checkbox" name="departamentos"
+                    value="{{ dept['departamento'] }}" id="f_dept_{{ loop.index }}" {% if dept['departamento'] in
+                    selected_departamentos %}checked{% endif %}>
+                  <label class="form-check-label" for="f_dept_{{ loop.index }}">{{ dept['departamento'] }}</label>
+                </div>
+                {% endfor %}
+              </div>
+            </div>
+            <div class="form-text">Selecciona uno o varios departamentos para filtrar los resultados.</div>
+            <!-- Hidden input (sin name) para que el script global de base.html no falle al buscar #departamento_filtro -->
+            <input type="hidden" id="departamento_filtro">
+          </div>
+        </div>
+
+        <div class="row g-3 mt-2">
+          <div class="col-12 d-flex justify-content-center gap-2">
+            <button type="submit" class="btn btn-primary flex-fill" style="max-width: 150px;">Filtrar</button>
+            <a href="{{ url_for('user.oposiciones_vigentes') }}" class="btn btn-outline-secondary flex-fill"
+              style="max-width: 150px;">Limpiar</a>
           </div>
         </div>
       </form>

@@ -122,7 +122,7 @@ Define la estructura general de la aplicación:
     <p>© 2025 Oposiciones BOE</p>
   </footer>
 
-  <script> // Script para gestionar el filtro de departamentos en las alertas
+  <script> // Script para gestionar el filtro de departamentos en las alertas por correo
     document.addEventListener("DOMContentLoaded", function () {
       const hiddenInput = document.getElementById("departamento_filtro");
       const checkboxes = document.querySelectorAll(".dept-check");
@@ -139,6 +139,21 @@ Define la estructura general de la aplicación:
 
       updateHidden(); // Inicializar
     });
+  </script>
+  <script> // Script para actualizar el texto del botón de filtro de departamentos en vigentes y favoritas
+    (function () {
+      const btn = document.getElementById('departamentosFiltroBtn');
+      const checks = () => Array.from(document.querySelectorAll('input[name="departamentos"]'));
+      function updateBtn() {
+        const c = checks().filter(i => i.checked);
+        if (!btn) return;
+        if (c.length === 0) btn.innerText = 'Todos los departamentos';
+        else if (c.length === 1) btn.innerText = c[0].value;
+        else btn.innerText = c.length + ' seleccionados';
+      }
+      document.addEventListener('change', function (e) { if (e.target && e.target.name === 'departamentos') updateBtn(); });
+      document.addEventListener('DOMContentLoaded', updateBtn);
+    })();
   </script>
   <!-- CRIS -->
   <script> // Scripts globales: gestión de fotos de perfil, contraseñas y formularios
