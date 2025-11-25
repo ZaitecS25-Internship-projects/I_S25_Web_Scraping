@@ -13,8 +13,7 @@ login_manager = LoginManager()
 def create_app():
     app = Flask(
         __name__,
-        template_folder=os.path.join(
-            os.path.dirname(__file__), "..", "templates"),
+        template_folder=os.path.join(os.path.dirname(__file__), "..", "templates"),
         static_folder=os.path.join(os.path.dirname(__file__), "..", "static"),
     )
     app.config.from_object(Config)
@@ -25,9 +24,7 @@ def create_app():
     login_manager.login_view = "auth.login"
 
     # Crear directorio para fotos de perfil
-    upload_folder = os.path.join(
-        app.static_folder, "uploads", "profiles"
-    )
+    upload_folder = os.path.join(app.static_folder, "uploads", "profiles")
     os.makedirs(upload_folder, exist_ok=True)
     app.config["UPLOAD_FOLDER"] = upload_folder
 
@@ -38,6 +35,7 @@ def create_app():
         migrate_users_db()
 
     from .db import teardown_appcontext
+
     app.teardown_appcontext(teardown_appcontext)
 
     # ==== Tema claro / oscuro ====
@@ -88,55 +86,61 @@ def create_app():
     def resaltar_titulo(titulo):
         """Resalta palabras clave importantes en el título de las oposiciones"""
         import re
+
         if not titulo:
             return titulo
-        
+
         # Palabras clave a resaltar
         palabras_clave = [
-            r'\bconvocatoria\b',
-            r'\boposiciones?\b',
-            r'\bplazas?\b',
-            r'\bacceso\b',
-            r'\bproceso selectivo\b',
-            r'\bfuncionarios?\b',
-            r'\bcuerpo\b',
-            r'\bescala\b',
-            r'\bgrupo [A-C][12]?\b',
-            r'\bturnos?\b',
-            r'\blibre\b',
-            r'\bpromoci[oó]n interna\b',
-            r'\bdiscapacidad\b',
-            r'\breserva\b',
-            r'\bnombramientos?\b',
-            r'\bceses?\b',
-            r'\bampliac[ió]n\b',
-            r'\bmodificac[ió]n\b',
-            r'\banulaci[oó]n\b',
-            r'\bcorrecc[ió]n\b',
-            r'\bpresentac[ió]n\b',
-            r'\badmisi[oó]n\b',
-            r'\bexclusi[oó]n\b',
-            r'\blista[s]?\b',
-            r'\bsolicitantes?\b',
-            r'\badmitidos?\b',
-            r'\bexcluidos?\b',
-            r'\btribunal\b',
-            r'\bcalificac[ió]n\b',
-            r'\bpruebas?\b',
-            r'\bejercicio[s]?\b',
-            r'\bexamen\b',
-            r'\bresultados?\b',
-            r'\bpuntuac[ió]n\b',
-            r'\badjudicac[ió]n\b',
-            r'\bdestinos?\b',
-            r'\btraslados?\b'
+            r"\bconvocatoria\b",
+            r"\boposiciones?\b",
+            r"\bplazas?\b",
+            r"\bacceso\b",
+            r"\bproceso selectivo\b",
+            r"\bfuncionarios?\b",
+            r"\bcuerpo\b",
+            r"\bescala\b",
+            r"\bgrupo [A-C][12]?\b",
+            r"\bturnos?\b",
+            r"\blibre\b",
+            r"\bpromoci[oó]n interna\b",
+            r"\bdiscapacidad\b",
+            r"\breserva\b",
+            r"\bnombramientos?\b",
+            r"\bceses?\b",
+            r"\bampliac[ió]n\b",
+            r"\bmodificac[ió]n\b",
+            r"\banulaci[oó]n\b",
+            r"\bcorrecc[ió]n\b",
+            r"\bpresentac[ió]n\b",
+            r"\badmisi[oó]n\b",
+            r"\bexclusi[oó]n\b",
+            r"\blista[s]?\b",
+            r"\bsolicitantes?\b",
+            r"\badmitidos?\b",
+            r"\bexcluidos?\b",
+            r"\btribunal\b",
+            r"\bcalificac[ió]n\b",
+            r"\bpruebas?\b",
+            r"\bejercicio[s]?\b",
+            r"\bexamen\b",
+            r"\bresultados?\b",
+            r"\bpuntuac[ió]n\b",
+            r"\badjudicac[ió]n\b",
+            r"\bdestinos?\b",
+            r"\btraslados?\b",
         ]
-        
+
         # Reemplazar cada palabra clave con versión en negrita
         resultado = titulo
         for patron in palabras_clave:
-            resultado = re.sub(patron, lambda m: f'<strong>{m.group()}</strong>', resultado, flags=re.IGNORECASE)
-        
+            resultado = re.sub(
+                patron,
+                lambda m: f"<strong>{m.group()}</strong>",
+                resultado,
+                flags=re.IGNORECASE,
+            )
+
         return resultado
 
     # Registrar blueprints
