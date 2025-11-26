@@ -94,16 +94,6 @@
                         value="{{ user.telefono or '' }}" placeholder="+34 600 000 000">
                     </div>
                   </div>
-                  <div class="col-md-6">
-                    <label for="genero" class="form-label fw-bold">Género</label>
-                    <div class="input-group">
-                      <span class="input-group-text"><i class="bi bi-gender-ambiguous"></i></span>
-                      <select class="form-select" id="genero" name="genero">
-                        <option value="Hombre" {% if user.genero=='Hombre' %}selected{% endif %}>Hombre</option>
-                        <option value="Mujer" {% if user.genero=='Mujer' %}selected{% endif %}>Mujer</option>
-                      </select>
-                    </div>
-                  </div>
                 </div>
 
                 <hr class="my-4">

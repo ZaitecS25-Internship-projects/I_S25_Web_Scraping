@@ -24,83 +24,66 @@ Define la estructura general de la aplicación:
 
 <body class="bg-light d-flex flex-column min-vh-100">
 
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm mi-navbar animated-navbar sticky-top">
-    <div class="container">
-      <a class="navbar-brand fs-4 d-flex align-items-center gap-2" href="{{ url_for('main.index') }}">
-        <img src="{{ url_for('static', filename='img/logo-navbar.png') }}" alt="Oposiciones BOE" width="50" height="50"
-          style="object-fit: contain;">
-        Oposiciones BOE
+  <nav class="mi-navbar">
+    <div class="container-nav">
+      <a class="site-brand" href="{{ url_for('main.index') }}">
+        <img src="{{ url_for('static', filename='img/logo-navbar.png') }}" alt="Oposiciones BOE" class="logo-img">
+        <span>Oposiciones BOE</span>
       </a>
 
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
-        aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarContent">
-        <ul class="navbar-nav ms-auto align-items-center">
-          {% if user.is_authenticated %}
-          <li class="nav-item dropdown me-2">
-            <a class="nav-link dropdown-toggle text-white px-2 d-flex align-items-center" href="#" id="userMenuDropdown"
-              role="button" data-bs-toggle="dropdown" aria-expanded="false">
-              {% if user.foto_perfil %}
-              <img src="{{ user.foto_perfil }}" alt="Perfil" class="rounded-circle me-2"
-                style="width: 30px; height: 30px; object-fit: cover; border: 2px solid white;">
-              {% else %}
-              👤
-              {% endif %}
-              <span class="ms-1">{{ user.name or 'Mi panel' }}</span>
-            </a>
-            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenuDropdown">
-              <li>
-                <a class="dropdown-item" href="{{ url_for('user.oposiciones_vigentes') }}">
-                  📚 Oposiciones vigentes
-                </a>
-              </li>
-              <li>
-                <a class="dropdown-item" href="{{ url_for('user.oposiciones_favoritas') }}">
-                  ⭐ Mis Favoritas
-                </a>
-              </li>
-              <li>
-                <a class="dropdown-item" href="{{ url_for('user.newsletter_prefs') }}">
-                  🔔 Alertas por correo
-                </a>
-              </li>
-              <li>
-                <hr class="dropdown-divider">
-              </li>
-              <li>
-                <a class="dropdown-item" href="{{ url_for('user.configuracion_cuenta') }}">
-                  ⚙️ Configuración
-                </a>
-              </li>
-            </ul>
-          </li>
+      <div class="nav-right">
+        <button class="nav-toggler" id="navToggler" aria-label="Toggle navigation" aria-expanded="false">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
 
-          <li class="nav-item me-2">
-            <a href="{{ url_for('auth.logout') }}" class="btn btn-sm btn-danger">
-              🔓 Salir
-            </a>
-          </li>
-          {% else %}
-          <li class="nav-item me-2">
-            <a href="{{ url_for('auth.login') }}" class="btn btn-outline-light btn-sm">
-              Iniciar sesión
-            </a>
-          </li>
-          <li class="nav-item me-2">
-            <a href="{{ url_for('auth.register') }}" class="btn btn-success btn-sm">
-              Registrarse
-            </a>
-          </li>
-          {% endif %}
+        <div id="navbarContent" class="nav-collapse">
+          <ul class="nav-list">
+            {% if user.is_authenticated %}
+            <li class="nav-item user-menu">
+              <a class="user-link" href="#" id="userMenuDropdown" aria-haspopup="true" aria-expanded="false">
+                {% if user.foto_perfil %}
+                <img src="{{ user.foto_perfil }}" alt="Perfil" class="profile-img">
+                {% else %}
+                <span class="profile-emoji">👤</span>
+                {% endif %}
+                <span class="user-name">{{ user.name or 'Mi panel' }}</span>
+              </a>
+              <ul class="user-dropdown" role="menu" aria-labelledby="userMenuDropdown">
+                <li>
+                  <a class="user-dropdown-item" href="{{ url_for('user.oposiciones_vigentes') }}">📚 Oposiciones
+                    vigentes</a>
+                </li>
+                <li>
+                  <a class="user-dropdown-item" href="{{ url_for('user.oposiciones_favoritas') }}">⭐ Mis Favoritas</a>
+                </li>
+                <li>
+                  <a class="user-dropdown-item" href="{{ url_for('user.newsletter_prefs') }}">🔔 Alertas por correo</a>
+                </li>
+                <li class="dropdown-sep"></li>
+                <li>
+                  <a class="user-dropdown-item" href="{{ url_for('user.configuracion_cuenta') }}">⚙️ Configuración</a>
+                </li>
+              </ul>
+            </li>
+            <li class="nav-item">
+              <a href="{{ url_for('auth.logout') }}" class="btn-logout">🔓 Salir</a>
+            </li>
+            {% else %}
+            <li class="nav-item">
+              <a href="{{ url_for('auth.login') }}" class="btn-login">Iniciar sesión</a>
+            </li>
+            <li class="nav-item">
+              <a href="{{ url_for('auth.register') }}" class="btn-register">Registrarse</a>
+            </li>
+            {% endif %}
+          </ul>
+        </div>
 
-          <li class="nav-item">
-            <a href="{{ url_for('toggle_theme') }}" class="btn btn-outline-light btn-sm">
-              {% if theme == 'dark' %}🔆{% else %}🌓{% endif %}
-            </a>
-          </li>
-        </ul>
+        <a href="{{ url_for('toggle_theme') }}" class="btn-toggle-theme" aria-label="Toggle theme">
+          {% if theme == 'dark' %}🔆{% else %}🌓{% endif %}
+        </a>
       </div>
     </div>
   </nav>
@@ -122,7 +105,58 @@ Define la estructura general de la aplicación:
     <p>© 2025 Oposiciones BOE</p>
   </footer>
 
-  <script> // Script para gestionar el filtro de departamentos en las alertas
+  <script> // Script para el toggle del navbar en móvil y gestión del dropdown
+    document.addEventListener("DOMContentLoaded", function () {
+      const toggler = document.getElementById('navToggler');
+      const navCollapse = document.getElementById('navbarContent');
+      const userMenu = document.querySelector('.user-menu');
+      const userLink = document.getElementById('userMenuDropdown');
+
+      // Toggle del menú principal en móvil
+      if (toggler) {
+        toggler.addEventListener('click', function () {
+          this.classList.toggle('active');
+          navCollapse.classList.toggle('show');
+        });
+
+        // Cerrar menú cuando se hace click en un enlace
+        const navLinks = navCollapse.querySelectorAll('a:not(#userMenuDropdown)');
+        navLinks.forEach(link => {
+          link.addEventListener('click', function () {
+            toggler.classList.remove('active');
+            navCollapse.classList.remove('show');
+          });
+        });
+      }
+
+      // Toggle del dropdown de usuario
+      if (userLink) {
+        userLink.addEventListener('click', function (e) {
+          e.preventDefault();
+          userMenu.classList.toggle('show');
+        });
+      }
+
+      // Cerrar dropdown/menu al hacer click fuera
+      document.addEventListener('click', function (e) {
+        const target = e.target;
+
+        // Cerrar dropdown de usuario si el click no está dentro
+        if (userMenu && !userMenu.contains(target)) {
+          userMenu.classList.remove('show');
+        }
+
+        // Cerrar menú colapsado en móvil si el click no está dentro del navCollapse ni sobre el toggler
+        if (navCollapse && toggler) {
+          if (!navCollapse.contains(target) && !toggler.contains(target)) {
+            navCollapse.classList.remove('show');
+            toggler.classList.remove('active');
+          }
+        }
+      });
+    });
+  </script>
+  <script> // Script para gestionar el filtro de departamentos en las alertas por correo
     document.addEventListener("DOMContentLoaded", function () {
       const hiddenInput = document.getElementById("departamento_filtro");
       const checkboxes = document.querySelectorAll(".dept-check");
@@ -140,12 +174,24 @@ Define la estructura general de la aplicación:
       updateHidden(); // Inicializar
     });
   </script>
-
-
-
+  <script> // Script para actualizar el texto del botón de filtro de departamentos en vigentes y favoritas
+    (function () {
+      const btn = document.getElementById('departamentosFiltroBtn');
+      const checks = () => Array.from(document.querySelectorAll('input[name="departamentos"]'));
+      function updateBtn() {
+        const c = checks().filter(i => i.checked);
+        if (!btn) return;
+        if (c.length === 0) btn.innerText = 'Todos los departamentos';
+        else if (c.length === 1) btn.innerText = c[0].value;
+        else btn.innerText = c.length + ' seleccionados';
+      }
+      document.addEventListener('change', function (e) { if (e.target && e.target.name === 'departamentos') updateBtn(); });
+      document.addEventListener('DOMContentLoaded', updateBtn);
+    })();
+  </script>
   <!-- CRIS -->
   <script> // Scripts globales: gestión de fotos de perfil, contraseñas y formularios
-    
+
     // ========== FOTO DE PERFIL ==========
     function setupFotoPerfilPreview(inputId, previewTargetId) {
       const input = document.getElementById(inputId);
@@ -159,7 +205,7 @@ Define la estructura general de la aplicación:
         reader.onload = function (event) {
           const imgHTML = `<img src="${event.target.result}" alt="Foto de perfil" class="rounded-circle" 
                           style="width: 120px; height: 120px; object-fit: cover; border: 3px solid #0d6efd;">`;
-          
+
           if (previewTargetId) {
             // Para register.html con contenedor específico
             const container = document.getElementById(previewTargetId);
@@ -170,7 +216,7 @@ Define la estructura general de la aplicación:
             if (container) {
               const img = container.querySelector('img');
               const placeholder = container.querySelector('.rounded-circle.d-flex');
-              
+
               if (img) {
                 img.src = event.target.result;
               } else if (placeholder) {
@@ -189,14 +235,14 @@ Define la estructura general de la aplicación:
 
 
     // ========== VISIBILIDAD DE CONTRASEÑAS ==========
-    
+
     function togglePasswordVisibility(fieldId) {
       // Soporta múltiples formatos de IDs
       let passwordField = document.getElementById('password-' + fieldId);
       if (!passwordField) {
         passwordField = document.getElementById(fieldId + '_password');
       }
-      
+
       const eyeIcon = document.getElementById('eye-icon-' + fieldId);
 
       if (passwordField && eyeIcon) {

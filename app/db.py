@@ -16,7 +16,8 @@ def get_boe_db():
 
 def init_boe_db():
     db = get_boe_db()
-    db.execute("""
+    db.execute(
+        """
         CREATE TABLE IF NOT EXISTS oposiciones (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             identificador TEXT,
@@ -28,11 +29,12 @@ def init_boe_db():
             fecha TEXT,
             provincia TEXT
         )
-    """)
+    """
+    )
+    db.execute("CREATE INDEX IF NOT EXISTS idx_oposiciones_fecha ON oposiciones(fecha)")
     db.execute(
-        "CREATE INDEX IF NOT EXISTS idx_oposiciones_fecha ON oposiciones(fecha)")
-    db.execute(
-        "CREATE INDEX IF NOT EXISTS idx_oposiciones_departamento ON oposiciones(departamento)")
+        "CREATE INDEX IF NOT EXISTS idx_oposiciones_departamento ON oposiciones(departamento)"
+    )
     db.commit()
 
 
@@ -49,7 +51,8 @@ def get_users_db():
 
 def init_users_db():
     db = get_users_db()
-    db.execute("""
+    db.execute(
+        """
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             email TEXT UNIQUE,
@@ -57,14 +60,15 @@ def init_users_db():
             name TEXT,
             apellidos TEXT,
             age INTEGER,
-            genero TEXT,
             telefono TEXT,
             foto_perfil TEXT,
             nivel_estudios TEXT,
             titulacion TEXT
         )
-    """)
-    db.execute("""
+    """
+    )
+    db.execute(
+        """
         CREATE TABLE IF NOT EXISTS visitas (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id INTEGER NOT NULL,
@@ -72,8 +76,10 @@ def init_users_db():
             fecha_visita TEXT NOT NULL,
             UNIQUE(user_id, oposicion_id)
         )
-    """)
-    db.execute("""
+    """
+    )
+    db.execute(
+        """
         CREATE TABLE IF NOT EXISTS favoritas (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id INTEGER NOT NULL,
@@ -81,15 +87,18 @@ def init_users_db():
             fecha_favorito TEXT NOT NULL,
             UNIQUE(user_id, oposicion_id)
         )
-    """)
-    db.execute("""
+    """
+    )
+    db.execute(
+        """
         CREATE TABLE IF NOT EXISTS suscripciones (
             user_id INTEGER PRIMARY KEY,
             alerta_diaria INTEGER DEFAULT 0,
             alerta_favoritos INTEGER DEFAULT 0,
             departamento_filtro TEXT
         )
-    """)
+    """
+    )
     db.commit()
 
 
