@@ -631,7 +631,7 @@ h2.titulo-registro+form input[type="radio"] {
 /* =========================================================
    RESPONSIVE
 ========================================================= */
-@media (max-width: 2500px) and (min-width: 993px) {
+@media (min-width: 993px) {
 
     /* Dark-mode: make navbar and its buttons visually uniform (transparent buttons) */
     html[data-theme="dark"] .mi-navbar .container-nav,

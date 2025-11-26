@@ -414,11 +414,12 @@ def enviar_resumen_ahora():
     users_db = get_users_db()
     user = current_user
 
+    # 1. Obtener preferencias guardadas
     prefs = users_db.execute(
         "SELECT * FROM suscripciones WHERE user_id = ?", (user.id,)
     ).fetchone()
 
-    dept_filter = (
+    dept_filter_str = (
         prefs["departamento_filtro"]
         if prefs and prefs["departamento_filtro"]
         else "Todos"
@@ -429,13 +430,23 @@ def enviar_resumen_ahora():
     sql = "SELECT * FROM oposiciones WHERE fecha >= ?"
     params = [fecha_limite]
 
-    if dept_filter != "Todos":
-        sql += " AND departamento = ?"
-        params.append(dept_filter)
+    # 🔴 CORRECCIÓN DE LIMPIEZA (Crucial para arreglar tu error)
+    if dept_filter_str and dept_filter_str != "Todos":
+        # 1. Limpiamos caracteres 'basura' ([ ] ' ") que puedan haber quedado en la BD
+        clean_str = dept_filter_str.replace("[", "").replace("]", "").replace("'", "").replace('"', "")
+        
+        # 2. Separamos por comas
+        lista_depts = [d.strip() for d in clean_str.split(',') if d.strip()]
+        
+        if lista_depts:
+            placeholders = ','.join(['?'] * len(lista_depts))
+            sql += f" AND departamento IN ({placeholders})"
+            params.extend(lista_depts)
 
-    sql += " ORDER BY fecha DESC LIMIT 20"
+    # Ampliamos límite a 200 para que quepan todos los departamentos
+    sql += " ORDER BY fecha DESC LIMIT 200"
+    
     rows = boe_db.execute(sql, params).fetchall()
-
     oposiciones = [dict(row) for row in rows]
 
     if oposiciones:
@@ -447,16 +458,11 @@ def enviar_resumen_ahora():
             )
         except Exception as e:
             import traceback
-
             traceback.print_exc()
-            flash(
-                f"❌ Error al enviar email (revisa la configuración SMTP): {e}",
-                "danger",
-            )
+            flash(f"❌ Error al enviar email: {e}", "danger")
     else:
-        flash(
-            f"⚠️ No se encontraron oposiciones recientes (últimos 7 días) para el departamento: {dept_filter}",
-            "warning",
-        )
+        # Mostramos la cadena limpia para depurar
+        msg_filtro = clean_str if 'clean_str' in locals() else dept_filter_str
+        flash(f"⚠️ No se encontraron oposiciones recientes (últimos 7 días) para: {msg_filtro}", "warning")
 
     return redirect(url_for("user.newsletter_prefs"))
