@@ -17,9 +17,10 @@
         </p>
 
         <form method="POST" action="{{ url_for('user.newsletter_prefs') }}">
-          <div class="form-check form-switch mb-3">
-            <input class="form-check-input" type="checkbox" id="alerta_diaria" name="alerta_diaria" {% if
-              prefs['alerta_diaria'] %}checked{% endif %}>
+          
+          <div class="form-check form-switch mb-3 text-start">
+            <input class="form-check-input" type="checkbox" id="alerta_diaria" name="alerta_diaria" 
+                   {% if prefs['alerta_diaria'] %}checked{% endif %}>
             <label class="form-check-label" for="alerta_diaria">
               <strong>Resumen diario</strong>
               <div class="text-muted small">Recibe un email cada mañana con las nuevas oposiciones.</div>
@@ -28,40 +29,43 @@
 
           <hr class="my-4">
 
-          <div class="form-check form-switch mb-3">
-            <input class="form-check-input" type="checkbox" id="alerta_favoritos" name="alerta_favoritos" {% if
-              prefs['alerta_favoritos'] %}checked{% endif %}>
+          <div class="form-check form-switch mb-3 text-start">
+            <input class="form-check-input" type="checkbox" id="alerta_favoritos" name="alerta_favoritos" 
+                   {% if prefs['alerta_favoritos'] %}checked{% endif %}>
             <label class="form-check-label" for="alerta_favoritos">
               <strong>Cambios en mis favoritas</strong>
               <div class="text-muted small">Avísame si hay actualizaciones en mis departamentos seleccionados.</div>
             </label>
           </div>
-          <div class="mb-3">
-            <!-- Botón del dropdown -->
+
+          <div class="mb-3 text-start">
+            <label class="form-label fw-bold">Filtrar resumen por departamento:</label>
+            
             <div class="dropdown">
-              <button class="btn btn-tertiary dropdown-toggle w-100" type="button" data-bs-toggle="dropdown">
-                Seleccionar departamentos
+              <button class="btn btn-outline-secondary dropdown-toggle w-100 text-start d-flex justify-content-between align-items-center" 
+                      type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <span>Seleccionar departamentos...</span>
               </button>
 
-              <!-- Contenido del dropdown -->
-              <div class="dropdown-menu p-3" style="max-height: 300px; overflow-y: auto;">
+              <div class="dropdown-menu p-3 w-100" style="max-height: 300px; overflow-y: auto;">
 
-                <!-- Checkbox: Todos -->
                 <div class="form-check">
-                  <input class="form-check-input dept-check" type="checkbox" value="Todos" id="dept_todos" {% if 'Todos'
-                    in prefs['departamento_filtro'] %}checked{% endif %}>
-                  <label class="form-check-label" for="dept_todos">
+                  <input class="form-check-input dept-check-all" type="checkbox" 
+                         name="departamentos" value="Todos" id="dept_todos" 
+                         {% if 'Todos' in prefs['departamento_filtro'] %}checked{% endif %}>
+                  <label class="form-check-label fw-bold" for="dept_todos">
                     Todos los departamentos
                   </label>
                 </div>
 
-                <hr>
+                <hr class="my-2">
 
-                <!-- Checkbox por cada departamento -->
                 {% for dept in departamentos %}
                 <div class="form-check">
-                  <input class="form-check-input dept-check" type="checkbox" value="{{ dept }}"
-                    id="dept_{{ loop.index }}" {% if dept in prefs['departamento_filtro'] %}checked{% endif %}>
+                  <input class="form-check-input dept-check-item" type="checkbox" 
+                         name="departamentos" value="{{ dept }}" 
+                         id="dept_{{ loop.index }}" 
+                         {% if dept in prefs['departamento_filtro'] %}checked{% endif %}>
                   <label class="form-check-label" for="dept_{{ loop.index }}">
                     {{ dept }}
                   </label>
@@ -70,10 +74,7 @@
 
               </div>
             </div>
-
-            <div class="form-text">Este filtro también se aplica al botón de envío manual de abajo.</div>
-            <!-- Campo oculto para enviar los valores -->
-            <input type="hidden" name="departamento_filtro" id="departamento_filtro">
+            <div class="form-text">Selecciona "Todos" para recibir cualquier oposición o marca solo los que te interesen.</div>
           </div>
 
           <div class="d-flex justify-content-end">
@@ -86,12 +87,10 @@
     </div>
 
     <div class="card shadow-sm border-warning">
-      <div class="card-body d-flex align-items-center justify-content-between">
-        <div>
-          <h6 class="fw-bold mb-1"><i class="bi bi-send-check text-warning"></i> ¿Quieres recibir las alertas de hoy?
-          </h6>
-          <small class="text-muted">Te enviaremos ahora mismo un resumen con las últimas oposiciones según tu
-            filtro.</small>
+      <div class="card-body d-flex align-items-center justify-content-between flex-wrap gap-3">
+        <div class="text-start">
+          <h6 class="fw-bold mb-1"><i class="bi bi-send-check text-warning"></i> ¿Quieres recibir las alertas de hoy?</h6>
+          <small class="text-muted">Te enviaremos ahora mismo un resumen con las últimas oposiciones según tu filtro.</small>
         </div>
 
         <form method="POST" action="{{ url_for('user.enviar_resumen_ahora') }}">
@@ -104,5 +103,27 @@
 
   </div>
 </div>
-</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const checkTodos = document.getElementById('dept_todos');
+    const otherChecks = document.querySelectorAll('.dept-check-item');
+
+    // Si marcas "Todos", desmarca los demás visualmente
+    checkTodos.addEventListener('change', function() {
+        if(this.checked) {
+            otherChecks.forEach(c => c.checked = false);
+        }
+    });
+
+    // Si marcas un departamento específico, desmarca "Todos"
+    otherChecks.forEach(check => {
+        check.addEventListener('change', function() {
+            if(this.checked) {
+                checkTodos.checked = false;
+            }
+        });
+    });
+});
+</script>
 {% endblock %}
