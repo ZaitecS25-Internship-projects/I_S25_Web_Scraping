@@ -8,7 +8,7 @@ Define la estructura general de la aplicación:
 -->
 
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" data-theme="{{ theme }}">
 
 <head>
   <meta charset="UTF-8">
@@ -17,68 +17,79 @@ Define la estructura general de la aplicación:
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+
+  <link rel="icon" type="image/ico" href="static/img/favicon.ico">
 </head>
 
 <body class="bg-light d-flex flex-column min-vh-100">
 
-  <!-- Barra de navegación -->
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm mi-navbar animated-navbar">
-    <div class="container">
-      <a class="navbar-brand fs-4" href="{{ url_for('index') }}">📜 Oposiciones BOE</a>
-      <div class="collapse navbar-collapse">
-        <ul class="navbar-nav ms-auto">
-          {% if user.is_authenticated %}
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle text-white px-2" href="#" id="userMenuDropdown" role="button"
-              data-bs-toggle="dropdown" aria-expanded="false">
-              👤 Mi panel
-            </a>
-            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenuDropdown">
-              <li>
-                <a class="dropdown-item" href="{{ url_for('oposiciones_vigentes') }}">
-                  Oposiciones vigentes
-                </a>
-              </li>
-              <li>
-                <a class="dropdown-item" href="{{ url_for('newsletter_prefs') }}">
-                  Alertas por correo
-                </a>
-              </li>
-              <li>
-                <hr class="dropdown-divider">
-              </li>
-              <li>
-                <a class="dropdown-item" href="{{ url_for('configuracion_cuenta') }}">
-                  Configuración
-                </a>
-              </li>
-            </ul>
-          </li>
-          <li class="nav-item ms-2">
-            <a href="{{ url_for('logout') }}" class="btn btn-sm btn-danger">
-              Salir
-            </a>
-          </li>
-          {% else %}
-          <li class="nav-item me-2">
-            <a href="{{ url_for('login') }}" class="btn btn-outline-light btn-sm">
-              Iniciar sesión
-            </a>
-          </li>
-          <li class="nav-item">
-            <a href="{{ url_for('register') }}" class="btn btn-success btn-sm">
-              Registrarse
-            </a>
-          </li>
-          {% endif %}
-        </ul>
+  <nav class="mi-navbar">
+    <div class="container-nav">
+      <a class="site-brand" href="{{ url_for('main.index') }}">
+        <img src="{{ url_for('static', filename='img/logo-navbar.png') }}" alt="Oposiciones BOE" class="logo-img">
+        <span>Oposiciones BOE</span>
+      </a>
+
+      <div class="nav-right">
+        <button class="nav-toggler" id="navToggler" aria-label="Toggle navigation" aria-expanded="false">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+
+        <div id="navbarContent" class="nav-collapse">
+          <ul class="nav-list">
+            {% if user.is_authenticated %}
+            <li class="nav-item user-menu">
+              <a class="user-link" href="#" id="userMenuDropdown" aria-haspopup="true" aria-expanded="false">
+                {% if user.foto_perfil %}
+                <img src="{{ user.foto_perfil }}" alt="Perfil" class="profile-img">
+                {% else %}
+                <span class="profile-emoji">👤</span>
+                {% endif %}
+                <span class="user-name">{{ user.name or 'Mi panel' }}</span>
+              </a>
+              <ul class="user-dropdown" role="menu" aria-labelledby="userMenuDropdown">
+                <li>
+                  <a class="user-dropdown-item" href="{{ url_for('user.oposiciones_vigentes') }}">📚 Oposiciones
+                    vigentes</a>
+                </li>
+                <li>
+                  <a class="user-dropdown-item" href="{{ url_for('user.oposiciones_favoritas') }}">⭐ Mis Favoritas</a>
+                </li>
+                <li>
+                  <a class="user-dropdown-item" href="{{ url_for('user.newsletter_prefs') }}">🔔 Alertas por correo</a>
+                </li>
+                <li class="dropdown-sep"></li>
+                <li>
+                  <a class="user-dropdown-item" href="{{ url_for('user.configuracion_cuenta') }}">⚙️ Configuración</a>
+                </li>
+              </ul>
+            </li>
+            <li class="nav-item">
+              <a href="{{ url_for('auth.logout') }}" class="btn-logout">🔓 Salir</a>
+            </li>
+            {% else %}
+            <li class="nav-item">
+              <a href="{{ url_for('auth.login') }}" class="btn-login">Iniciar sesión</a>
+            </li>
+            <li class="nav-item">
+              <a href="{{ url_for('auth.register') }}" class="btn-register">Registrarse</a>
+            </li>
+            {% endif %}
+          </ul>
+        </div>
+
+        <a href="{{ url_for('toggle_theme') }}" class="btn-toggle-theme" aria-label="Toggle theme">
+          {% if theme == 'dark' %}🔆{% else %}🌓{% endif %}
+        </a>
       </div>
     </div>
   </nav>
 
   {% block hero %}{% endblock %}
 
-  <!-- Contenido principal -->
   <main class="container mt-4 contenido-principal flex-grow-1">
     {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
@@ -90,20 +101,262 @@ Define la estructura general de la aplicación:
     {% block content %}{% endblock %}
   </main>
 
-  <!-- Footer -->
   <footer class="mi-footer">
     <p>© 2025 Oposiciones BOE</p>
-    
   </footer>
-  <script>
-    const select = document.getElementById("edad");
-    for (let i = 18; i <= 67; i++) {
-      const option = document.createElement("option");
-      option.value = i;
-      option.textContent = i;
-      select.appendChild(option);
+
+  <script> // Script para el toggle del navbar en móvil y gestión del dropdown
+    document.addEventListener("DOMContentLoaded", function () {
+      const toggler = document.getElementById('navToggler');
+      const navCollapse = document.getElementById('navbarContent');
+      const userMenu = document.querySelector('.user-menu');
+      const userLink = document.getElementById('userMenuDropdown');
+
+      // Toggle del menú principal en móvil
+      if (toggler) {
+        toggler.addEventListener('click', function () {
+          this.classList.toggle('active');
+          navCollapse.classList.toggle('show');
+        });
+
+        // Cerrar menú cuando se hace click en un enlace
+        const navLinks = navCollapse.querySelectorAll('a:not(#userMenuDropdown)');
+        navLinks.forEach(link => {
+          link.addEventListener('click', function () {
+            toggler.classList.remove('active');
+            navCollapse.classList.remove('show');
+          });
+        });
+      }
+
+      // Toggle del dropdown de usuario
+      if (userLink) {
+        userLink.addEventListener('click', function (e) {
+          e.preventDefault();
+          userMenu.classList.toggle('show');
+        });
+      }
+
+      // Cerrar dropdown/menu al hacer click fuera
+      document.addEventListener('click', function (e) {
+        const target = e.target;
+
+        // Cerrar dropdown de usuario si el click no está dentro
+        if (userMenu && !userMenu.contains(target)) {
+          userMenu.classList.remove('show');
+        }
+
+        // Cerrar menú colapsado en móvil si el click no está dentro del navCollapse ni sobre el toggler
+        if (navCollapse && toggler) {
+          if (!navCollapse.contains(target) && !toggler.contains(target)) {
+            navCollapse.classList.remove('show');
+            toggler.classList.remove('active');
+          }
+        }
+      });
+    });
+  </script>
+  <script> // Script para gestionar el filtro de departamentos en las alertas por correo
+    document.addEventListener("DOMContentLoaded", function () {
+      const hiddenInput = document.getElementById("departamento_filtro");
+      const checkboxes = document.querySelectorAll(".dept-check");
+
+      function updateHidden() {
+        const values = [...checkboxes]
+          .filter(c => c.checked)
+          .map(c => c.value);
+
+        hiddenInput.value = JSON.stringify(values);
+      }
+
+      checkboxes.forEach(cb => cb.addEventListener("change", updateHidden));
+
+      updateHidden(); // Inicializar
+    });
+  </script>
+  <script> // Script para actualizar el texto del botón de filtro de departamentos en vigentes y favoritas
+    (function () {
+      const btn = document.getElementById('departamentosFiltroBtn');
+      const checks = () => Array.from(document.querySelectorAll('input[name="departamentos"]'));
+      function updateBtn() {
+        const c = checks().filter(i => i.checked);
+        if (!btn) return;
+        if (c.length === 0) btn.innerText = 'Todos los departamentos';
+        else if (c.length === 1) btn.innerText = c[0].value;
+        else btn.innerText = c.length + ' seleccionados';
+      }
+      document.addEventListener('change', function (e) { if (e.target && e.target.name === 'departamentos') updateBtn(); });
+      document.addEventListener('DOMContentLoaded', updateBtn);
+    })();
+  </script>
+  <!-- CRIS -->
+  <script> // Scripts globales: gestión de fotos de perfil, contraseñas y formularios
+
+    // ========== FOTO DE PERFIL ==========
+    function setupFotoPerfilPreview(inputId, previewTargetId) {
+      const input = document.getElementById(inputId);
+      if (!input) return;
+
+      input.addEventListener('change', function (e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function (event) {
+          const imgHTML = `<img src="${event.target.result}" alt="Foto de perfil" class="rounded-circle" 
+                          style="width: 120px; height: 120px; object-fit: cover; border: 3px solid #0d6efd;">`;
+
+          if (previewTargetId) {
+            // Para register.html con contenedor específico
+            const container = document.getElementById(previewTargetId);
+            if (container) container.innerHTML = imgHTML;
+          } else {
+            // Para user_configuracion.html (buscar en contenedor padre)
+            const container = input.closest('.text-center').querySelector('.position-relative');
+            if (container) {
+              const img = container.querySelector('img');
+              const placeholder = container.querySelector('.rounded-circle.d-flex');
+
+              if (img) {
+                img.src = event.target.result;
+              } else if (placeholder) {
+                placeholder.outerHTML = imgHTML;
+              }
+            }
+          }
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    // Inicializar previsualizaciones
+    setupFotoPerfilPreview('foto_perfil'); // user_configuracion.html
+    setupFotoPerfilPreview('foto_perfil_register', 'previewContainer'); // register.html
+
+
+    // ========== VISIBILIDAD DE CONTRASEÑAS ==========
+
+    function togglePasswordVisibility(fieldId) {
+      // Soporta múltiples formatos de IDs
+      let passwordField = document.getElementById('password-' + fieldId);
+      if (!passwordField) {
+        passwordField = document.getElementById(fieldId + '_password');
+      }
+
+      const eyeIcon = document.getElementById('eye-icon-' + fieldId);
+
+      if (passwordField && eyeIcon) {
+        if (passwordField.type === 'password') {
+          passwordField.type = 'text';
+          eyeIcon.classList.remove('bi-eye');
+          eyeIcon.classList.add('bi-eye-slash');
+        } else {
+          passwordField.type = 'password';
+          eyeIcon.classList.remove('bi-eye-slash');
+          eyeIcon.classList.add('bi-eye');
+        }
+      }
+    }
+
+
+    // ========== FORMULARIO DE REGISTRO ==========
+    // Generar opciones de edad (18-67 años)
+    const selectEdad = document.getElementById("edad");
+    if (selectEdad) {
+      for (let i = 18; i <= 67; i++) {
+        const option = document.createElement("option");
+        option.value = i;
+        option.textContent = i;
+        selectEdad.appendChild(option);
+      }
     }
   </script>
+
+  <script> // Lógica para botones de FAVORITO y MARCAR COMO VISITADA
+    document.addEventListener('DOMContentLoaded', () => {
+
+      // 1️⃣ Lógica del botón FAVORITO (Estrella)
+      document.querySelectorAll('.toggle-favorito-btn').forEach(button => {
+        button.addEventListener('click', function () {
+          const oposicionId = this.dataset.oposicionId;
+          if (!oposicionId) return;
+
+          const url = `/toggle_favorito/${oposicionId}`;
+          const icon = this.querySelector('i');
+
+          // Efecto visual inmediato (feedback)
+          icon.style.transform = "scale(1.2)";
+          setTimeout(() => icon.style.transform = "scale(1)", 200);
+
+          fetch(url, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+          })
+            .then(response => response.json())
+            .then(data => {
+              if (data.ok) {
+                // Cambiar clase del icono según estado
+                if (data.is_favorite) {
+                  icon.classList.replace('bi-star', 'bi-star-fill');
+                  icon.title = "Quitar de Favoritos";
+                } else {
+                  icon.classList.replace('bi-star-fill', 'bi-star');
+                  icon.title = "Marcar como Favorito";
+                }
+              } else {
+                console.warn("Error al actualizar favoritos en servidor.");
+              }
+            })
+            .catch(error => console.error('Error conexión:', error));
+        });
+      });
+
+      // 2️⃣ Lógica unificada: Botón PDF y Enlace Título (Marcar como Visitada)
+      document.querySelectorAll('.btn-pdf, .link-visitada').forEach(element => {
+        element.addEventListener('click', function (e) {
+          // NO usamos preventDefault() para permitir que el enlace se abra en nueva pestaña
+
+          const id = this.dataset.id;
+          // Buscamos la fila de la tabla más cercana
+          const tr = this.closest('tr');
+
+          if (!id) return;
+
+          const beaconUrl = `/marcar_visitada/${id}`;
+
+          // A) Enviar petición en segundo plano (sendBeacon es ideal para cambios de página)
+          if (navigator.sendBeacon) {
+            const payload = JSON.stringify({ ts: new Date().toISOString() });
+            const blob = new Blob([payload], { type: 'application/json' });
+            navigator.sendBeacon(beaconUrl, blob);
+          } else {
+            // Fallback para navegadores antiguos
+            fetch(beaconUrl, { method: 'POST' }).catch(err => console.warn(err));
+          }
+
+          // B) Actualizar la interfaz inmediatamente (Feedback visual)
+          if (tr) {
+            tr.classList.add('visitada-oposicion');
+
+            // Buscamos el contenedor de los badges (la columna vertical)
+            const badgesDiv = tr.querySelector('td:nth-child(2) .d-flex.flex-column');
+
+            // Si existe el contenedor y no tiene ya el badge, lo creamos
+            if (badgesDiv && !badgesDiv.querySelector('.badge-visitada')) {
+              const span = document.createElement('span');
+              span.className = 'badge-visitada'; // Clase CSS definida en styles.css
+              span.textContent = '🔵 Visitada';
+              badgesDiv.appendChild(span);
+            }
+          }
+        });
+      });
+
+    });
+  </script>
+
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 

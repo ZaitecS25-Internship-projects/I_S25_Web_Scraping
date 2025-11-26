@@ -1,21 +1,108 @@
 {% extends "base.html" %}
-{% block title %}Alertas por correo{% endblock %}
+{% block title %}Mis Alertas - Oposiciones BOE{% endblock %}
 
 {% block content %}
-<div class="container py-4">
-    <h2 class="mb-3">📬 Alertas por correo</h2>
-    <p class="text-muted">
-        Elige qué departamentos quieres seguir y te enviaremos un email cuando haya
-        nuevas oposiciones relacionadas.
-    </p>
+<div class="col-md-9 mx-auto text-center mb-4">
+  <h2 class="hero-title">📬 Gestión de Alertas</h2>
 
-    <div class="alert alert-info">
-        Aquí podrás añadir en el futuro:
-        <ul class="mb-0">
-            <li>Un listado de departamentos con checkboxes.</li>
-            <li>Un botón para guardar tus preferencias de alertas.</li>
-            <li>Opciones de frecuencia (diaria, semanal, solo nuevas).</li>
-        </ul>
+  <div class="col-md-9 mx-auto">
+
+    <div class="card shadow-sm mb-4">
+      <div class="card-header bg-white py-3">
+        <h5 class="mb-0 text-primary">Notificaciones por Correo</h5>
+      </div>
+      <div class="card-body">
+        <p class="text-muted">
+          Configura aquí qué notificaciones quieres recibir en: <strong>{{ user.email }}</strong>
+        </p>
+
+        <form method="POST" action="{{ url_for('user.newsletter_prefs') }}">
+          <div class="form-check form-switch mb-3">
+            <input class="form-check-input" type="checkbox" id="alerta_diaria" name="alerta_diaria" {% if
+              prefs['alerta_diaria'] %}checked{% endif %}>
+            <label class="form-check-label" for="alerta_diaria">
+              <strong>Resumen diario</strong>
+              <div class="text-muted small">Recibe un email cada mañana con las nuevas oposiciones.</div>
+            </label>
+          </div>
+
+          <hr class="my-4">
+
+          <div class="form-check form-switch mb-3">
+            <input class="form-check-input" type="checkbox" id="alerta_favoritos" name="alerta_favoritos" {% if
+              prefs['alerta_favoritos'] %}checked{% endif %}>
+            <label class="form-check-label" for="alerta_favoritos">
+              <strong>Cambios en mis favoritas</strong>
+              <div class="text-muted small">Avísame si hay actualizaciones en mis departamentos seleccionados.</div>
+            </label>
+          </div>
+          <div class="mb-3">
+            <!-- Botón del dropdown -->
+            <div class="dropdown">
+              <button class="btn btn-tertiary dropdown-toggle w-100" type="button" data-bs-toggle="dropdown">
+                Seleccionar departamentos
+              </button>
+
+              <!-- Contenido del dropdown -->
+              <div class="dropdown-menu p-3" style="max-height: 300px; overflow-y: auto;">
+
+                <!-- Checkbox: Todos -->
+                <div class="form-check">
+                  <input class="form-check-input dept-check" type="checkbox" value="Todos" id="dept_todos" {% if 'Todos'
+                    in prefs['departamento_filtro'] %}checked{% endif %}>
+                  <label class="form-check-label" for="dept_todos">
+                    Todos los departamentos
+                  </label>
+                </div>
+
+                <hr>
+
+                <!-- Checkbox por cada departamento -->
+                {% for dept in departamentos %}
+                <div class="form-check">
+                  <input class="form-check-input dept-check" type="checkbox" value="{{ dept }}"
+                    id="dept_{{ loop.index }}" {% if dept in prefs['departamento_filtro'] %}checked{% endif %}>
+                  <label class="form-check-label" for="dept_{{ loop.index }}">
+                    {{ dept }}
+                  </label>
+                </div>
+                {% endfor %}
+
+              </div>
+            </div>
+
+            <div class="form-text">Este filtro también se aplica al botón de envío manual de abajo.</div>
+            <!-- Campo oculto para enviar los valores -->
+            <input type="hidden" name="departamento_filtro" id="departamento_filtro">
+          </div>
+
+          <div class="d-flex justify-content-end">
+            <button type="submit" class="btn btn-primary">
+              <i class="bi bi-save"></i> Guardar Preferencias
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
+
+    <div class="card shadow-sm border-warning">
+      <div class="card-body d-flex align-items-center justify-content-between">
+        <div>
+          <h6 class="fw-bold mb-1"><i class="bi bi-send-check text-warning"></i> ¿Quieres recibir las alertas de hoy?
+          </h6>
+          <small class="text-muted">Te enviaremos ahora mismo un resumen con las últimas oposiciones según tu
+            filtro.</small>
+        </div>
+
+        <form method="POST" action="{{ url_for('user.enviar_resumen_ahora') }}">
+          <button type="submit" class="btn btn-primary">
+            Enviar Email Ahora
+          </button>
+        </form>
+      </div>
+    </div>
+
+  </div>
+</div>
 </div>
 {% endblock %}

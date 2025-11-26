@@ -1,90 +1,210 @@
 {% extends "base.html" %}
-{% block title %}Oposiciones vigentes{% endblock %}
+{% block title %}Oposiciones - BOE{% endblock %}
+
 {% block content %}
-<div class="container py-4">
-    <h2 class="mb-4">📑 Oposiciones vigentes de {{ current_user.name }} {{ current_user.apellidos }} </h2>
-</div>
-<div class="container mt-4">
-    <!-- Filtros de búsqueda -->
-    <div class="card mb-4 shadow-sm">
-        <div class="card-body">
-            <h5 class="card-title mb-3">Filtros de búsqueda</h5>
 
-            <form method="GET" action="{{ url_for('oposiciones_vigentes') }}">
-                <div class="row g-3 mb-3">
-                    <div class="col-md-8">
-                        <label for="busqueda" class="form-label">Buscar por palabras clave:</label>
-                        <input type="text" class="form-control" id="busqueda" name="busqueda"
-                            value="{{ busqueda or '' }}" placeholder="Buscar en identificador, título, control...">
-                    </div>
-                    <div class="col-md-4">
-                        <label for="provincia" class="form-label">Filtrar por provincia:</label>
-                        <select class="form-select" id="provincia" name="provincia">
-                            <option value="">Todas las provincias</option>
-                            {% for prov in provincias %}
-                            <option value="{{ prov['provincia'] }}" {% if provincia_filtro==prov['provincia']
-                                %}selected{% endif %}>
-                                {{ prov['provincia'] }}
-                            </option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                </div>
+<div class="container py-4 contenido-principal">
+  <h2 class="mb-4 text-center hero-title">{{ titulo_pagina }}</h2>
 
-                <div class="row g-3">
-                    <div class="col-md-4">
-                        <label for="fecha_desde" class="form-label">Fecha desde:</label>
-                        <input type="date" class="form-control" id="fecha_desde" name="fecha_desde"
-                            value="{{ fecha_desde or '' }}">
-                    </div>
-                    <div class="col-md-4">
-                        <label for="fecha_hasta" class="form-label">Fecha hasta:</label>
-                        <input type="date" class="form-control" id="fecha_hasta" name="fecha_hasta"
-                            value="{{ fecha_hasta or '' }}">
-                    </div>
-                    <div class="col-md-4 d-flex align-items-end gap-2">
-                        <button type="submit" class="btn btn-primary flex-fill">Filtrar</button>
-                        <a href="{{ url_for('oposiciones_vigentes') }}" class="btn btn-outline-secondary flex-fill">Limpiar</a>
-                    </div>
-                </div>
-            </form>
+  <div class="card mb-4 shadow-sm">
+    <div class="card-body">
+      <h5 class="card-title mb-3">Filtros de búsqueda</h5>
 
-            <div class="mt-3">
-                <small class="text-muted">Total de registros: {{ oposiciones|length }}</small>
-            </div>
+      <form method="GET" action="{{ url_for('user.oposiciones_vigentes') }}">
+        <div class="row g-3 mb-3">
+          <div class="col-md-8">
+            <label for="busqueda" class="form-label">Buscar por palabras clave:</label>
+            <input type="text" class="form-control" id="busqueda" name="busqueda" value="{{ busqueda or '' }}"
+              placeholder="Buscar por identificador, título, control...">
+          </div>
+          <div class="col-md-4">
+            <label for="provincia" class="form-label">Filtrar por provincia:</label>
+            <select class="form-select" id="provincia" name="provincia">
+              <option value="">Todas las provincias</option>
+              {% for prov in provincias %}
+              <option value="{{ prov['provincia'] }}" {% if provincia_filtro==prov['provincia'] %}selected{% endif %}>
+                {{ prov['provincia'] }}
+              </option>
+              {% endfor %}
+            </select>
+          </div>
         </div>
-    </div>
 
-    <!-- Tabla de oposiciones -->
-    <div class="table-responsive">
-        <table class="table table-striped table-bordered align-middle">
-            <thead class="table-dark">
-                <tr>
-                    <th>Fecha</th>
-                    <th>Departamento</th>
-                    <th>Título</th>
-                    <th>Provincia</th>
-                    <th>Enlaces</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for o in oposiciones %}
-                <tr>
-                    <td>{{ o['fecha']|format_date }}</td>
-                    <td>{{ o['departamento'] }}</td>
-                    <td>{{ o['titulo'] }}</td>
-                    <td>{{ o['provincia'] or '-' }}</td>
-                    <td>
-                        <a href="{{ o['url_html'] }}" target="_blank" class="btn btn-sm btn-outline-primary">BOE</a>
-                        {% if o['url_pdf'] %}
-                        <a href="{{ o['url_pdf'] }}" target="_blank" class="btn btn-sm btn-outline-secondary">PDF</a>
-                        {% endif %}
-                    </td>
-                </tr>
+        <div class="row g-3">
+          <div class="col-md-3">
+            <label for="fecha_desde" class="form-label">Desde:</label>
+            <input type="date" class="form-control" id="fecha_desde" name="fecha_desde" value="{{ fecha_desde or '' }}">
+          </div>
+          <div class="col-md-3">
+            <label for="fecha_hasta" class="form-label">Hasta:</label>
+            <input type="date" class="form-control" id="fecha_hasta" name="fecha_hasta" value="{{ fecha_hasta or '' }}">
+          </div>
+          <!-- Filtro por departamentos -->
+          <div class="col-md-6">
+            <label class="form-label">Departamentos:</label>
+            <div class="dropup">
+              <button class="btn btn-tertiary  dropdown-toggle w-100 text-start" type="button"
+                id="departamentosFiltroBtn" data-bs-toggle="dropdown" aria-expanded="false">
+                {% if selected_departamentos %}
+                {{ selected_departamentos|length }} seleccionados
+                {% else %}
+                Todos los departamentos
+                {% endif %}
+              </button>
+              <div class="dropdown-menu p-3" aria-labelledby="departamentosFiltroBtn"
+                style="max-height: 190px; overflow-y: auto;">
+                {% for dept in departamentos %}
+                <div class="form-check">
+                  <input class="form-check-input dept-check" type="checkbox" name="departamentos"
+                    value="{{ dept['departamento'] }}" id="f_dept_{{ loop.index }}" {% if dept['departamento'] in
+                    selected_departamentos %}checked{% endif %}>
+                  <label class="form-check-label" for="f_dept_{{ loop.index }}">{{ dept['departamento'] }}</label>
+                </div>
                 {% endfor %}
-            </tbody>
-        </table>
-    </div>
-</div>
+              </div>
+            </div>
+            <div class="form-text">Selecciona uno o varios departamentos para filtrar los resultados.</div>
+            <!-- Hidden input (sin name) para que el script global de base.html no falle al buscar #departamento_filtro -->
+            <input type="hidden" id="departamento_filtro">
+          </div>
+        </div>
 
+        <div class="row g-3 mt-2">
+          <div class="col-12 d-flex justify-content-center gap-2">
+            <button type="submit" class="btn btn-primary flex-fill" style="max-width: 150px;">Filtrar</button>
+            <a href="{{ url_for('user.oposiciones_vigentes') }}" class="btn btn-outline-secondary flex-fill"
+              style="max-width: 150px;">Limpiar</a>
+          </div>
+        </div>
+      </form>
+
+      <div class="mt-3">
+        <small class="text-muted">Total de registros: {{ total }}</small>
+      </div>
+    </div>
+  </div>
+
+  <div class="table-responsive shadow-sm">
+    <table class="table table-striped table-bordered align-middle table-hover">
+      <thead class="table-dark">
+        <tr>
+          <th>Identificador</th>
+          <th>Título</th>
+          <th>Departamento</th>
+          <th>Control</th>
+          <th>PDF</th>
+          <th>Fecha</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in oposiciones %}
+        <tr class="
+                {% if row['fecha'] == hoy %}nueva-oposicion{% endif %}
+                {% if row['id'] in visitadas %} visitada-oposicion{% endif %}
+            ">
+          <td>{{ row['identificador'] }}</td>
+
+          <td>
+            <div class="d-flex justify-content-between align-items-start">
+              {% if row['url_html'] %}
+              <a href="{{ row['url_html'] }}" target="_blank" class="text-decoration-none text-dark link-visitada"
+                data-id="{{ row['id'] }}" title="Ver en la web del BOE">
+                {{ row['titulo'] }} <i class="bi bi-box-arrow-up-right text-muted small ms-1"></i>
+              </a>
+              {% else %}
+              <span>{{ row['titulo'] }}</span>
+              {% endif %}
+
+              {% if user.is_authenticated %}
+              <span style="margin-left: 10px;">
+                <button type="button" class="toggle-favorito-btn" data-oposicion-id="{{ row['id'] }}"
+                  aria-label="Marcar como favorito"
+                  style="border: none; background: none; cursor: pointer; color: orange;">
+                  <i class="bi {% if row['id'] in favoritas %}bi-star-fill{% else %}bi-star{% endif %}"
+                    title="{% if row['id'] in favoritas %}Quitar de Favoritos{% else %}Marcar como Favorito{% endif %}">
+                  </i>
+                </button>
+              </span>
+              {% endif %}
+            </div>
+
+            <div class="mt-2 d-flex flex-column align-items-start gap-1">
+              {% if row['fecha'] == hoy %}
+              <span class="badge-nuevo">🟡 Nuevo</span>
+              {% endif %}
+              {% if row['id'] in visitadas %}
+              <span class="badge-visitada">🔵 Visitada</span>
+              {% endif %}
+            </div>
+          </td>
+
+          <td><small class="fw-bold text-primary">{{ row['departamento'] }}</small></td>
+          <td>{{ row['control'] }}</td>
+
+          <td>
+            {% if row['url_pdf'] %}
+            <a href="{{ row['url_pdf'] }}" target="_blank" class="btn btn-sm btn-primary btn-pdf text-nowrap"
+              data-id="{{ row['id'] }}">
+              Ver PDF
+            </a>
+            {% endif %}
+          </td>
+
+          <td>{{ row['fecha']|format_date }}</td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="6" class="text-center py-4">No hay oposiciones disponibles con estos filtros.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% if total_pages > 1 %}
+  <nav aria-label="Paginación de oposiciones" class="mt-4">
+    <ul class="pagination justify-content-center">
+      <li class="page-item {% if page <= 1 %}disabled{% endif %}">
+        <a class="page-link"
+          href="{{ url_for('user.oposiciones_vigentes', page=page-1, busqueda=busqueda, provincia=provincia, fecha_desde=fecha_desde, fecha_hasta=fecha_hasta, departamentos=selected_departamentos) }}">←</a>
+      </li>
+
+      {% set start_page = page - 2 if page > 3 else 1 %}
+      {% set end_page = page + 2 if page < total_pages - 2 else total_pages %} {% if start_page> 1 %}
+        <li class="page-item">
+          <a class="page-link"
+            href="{{ url_for('user.oposiciones_vigentes', page=1, busqueda=busqueda, provincia=provincia, fecha_desde=fecha_desde, fecha_hasta=fecha_hasta, departamentos=selected_departamentos) }}">1</a>
+        </li>
+        {% if start_page > 2 %}
+        <li class="page-item disabled"><span class="page-link">…</span></li>
+        {% endif %}
+        {% endif %}
+
+        {% for p in range(start_page, end_page + 1) %}
+        <li class="page-item {% if p == page %}active{% endif %}">
+          <a class="page-link"
+            href="{{ url_for('user.oposiciones_vigentes', page=p, busqueda=busqueda, provincia=provincia, fecha_desde=fecha_desde, fecha_hasta=fecha_hasta, departamentos=selected_departamentos) }}">{{
+            p }}</a>
+        </li>
+        {% endfor %}
+
+        {% if end_page < total_pages %} {% if end_page < total_pages - 1 %} <li class="page-item disabled"><span
+            class="page-link">…</span></li>
+          {% endif %}
+          <li class="page-item">
+            <a class="page-link"
+              href="{{ url_for('user.oposiciones_vigentes', page=total_pages, busqueda=busqueda, provincia=provincia, fecha_desde=fecha_desde, fecha_hasta=fecha_hasta, departamentos=selected_departamentos) }}">{{
+              total_pages }}</a>
+          </li>
+          {% endif %}
+
+          <li class="page-item {% if page >= total_pages %}disabled{% endif %}">
+            <a class="page-link"
+              href="{{ url_for('user.oposiciones_vigentes', page=page+1, busqueda=busqueda, provincia=provincia, fecha_desde=fecha_desde, fecha_hasta=fecha_hasta, departamentos=selected_departamentos) }}">→</a>
+          </li>
+    </ul>
+  </nav>
+  {% endif %}
+
+</div>
 {% endblock %}

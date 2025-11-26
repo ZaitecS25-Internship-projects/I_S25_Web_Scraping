@@ -1,14 +1,75 @@
-
-# Python
+# Byte-compiled / optimized / DLL files
 __pycache__/
-*.pyc
-.venv/
+*.py[cod]
+*$py.class
 
-# DB local
-oposiciones.db
-*.sqlite3
+# C extensions
+*.so
 
-# Entornos/IDE
+# Virtual environment
+venv/
+ENV/
+env/
 .env
 
+# SQLite databases (do not commit local DB files)
+*.db
+*.sqlite3
+usuarios.db
 oposiciones.db
+
+# Static uploads (user-generated content)
+static/uploads/
+
+# Editor directories and files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+pip-wheel-metadata/
+
+# Logs
+*.log
+
+# Python wheel cache
+wheelhouse/
+
+# Test / typecheck caches
+.pytest_cache/
+.mypy_cache/
+.cache/
+
+# Coverage
+.coverage
+coverage.xml
+htmlcov/
+
+# SQLite temporary files
+*.db-wal
+*.db-shm
+*.db-journal
+*.sqlite3-journal
+
+# Alternate virtualenv names
+.venv/
+
+# pyenv
+.python-version
+
+# Local env files
+.env.*
+
+# Eggs / packaging extras
+*.egg
+*.egg-info/
+pip-log.txt

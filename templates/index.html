@@ -2,47 +2,43 @@
 {% block title %}Oposiciones del día - BOE{% endblock %}
 
 {% block content %}
-
-  <!-- Hero/Portada con imagen responsive -->
-  <div class="hero-image-container">
-    <img src="{{ url_for('static', filename='img/hero-oposiciones.png') }}" 
-         alt="Oposiciones BOE" 
-         class="hero-image"
-         onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-    <div class="hero-fallback" style="display: none;">
-      <h1 class="hero-title">Oposiciones BOE</h1>
-    </div>
+<!-- Hero/Portada con imagen responsive -->
+<div class="hero-image-container">
+  <img src="{{ url_for('static', filename='img/hero-oposiciones.png') }}" alt="Oposiciones BOE" class="hero-image"
+    onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+  <div class="hero-fallback" style="display: none;">
+    <h1 class="hero-title">Oposiciones BOE</h1>
   </div>
+</div>
 
-  <!-- Contenedor principal con tarjetas de departamentos -->
-  
-  <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+<!-- Contenedor principal con tarjetas de departamentos -->
+
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
   <h2 class="mb-0">Departamentos</h2>
-  <div class="d-flex gap-2">
-    <a href="{{ url_for('do_scrape') }}" class="btn btn-primary btn-update">
-      Actualizar datos BOE
-    </a>
-  </div>
+  
+  <span class="text-muted fs-5">
+    📅 Oposiciones del {{ fecha_hoy }}
+  </span>
 </div>
 
 
 
 
-    <div class="row g-4">
-      {% for dep in departamentos %}
-        <div class="col-md-4 col-lg-3">
-          <a href="{{ url_for('mostrar_departamento', nombre=dep['departamento']) }}" class="text-decoration-none">
-            <div class="card h-100 shadow-sm tarjeta-departamento">
-              <img src="{{ url_for('static', filename='img/' + dep['departamento']|replace(' ', '_') + '.avif') }}"
-                   class="card-img-top" alt="{{ dep['departamento'] }}"
-                   onerror="this.src='{{ url_for('static', filename='img/default.svg') }}'">
-              <div class="card-body">
-                <h5 class="card-title">{{ dep['departamento'] }}</h5>
-              </div>
-            </div>
-          </a>
+<div class="row g-4">
+  {% for dep in departamentos %}
+  <div class="col-md-4 col-lg-3">
+    <a href="{{ url_for('main.mostrar_departamento', nombre=dep['departamento']) }}" class="text-decoration-none">
+      <div class="card h-100 shadow-sm tarjeta-departamento">
+        <img src="{{ url_for('static', filename='img/dept/' + dep['departamento']|replace(' ', '_') + '.avif') }}"
+          class="card-img-top" alt="{{ dep['departamento'] }}"
+          onerror="this.src='{{ url_for('static', filename='img/default.svg') }}'">
+        <div class="card-body">
+          <h5 class="card-title">{{ dep['departamento'] }}</h5>
         </div>
-      {% endfor %}
-    </div>
+      </div>
+    </a>
   </div>
+  {% endfor %}
+</div>
+</div>
 {% endblock %}

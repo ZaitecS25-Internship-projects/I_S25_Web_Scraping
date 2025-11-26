@@ -1,41 +1,220 @@
 {% extends "base.html" %}
-{% block title %}Configuración de cuenta{% endblock %}
+{% block title %}Configuración - Oposiciones BOE{% endblock %}
 
 {% block content %}
-<div class="container py-4" style="max-width: 720px;">
-    <h2 class="mb-4">⚙️ Configuración de cuenta</h2>
+<div class="container py-4 contenido-principal config-page">
+  <h2 class="mb-4 text-center hero-title">⚙️ Configuración</h2>
 
-    <div class="card mb-4 shadow-sm">
-        <div class="card-body">
-            <h5 class="card-title">Perfil</h5>
-            <p class="text-muted small mb-3">
-                Aquí podrás editar tu nombre, email visible y foto de perfil.
-            </p>
-            <!-- Futuro: formulario de perfil -->
-            <p class="mb-0">Pendiente de implementar formulario de perfil.</p>
-        </div>
+  <div class="row">
+    <div class="col-md-3 mb-4">
+      <div class="list-group shadow-sm">
+        <a href="#perfil" class="list-group-item list-group-item-action active" data-bs-toggle="list">
+          <i class="bi bi-person-badge me-2"></i> Perfil
+        </a>
+        <a href="#seguridad" class="list-group-item list-group-item-action" data-bs-toggle="list">
+          <i class="bi bi-shield-lock me-2"></i> Seguridad
+        </a>
+      </div>
     </div>
 
-    <div class="card mb-4 shadow-sm">
-        <div class="card-body">
-            <h5 class="card-title">Seguridad</h5>
-            <p class="text-muted small mb-3">
-                Cambia tu contraseña y revisa opciones de seguridad de la cuenta.
-            </p>
-            <!-- Futuro: formulario de cambio de contraseña -->
-            <p class="mb-0">Pendiente de implementar cambio de contraseña.</p>
-        </div>
-    </div>
+    <div class="col-md-9">
+      <div class="tab-content">
+        <!-- Pestaña Perfil -->
+        <div class="tab-pane fade show active" id="perfil">
+          <div class="card shadow-sm">
+            <div class="card-header bg-white py-3">
+              <h5 class="mb-0 text-primary">Mi Perfil</h5>
+            </div>
+            <div class="card-body">
+              <form action="{{ url_for('user.update_profile') }}" method="POST" enctype="multipart/form-data">
 
-    <div class="card mb-4 shadow-sm">
-        <div class="card-body">
-            <h5 class="card-title">Preferencias</h5>
-            <p class="text-muted small mb-3">
-                Ajusta idioma, zona horaria y la forma en que quieres recibir notificaciones.
-            </p>
-            <!-- Futuro: switches de preferencias -->
-            <p class="mb-0">Pendiente de implementar ajustes de preferencias.</p>
+                <!-- Foto de perfil -->
+                <div class="text-center mb-4">
+                  <div class="position-relative d-inline-block">
+                    {% if user.foto_perfil %}
+                    <img src="{{ user.foto_perfil }}" alt="Foto de perfil" class="rounded-circle"
+                      style="width: 120px; height: 120px; object-fit: cover; border: 3px solid #0d6efd;">
+                    {% else %}
+                    <div class="rounded-circle d-flex align-items-center justify-content-center bg-primary text-white"
+                      style="width: 120px; height: 120px; font-size: 48px; border: 3px solid #0d6efd;">
+                      <i class="bi bi-person-circle"></i>
+                    </div>
+                    {% endif %}
+                  </div>
+                  <div class="mt-3">
+                    <label for="foto_perfil" class="btn btn-sm btn-outline-primary">
+                      <i class="bi bi-camera"></i> Cambiar foto
+                    </label>
+                    <input type="file" class="d-none" id="foto_perfil" name="foto_perfil" accept="image/*">
+                    <small class="d-block text-muted mt-2">Formatos: JPG, PNG, GIF, WEBP</small>
+                  </div>
+                </div>
+
+                <hr class="my-4">
+
+                <!-- Nombre y Apellidos -->
+                <div class="row g-3 mb-3">
+                  <div class="col-md-6">
+                    <label for="name" class="form-label fw-bold">Nombre <span class="text-danger">*</span></label>
+                    <div class="input-group">
+                      <span class="input-group-text"><i class="bi bi-person"></i></span>
+                      <input type="text" class="form-control" id="name" name="name" value="{{ user.name or '' }}"
+                        required>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <label for="apellidos" class="form-label fw-bold">Apellidos <span
+                        class="text-danger">*</span></label>
+                    <div class="input-group">
+                      <span class="input-group-text"><i class="bi bi-person-lines-fill"></i></span>
+                      <input type="text" class="form-control" id="apellidos" name="apellidos"
+                        value="{{ user.apellidos or '' }}" required>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Email (solo lectura) -->
+                <div class="mb-3">
+                  <label for="email" class="form-label fw-bold">Correo Electrónico</label>
+                  <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                    <input type="email" class="form-control" id="email" value="{{ user.email }}" disabled>
+                  </div>
+                  <small class="text-muted">El email no se puede modificar</small>
+                </div>
+
+                <!-- Teléfono y Género -->
+                <div class="row g-3 mb-3">
+                  <div class="col-md-6">
+                    <label for="telefono" class="form-label fw-bold">Teléfono <span
+                        class="text-muted">(opcional)</span></label>
+                    <div class="input-group">
+                      <span class="input-group-text"><i class="bi bi-telephone"></i></span>
+                      <input type="tel" class="form-control" id="telefono" name="telefono"
+                        value="{{ user.telefono or '' }}" placeholder="+34 600 000 000">
+                    </div>
+                  </div>
+                </div>
+
+                <hr class="my-4">
+                <h6 class="text-secondary mb-3"><i class="bi bi-mortarboard"></i> Formación Académica</h6>
+
+                <!-- Nivel de Estudios y Titulación -->
+                <div class="row g-3 mb-3">
+                  <div class="col-md-6">
+                    <label for="nivel_estudios" class="form-label fw-bold">Nivel de Estudios <span
+                        class="text-danger">*</span></label>
+                    <div class="input-group">
+                      <span class="input-group-text"><i class="bi bi-book"></i></span>
+                      <select class="form-select" id="nivel_estudios" name="nivel_estudios" required>
+                        <option value="">Selecciona...</option>
+                        <option value="ESO" {% if user.nivel_estudios=='ESO' %}selected{% endif %}>ESO</option>
+                        <option value="Bachillerato" {% if user.nivel_estudios=='Bachillerato' %}selected{% endif %}>
+                          Bachillerato</option>
+                        <option value="FP Grado Medio" {% if user.nivel_estudios=='FP Grado Medio' %}selected{% endif
+                          %}>FP Grado Medio</option>
+                        <option value="FP Grado Superior" {% if user.nivel_estudios=='FP Grado Superior' %}selected{%
+                          endif %}>FP Grado Superior</option>
+                        <option value="Grado Universitario" {% if user.nivel_estudios=='Grado Universitario'
+                          %}selected{% endif %}>Grado Universitario</option>
+                        <option value="Máster" {% if user.nivel_estudios=='Máster' %}selected{% endif %}>Máster</option>
+                        <option value="Doctorado" {% if user.nivel_estudios=='Doctorado' %}selected{% endif %}>Doctorado
+                        </option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <label for="titulacion" class="form-label fw-bold">Titulación</label>
+                    <div class="input-group">
+                      <span class="input-group-text"><i class="bi bi-award"></i></span>
+                      <input type="text" class="form-control" id="titulacion" name="titulacion"
+                        value="{{ user.titulacion or '' }}" placeholder="Ej: Grado en Derecho">
+                    </div>
+                  </div>
+                </div>
+
+                <div class="mt-4 d-flex justify-content-end">
+                  <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-check-lg"></i> Guardar Cambios
+                  </button>
+                </div>
+
+              </form>
+            </div>
+          </div>
         </div>
+
+        <!-- Pestaña Seguridad -->
+        <div class="tab-pane fade" id="seguridad">
+          <div class="card shadow-sm">
+            <div class="card-header bg-white py-3">
+              <h5 class="mb-0 text-primary">Cambiar Contraseña</h5>
+            </div>
+            <div class="card-body">
+              <p class="text-muted small mb-4">
+                Para proteger tu cuenta, te pediremos tu contraseña actual antes de realizar cambios.
+              </p>
+
+              <form action="{{ url_for('auth.change_password') }}" method="POST">
+
+                <div class="mb-3">
+                  <label for="current_password" class="form-label fw-bold">Contraseña Actual</label>
+                  <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-key"></i></span>
+                    <input type="password" class="form-control pe-5" id="current_password" name="current_password"
+                      required>
+                    <button type="button"
+                      class="btn position-absolute top-50 end-0 translate-middle-y border-0 bg-transparent"
+                      onclick="togglePasswordVisibility('current')" style="z-index: 10;">
+                      <i class="bi bi-eye text-muted" id="eye-icon-current"></i>
+                    </button>
+                  </div>
+                </div>
+
+                <hr class="my-4">
+
+                <div class="row g-3">
+                  <div class="col-md-6">
+                    <label for="new_password" class="form-label fw-bold">Nueva Contraseña</label>
+                    <div class="input-group">
+                      <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                      <input type="password" class="form-control pe-5" id="new_password" name="new_password" required
+                        minlength="6">
+                      <button type="button"
+                        class="btn position-absolute top-50 end-0 translate-middle-y border-0 bg-transparent"
+                        onclick="togglePasswordVisibility('new')" style="z-index: 10;">
+                        <i class="bi bi-eye text-muted" id="eye-icon-new"></i>
+                      </button>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <label for="confirm_password" class="form-label fw-bold">Confirmar Nueva</label>
+                    <div class="input-group">
+                      <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
+                      <input type="password" class="form-control pe-5" id="confirm_password" name="confirm_password"
+                        required minlength="6">
+                      <button type="button"
+                        class="btn position-absolute top-50 end-0 translate-middle-y border-0 bg-transparent"
+                        onclick="togglePasswordVisibility('confirm')" style="z-index: 10;">
+                        <i class="bi bi-eye text-muted" id="eye-icon-confirm"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="mt-4 d-flex justify-content-end">
+                  <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-check-lg"></i> Actualizar Contraseña
+                  </button>
+                </div>
+
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
+  </div>
 </div>
+
 {% endblock %}
