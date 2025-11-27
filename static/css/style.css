@@ -632,7 +632,7 @@ h2.titulo-registro+form input[type="radio"] {
 /* =========================================================
    RESPONSIVE
 ========================================================= */
-@media (max-width: 2500px) and (min-width: 993px) {
+@media (min-width: 993px) {
 
     /* Dark-mode: make navbar and its buttons visually uniform (transparent buttons) */
     html[data-theme="dark"] .mi-navbar .container-nav,
@@ -1270,35 +1270,5 @@ html[data-theme="dark"] .form-select {
 
 /* Dropdown departamentos modo oscuro ultra-compacto */
 html[data-theme="dark"] .dropdown-menu,
-html[data-theme="dark"] .dropdown-menu[style] {
-    background: #2c2f47 !important;
-    color: #e5e7eb !important;
-    border-color: #3b3f54 !important;
-}
-
-html[data-theme="dark"] .dropdown-menu .form-check-input {
-    accent-color: #60a5fa !important;
-    background: transparent !important;
-    border-color: #4b5166 !important;
-}
-
-/* Final safety overrides: ensure mobile dark-mode nav and any tables inside are fully transparent */
-@media (max-width: 768px) {
-
-
-    html[data-theme="dark"] .nav-collapse .user-dropdown,
-    html[data-theme="dark"] .nav-collapse .user-dropdown-item,
-    html[data-theme="dark"] .nav-collapse .table,
-    html[data-theme="dark"] .nav-collapse .table th,
-    html[data-theme="dark"] .nav-collapse .table td {
-        background: transparent !important;
-        box-shadow: none !important;
-        border-color: transparent !important;
-        color: #fff !important;
-    }
-
-    html[data-theme="dark"] .nav-collapse .user-dropdown-item:hover {
-        background: rgba(255, 255, 255, 0.06) !important;
-        color: #fff !important;
-    }
-}
+html[data-theme="dark"] .dropdown-menu[style] { background:#2c2f47 !important; color:#e5e7eb !important; border-color:#3b3f54 !important; }
+html[data-theme="dark"] .dropdown-menu .form-check-input { accent-color:#60a5fa !important; background:transparent !important; border-color:#4b5166 !important; }

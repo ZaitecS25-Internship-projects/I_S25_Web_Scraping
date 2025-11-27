@@ -71,10 +71,10 @@
               {% if row['url_html'] %}
               <a href="{{ row['url_html'] }}" target="_blank" class="text-decoration-none text-dark link-visitada"
                 data-id="{{ row['id'] }}" title="Ver en la web del BOE">
-                {{ row['titulo'] }} <i class="bi bi-box-arrow-up-right text-muted small ms-1"></i>
+                {{ row['titulo']|resaltar_titulo|safe }} <i class="bi bi-box-arrow-up-right text-muted small ms-1"></i>
               </a>
               {% else %}
-              <span>{{ row['titulo'] }}</span>
+              <span>{{ row['titulo']|resaltar_titulo|safe }}</span>
               {% endif %}
 
               {% if user.is_authenticated %}
