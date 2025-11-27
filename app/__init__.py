@@ -129,6 +129,7 @@ def create_app():
             r"\badjudicac[ió]n\b",
             r"\bdestinos?\b",
             r"\btraslados?\b",
+            r"\bayuntamiento?\b"
         ]
 
         # Reemplazar cada palabra clave con versión en negrita
@@ -136,7 +137,7 @@ def create_app():
         for patron in palabras_clave:
             resultado = re.sub(
                 patron,
-                lambda m: f"<strong>{m.group()}</strong>",
+                lambda m: f'<strong>{m.group()}</strong>',
                 resultado,
                 flags=re.IGNORECASE,
             )
