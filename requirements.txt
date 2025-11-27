@@ -10,3 +10,7 @@ itsdangerous==2.1.2 # Requerido por Flask internamente
 Jinja2==3.1.3 # Motor de plantillas
 click==8.1.7 # Necesario para el CLI de Flask
 MarkupSafe==2.1.5 # Lo usa Jinja
+
+# Bot de Telegram
+python-telegram-bot>=20.0 # Bot de Telegram para notificaciones
+python-dotenv==1.0.0 # Cargar variables de entorno
