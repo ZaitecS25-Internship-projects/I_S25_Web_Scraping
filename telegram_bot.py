@@ -27,10 +27,14 @@ from telegram.ext import (
 # Cargar variables de entorno
 load_dotenv()
 
-# Configurar logging
+# Configurar logging con archivo
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    level=logging.INFO
+    level=logging.INFO,
+    handlers=[
+        logging.FileHandler('telegram_bot.log', encoding='utf-8'),
+        logging.StreamHandler()
+    ]
 )
 logger = logging.getLogger(__name__)
 
