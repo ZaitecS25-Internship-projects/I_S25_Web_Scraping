@@ -166,26 +166,28 @@ async def departamentos(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("❌ No hay departamentos con oposiciones hoy.")
         return
     
+    # Mostrar lista de departamentos como texto en lugar de botones inline
     mensaje = "🏛️ *Departamentos con Oposiciones Hoy*\n\n"
     
-    # Crear botones inline para cada departamento
-    keyboard = []
-    for i, dep in enumerate(deps[:20], 1):  # Máximo 20 departamentos
+    # Guardar mapping para búsquedas posteriores
+    context.user_data['dept_list'] = [dep['departamento'] for dep in deps]
+    
+    for i, dep in enumerate(deps[:15], 1):  # Mostrar top 15
         nombre = dep['departamento']
         total = dep['total']
-        # Acortar nombre si es muy largo
-        nombre_corto = nombre[:30] + "..." if len(nombre) > 30 else nombre
-        keyboard.append([InlineKeyboardButton(
-            f"{nombre_corto} ({total})",
-            callback_data=f"dept_{nombre}"
-        )])
+        # Acortar nombre si es muy largo para visualización
+        nombre_mostrar = nombre[:45] + "..." if len(nombre) > 45 else nombre
+        mensaje += f"{i}. {nombre_mostrar} - *{total}* oposiciones\n"
     
-    reply_markup = InlineKeyboardMarkup(keyboard)
+    if len(deps) > 15:
+        mensaje += f"\n_... y {len(deps) - 15} departamentos más_\n"
     
-    mensaje += f"_Toca un departamento para ver sus oposiciones_\n"
-    mensaje += f"Total: {len(deps)} departamentos"
+    mensaje += f"\n📝 Total: *{len(deps)}* departamentos\n"
+    mensaje += "\n💡 *Para buscar por departamento:*\n"
+    mensaje += "Usa: `/buscar <nombre del departamento>`\n"
+    mensaje += "Ejemplo: `/buscar ministerio sanidad`"
     
-    await update.message.reply_text(mensaje, parse_mode='Markdown', reply_markup=reply_markup)
+    await update.message.reply_text(mensaje, parse_mode='Markdown')
 
 
 async def buscar(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -321,33 +323,7 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         
         await query.edit_message_text(mensaje, parse_mode='Markdown')
     
-    elif data.startswith("dept_"):
-        departamento = data[5:]  # Quitar "dept_"
-        db = get_boe_db()
-        hoy = datetime.today().strftime("%Y%m%d")
-        
-        oposiciones = db.execute(
-            "SELECT * FROM oposiciones WHERE fecha = ? AND departamento = ? LIMIT 10",
-            (hoy, departamento)
-        ).fetchall()
-        
-        db.close()
-        
-        if not oposiciones:
-            await query.edit_message_text(f"❌ No hay oposiciones para {departamento}")
-            return
-        
-        mensaje = f"🏛️ *{departamento}*\n"
-        mensaje += f"_Oposiciones del día: {len(oposiciones)}_\n\n"
-        
-        for op in oposiciones:
-            titulo = op['titulo'][:100] + "..." if len(op['titulo']) > 100 else op['titulo']
-            mensaje += f"📄 {titulo}\n"
-            if op['url_html']:
-                mensaje += f"   🔗 [Ver en BOE]({op['url_html']})\n"
-            mensaje += "\n"
-        
-        await query.edit_message_text(mensaje, parse_mode='Markdown', disable_web_page_preview=True)
+
 
 
 async def ayuda(update: Update, context: ContextTypes.DEFAULT_TYPE):
