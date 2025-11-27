@@ -55,25 +55,7 @@
           <th>Título</th>
           <th>Control</th>
           <th>PDF</th>
-          <th>
-            Fecha
-            <div class="btn-group btn-group-sm ms-2" role="group">
-              <a href="{{ url_for('main.mostrar_departamento', nombre=departamento, page=page, 
-                         busqueda=busqueda, provincia_filtro=provincia_filtro, 
-                         fecha_desde=fecha_desde, fecha_hasta=fecha_hasta, orden='fecha_asc') }}" 
-                 class="btn btn-sm {% if orden == 'fecha_asc' %}btn-light fw-bold{% else %}btn-outline-light{% endif %}" 
-                 title="Ordenar ascendente">
-                <i class="bi bi-arrow-up"></i>
-              </a>
-              <a href="{{ url_for('main.mostrar_departamento', nombre=departamento, page=page, 
-                         busqueda=busqueda, provincia_filtro=provincia_filtro, 
-                         fecha_desde=fecha_desde, fecha_hasta=fecha_hasta, orden='fecha_desc') }}" 
-                 class="btn btn-sm {% if orden == 'fecha_desc' %}btn-light fw-bold{% else %}btn-outline-light{% endif %}" 
-                 title="Ordenar descendente">
-                <i class="bi bi-arrow-down"></i>
-              </a>
-            </div>
-          </th>
+          <th>Fecha</th>
         </tr>
       </thead>
       <tbody>
@@ -142,13 +124,13 @@
   <nav aria-label="Paginación de oposiciones" class="mt-4">
     <ul class="pagination justify-content-center">
       <li class="page-item {% if page <= 1 %}disabled{% endif %}">
-        <a class="page-link" href="{{ url_for('main.mostrar_departamento', nombre=departamento, page=page-1, busqueda=busqueda, provincia_filtro=provincia_filtro, fecha_desde=fecha_desde, fecha_hasta=fecha_hasta, orden=orden) }}">←</a>
+        <a class="page-link" href="{{ url_for('main.mostrar_departamento', nombre=departamento, page=page-1) }}">←</a>
       </li>
 
       {% set start_page = page - 2 if page > 3 else 1 %}
       {% set end_page = page + 2 if page < total_pages - 2 else total_pages %} {% if start_page> 1 %}
         <li class="page-item">
-          <a class="page-link" href="{{ url_for('main.mostrar_departamento', nombre=departamento, page=1, busqueda=busqueda, provincia_filtro=provincia_filtro, fecha_desde=fecha_desde, fecha_hasta=fecha_hasta, orden=orden) }}">1</a>
+          <a class="page-link" href="{{ url_for('main.mostrar_departamento', nombre=departamento, page=1) }}">1</a>
         </li>
         {% if start_page > 2 %}
         <li class="page-item disabled"><span class="page-link">…</span></li>
@@ -157,7 +139,7 @@
 
         {% for p in range(start_page, end_page + 1) %}
         <li class="page-item {% if p == page %}active{% endif %}">
-          <a class="page-link" href="{{ url_for('main.mostrar_departamento', nombre=departamento, page=p, busqueda=busqueda, provincia_filtro=provincia_filtro, fecha_desde=fecha_desde, fecha_hasta=fecha_hasta, orden=orden) }}">{{ p
+          <a class="page-link" href="{{ url_for('main.mostrar_departamento', nombre=departamento, page=p) }}">{{ p
             }}</a>
         </li>
         {% endfor %}
@@ -167,14 +149,14 @@
           {% endif %}
           <li class="page-item">
             <a class="page-link"
-              href="{{ url_for('main.mostrar_departamento', nombre=departamento, page=total_pages, busqueda=busqueda, provincia_filtro=provincia_filtro, fecha_desde=fecha_desde, fecha_hasta=fecha_hasta, orden=orden) }}">{{ total_pages
+              href="{{ url_for('main.mostrar_departamento', nombre=departamento, page=total_pages) }}">{{ total_pages
               }}</a>
           </li>
           {% endif %}
 
           <li class="page-item {% if page >= total_pages %}disabled{% endif %}">
             <a class="page-link"
-              href="{{ url_for('main.mostrar_departamento', nombre=departamento, page=page+1, busqueda=busqueda, provincia_filtro=provincia_filtro, fecha_desde=fecha_desde, fecha_hasta=fecha_hasta, orden=orden) }}">→</a>
+              href="{{ url_for('main.mostrar_departamento', nombre=departamento, page=page+1) }}">→</a>
           </li>
     </ul>
   </nav>

@@ -46,8 +46,6 @@ def mostrar_departamento(nombre):
     user = current_user
     busqueda = request.args.get("busqueda", "")
     provincia = request.args.get("provincia", "")
-    fecha_desde = request.args.get("fecha_desde", "")
-    fecha_hasta = request.args.get("fecha_hasta", "")
     orden = request.args.get("orden", "fecha_desc")
     page = int(request.args.get("page", 1))
     por_pagina = 10
@@ -125,8 +123,6 @@ def mostrar_departamento(nombre):
         provincias=provincias,
         busqueda=busqueda,
         provincia_filtro=provincia,
-        fecha_desde=fecha_desde,
-        fecha_hasta=fecha_hasta,
         orden=orden,
         hoy=hoy,
         visitadas=visitadas,

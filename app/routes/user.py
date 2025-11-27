@@ -178,7 +178,6 @@ def oposiciones_vigentes():
         hoy=datetime.today().strftime("%Y%m%d"),
         titulo_pagina=f"📢 Oposiciones Vigentes de {user.name} {user.apellidos}",
         total=total,
-        es_favoritas=False,
     )
 
 
@@ -324,9 +323,6 @@ def oposiciones_favoritas():
     boe_db = get_boe_db()
     users_db = get_users_db()
     user = current_user
-    
-    # Obtener parámetro de ordenación
-    orden = request.args.get("orden", "fecha_desc")
 
     # 🟢 CORRECCIÓN: Obtener datos para los filtros también en Favoritas
     desde = (datetime.today() - timedelta(days=30)).strftime("%Y%m%d")
@@ -372,9 +368,8 @@ def oposiciones_favoritas():
             total=0,
             page=1,
             total_pages=1,
-            orden=orden,
+            orden="desc",
             titulo_pagina=f"⭐ Oposiciones Favoritas de {user.name} {user.apellidos}",
-            es_favoritas=True,
         )
 
     opos_ids = [row["oposicion_id"] for row in fav_rows]
@@ -385,12 +380,12 @@ def oposiciones_favoritas():
         opos_ids,
     ).fetchall()
 
-    # Ordenar según el parámetro orden
-    reverse_order = True if orden == "fecha_desc" else False
+    fecha_por_id = {row["oposicion_id"]: row["fecha_favorito"] for row in fav_rows}
+
     oposiciones_ordenadas = sorted(
         oposiciones,
-        key=lambda o: o["fecha"] if o["fecha"] else "",
-        reverse=reverse_order,
+        key=lambda o: fecha_por_id.get(o["id"], ""),
+        reverse=True,
     )
 
     visitadas = [
@@ -417,9 +412,8 @@ def oposiciones_favoritas():
         total=len(oposiciones_ordenadas),
         page=1,
         total_pages=1,
-        orden=orden,
+        orden="desc",
         titulo_pagina=f"⭐ Oposiciones Favoritas de {user.name} {user.apellidos}",
-        es_favoritas=True,
     )
 
 
