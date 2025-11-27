@@ -191,19 +191,29 @@ def newsletter_prefs():
     if request.method == "POST":
         alerta_diaria = 1 if request.form.get("alerta_diaria") else 0
         alerta_favoritos = 1 if request.form.get("alerta_favoritos") else 0
-        departamento = request.form.get("departamento_filtro")
+        
+        # 🟢 CAPTURAR LISTA MÚLTIPLE DEL FORMULARIO
+        seleccionados = request.form.getlist("departamentos")
+        
+        # Lógica: Si marca "Todos" o no marca nada -> "Todos"
+        if "Todos" in seleccionados or not seleccionados:
+            dept_string = "Todos"
+        else:
+            # Guardamos limpio: "Sanidad,Justicia,Hacienda"
+            dept_string = ",".join(seleccionados)
 
         users_db.execute(
             """
             INSERT OR REPLACE INTO suscripciones (user_id, alerta_diaria, alerta_favoritos, departamento_filtro)
             VALUES (?, ?, ?, ?)
         """,
-            (user_id, alerta_diaria, alerta_favoritos, departamento),
+            (user_id, alerta_diaria, alerta_favoritos, dept_string),
         )
         users_db.commit()
         flash("¡Preferencias de alertas actualizadas!", "success")
         return redirect(url_for("user.newsletter_prefs"))
 
+    # Cargar preferencias actuales
     prefs = users_db.execute(
         "SELECT * FROM suscripciones WHERE user_id = ?", (user_id,)
     ).fetchone()
@@ -215,6 +225,7 @@ def newsletter_prefs():
             "departamento_filtro": "Todos",
         }
 
+    # Cargar lista de departamentos para el HTML
     dept_rows = boe_db.execute(
         "SELECT DISTINCT departamento FROM oposiciones WHERE departamento IS NOT NULL ORDER BY departamento"
     ).fetchall()
@@ -413,7 +424,6 @@ def enviar_resumen_ahora():
     users_db = get_users_db()
     user = current_user
 
-    # 1. Obtener preferencias guardadas
     prefs = users_db.execute(
         "SELECT * FROM suscripciones WHERE user_id = ?", (user.id,)
     ).fetchone()
@@ -424,17 +434,17 @@ def enviar_resumen_ahora():
         else "Todos"
     )
 
+    # Buscamos en los últimos 7 días para asegurar resultados en la prueba
     fecha_limite = (datetime.now() - timedelta(days=7)).strftime("%Y%m%d")
 
     sql = "SELECT * FROM oposiciones WHERE fecha >= ?"
     params = [fecha_limite]
 
-    # 🔴 CORRECCIÓN DE LIMPIEZA (Crucial para arreglar tu error)
+    # 🟢 LÓGICA ROBUSTA DE LIMPIEZA Y BÚSQUEDA
     if dept_filter_str and dept_filter_str != "Todos":
-        # 1. Limpiamos caracteres 'basura' ([ ] ' ") que puedan haber quedado en la BD
+        # 1. Limpiar caracteres sucios ([], ', ")
         clean_str = dept_filter_str.replace("[", "").replace("]", "").replace("'", "").replace('"', "")
-        
-        # 2. Separamos por comas
+        # 2. Separar por comas
         lista_depts = [d.strip() for d in clean_str.split(',') if d.strip()]
         
         if lista_depts:
@@ -442,10 +452,10 @@ def enviar_resumen_ahora():
             sql += f" AND departamento IN ({placeholders})"
             params.extend(lista_depts)
 
-    # Ampliamos límite a 200 para que quepan todos los departamentos
+    # Límite ampliado a 200 para que quepan varios ministerios
     sql += " ORDER BY fecha DESC LIMIT 200"
-    
     rows = boe_db.execute(sql, params).fetchall()
+
     oposiciones = [dict(row) for row in rows]
 
     if oposiciones:
@@ -460,8 +470,6 @@ def enviar_resumen_ahora():
             traceback.print_exc()
             flash(f"❌ Error al enviar email: {e}", "danger")
     else:
-        # Mostramos la cadena limpia para depurar
-        msg_filtro = clean_str if 'clean_str' in locals() else dept_filter_str
-        flash(f"⚠️ No se encontraron oposiciones recientes (últimos 7 días) para: {msg_filtro}", "warning")
+        flash(f"⚠️ No se encontraron oposiciones recientes para: {dept_filter_str}. Intenta marcar 'Todos' para probar.", "warning")
 
     return redirect(url_for("user.newsletter_prefs"))
