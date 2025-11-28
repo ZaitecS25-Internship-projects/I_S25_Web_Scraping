@@ -12,7 +12,7 @@ test_premium_bp = Blueprint('test_premium', __name__)
 @test_premium_bp.route('/activar-premium-prueba')
 @login_required
 def activar_premium_prueba():
-    """Activa una suscripción premium de prueba (30 días) sin pagar"""
+    """Activa una suscripción premium de prueba (15 días) sin pagar"""
     db = get_users_db()
     
     try:
@@ -25,9 +25,9 @@ def activar_premium_prueba():
         if suscripcion_existente:
             flash('Ya tienes una suscripción premium activa', 'info')
         else:
-            # Crear suscripción de prueba por 30 días
+            # Crear suscripción de prueba por 15 días
             fecha_inicio = datetime.now()
-            fecha_fin = fecha_inicio + timedelta(days=30)
+            fecha_fin = fecha_inicio + timedelta(days=15)
             
             db.execute("""
                 INSERT INTO suscripciones_premium 
@@ -41,7 +41,7 @@ def activar_premium_prueba():
                     estado = 'activa'
             """, (
                 current_user.id,
-                'Plan Premium Prueba (30 días)',
+                'Plan Premium Prueba (15 días)',
                 0.00,
                 fecha_inicio.isoformat(),
                 fecha_fin.isoformat(),
@@ -49,7 +49,7 @@ def activar_premium_prueba():
             ))
             
             db.commit()
-            flash('✅ Premium de prueba activado por 30 días', 'success')
+            flash('✅ Premium de prueba activado por 15 días', 'success')
     
     except Exception as e:
         flash(f'Error al activar premium de prueba: {str(e)}', 'error')
