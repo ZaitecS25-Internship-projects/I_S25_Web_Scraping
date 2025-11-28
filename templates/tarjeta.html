@@ -80,12 +80,14 @@
               {% if user.is_authenticated %}
               <span style="margin-left: 10px;">
                 <button type="button" class="toggle-favorito-btn" data-oposicion-id="{{ row['id'] }}"
-                  aria-label="Marcar como favorito"
-                  style="border: none; background: none; cursor: pointer; color: orange;">
+                  aria-label="Marcar como favorito (Premium)"
+                  style="border: none; background: none; cursor: pointer; color: orange;"
+                  title="Función Premium: Favoritos">
                   <i class="bi {% if row['id'] in favoritas %}bi-star-fill{% else %}bi-star{% endif %}"
-                    title="{% if row['id'] in favoritas %}Quitar de Favoritos{% else %}Marcar como Favorito{% endif %}">
+                    title="{% if row['id'] in favoritas %}Quitar de Favoritos (Premium){% else %}Marcar como Favorito (Premium){% endif %}">
                   </i>
                 </button>
+                <small class="text-muted" style="font-size: 0.7rem;">💎</small>
               </span>
               {% endif %}
             </div>

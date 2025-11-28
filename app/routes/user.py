@@ -66,6 +66,12 @@ def user_home():
 @user_bp.route("/user_oposiciones")
 @login_required
 def oposiciones_vigentes():
+    from app.utils.premium import is_premium
+    
+    # Verificar si tiene premium para acceder a oposiciones vigentes
+    if not is_premium(current_user.id):
+        flash('⚠️ El acceso a Oposiciones Vigentes es una función premium. Actualiza tu cuenta para acceder.', 'warning')
+        return redirect(url_for('subscription.centro_suscripciones'))
 
     boe_db = get_boe_db()
     users_db = get_users_db()
@@ -79,12 +85,31 @@ def oposiciones_vigentes():
     # 🔴 CAMBIO: Obtener lista de departamentos filtrando vacíos
     raw_departamentos = request.args.getlist("departamentos")
     selected_departamentos = [d for d in raw_departamentos if d.strip()]
+    
+    # Verificar si intenta usar filtros sin premium
+    tiene_premium = is_premium(user.id)
+    if not tiene_premium and selected_departamentos:
+        flash('⚠️ Los filtros de departamento son una función premium. Actualiza tu cuenta para usarlos.', 'warning')
+        selected_departamentos = []
 
     busqueda = request.args.get("busqueda", "")
     provincia = request.args.get("provincia", "")
     fecha_desde = request.args.get("fecha_desde", "")
     fecha_hasta = request.args.get("fecha_hasta", "")
     orden = request.args.get("orden", "fecha_desc")
+    
+    # Verificar búsqueda, provincia y fechas (también premium)
+    if not tiene_premium:
+        if busqueda:
+            flash('⚠️ La búsqueda por palabras clave es una función premium. Actualiza tu cuenta para usarla.', 'warning')
+            busqueda = ""
+        if provincia:
+            flash('⚠️ El filtro por provincia es una función premium. Actualiza tu cuenta para usarlo.', 'warning')
+            provincia = ""
+        if fecha_desde or fecha_hasta:
+            flash('⚠️ Los filtros por fecha son una función premium. Actualiza tu cuenta para usarlos.', 'warning')
+            fecha_desde = ""
+            fecha_hasta = ""
 
     sql_part = "FROM oposiciones WHERE fecha >= ?"
     params = [desde]
@@ -184,9 +209,16 @@ def oposiciones_vigentes():
 @user_bp.route("/user_alertas", methods=["GET", "POST"])
 @login_required
 def newsletter_prefs():
+    from app.utils.premium import is_premium
+    
     boe_db = get_boe_db()
     users_db = get_users_db()
     user_id = current_user.id
+    
+    # Verificar si tiene premium
+    if not is_premium(user_id):
+        flash('⚠️ Las alertas personalizadas por correo son una función premium. Actualiza tu cuenta para configurarlas.', 'warning')
+        return redirect(url_for('subscription.centro_suscripciones'))
 
     if request.method == "POST":
         alerta_diaria = 1 if request.form.get("alerta_diaria") else 0
@@ -312,7 +344,18 @@ def marcar_visitada(oposicion_id):
 @user_bp.route("/toggle_favorito/<int:oposicion_id>", methods=["POST"])
 @login_required
 def toggle_favorito_route(oposicion_id):
+    from app.utils.premium import is_premium
+    
     user = current_user
+    
+    # Verificar si tiene premium
+    if not is_premium(user.id):
+        return jsonify({
+            "ok": False, 
+            "error": "premium_required",
+            "message": "La función de favoritos es exclusiva para usuarios premium. Actualiza tu cuenta para usarla."
+        }), 403
+    
     is_favorite = toggle_favorito(user.id, oposicion_id)
     return jsonify({"ok": True, "is_favorite": is_favorite})
 
@@ -320,6 +363,13 @@ def toggle_favorito_route(oposicion_id):
 @user_bp.route("/user_favoritas")
 @login_required
 def oposiciones_favoritas():
+    from app.utils.premium import is_premium
+    
+    # Verificar si tiene premium
+    if not is_premium(current_user.id):
+        flash('⚠️ La función de favoritos es exclusiva para usuarios premium. Actualiza tu cuenta para acceder.', 'warning')
+        return redirect(url_for('subscription.centro_suscripciones'))
+    
     boe_db = get_boe_db()
     users_db = get_users_db()
     user = current_user

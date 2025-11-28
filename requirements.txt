@@ -14,3 +14,6 @@ MarkupSafe==2.1.5 # Lo usa Jinja
 # Bot de Telegram
 python-telegram-bot>=20.0 # Bot de Telegram para notificaciones
 python-dotenv==1.0.0 # Cargar variables de entorno
+
+# Pagos con Stripe
+stripe==11.1.0 # Procesamiento de pagos
