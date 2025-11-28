@@ -132,14 +132,17 @@ async def nuevas(update: Update, context: ContextTypes.DEFAULT_TYPE):
         mensaje += f"🏛️ *{dept}* ({len(ops)} oposiciones)\n"
         for op in ops[:3]:  # Max 3 por departamento
             titulo = op['titulo'][:100] + "..." if len(op['titulo']) > 100 else op['titulo']
-            mensaje += f"  • {titulo}\n"
+            if op['url_html']:
+                mensaje += f"  • [{titulo}]({op['url_html']})\n"
+            else:
+                mensaje += f"  • {titulo}\n"
         if len(ops) > 3:
             mensaje += f"  _... y {len(ops) - 3} más_\n"
         mensaje += "\n"
     
     # Botones para ver más
     keyboard = [
-        [InlineKeyboardButton("🔍 Ver por Departamento", callback_data="ver_departamentos")]
+        [InlineKeyboardButton("🔍 Ver por Departamento", callback_data="listar_departamentos")]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     
@@ -230,11 +233,12 @@ async def buscar(update: Update, context: ContextTypes.DEFAULT_TYPE):
         fecha = datetime.strptime(op['fecha'], "%Y%m%d").strftime("%d/%m/%Y")
         dept = op['departamento'][:40] if op['departamento'] else "Sin departamento"
         
-        mensaje += f"📄 *{titulo}*\n"
+        if op['url_html']:
+            mensaje += f"📄 *[{titulo}]({op['url_html']})*\n"
+        else:
+            mensaje += f"📄 *{titulo}*\n"
         mensaje += f"   🏛️ {dept}\n"
         mensaje += f"   📅 {fecha}\n"
-        if op['url_html']:
-            mensaje += f"   🔗 [Ver en BOE]({op['url_html']})\n"
         mensaje += "\n"
     
     if len(oposiciones) > 10:
@@ -301,7 +305,7 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     data = query.data
     
-    if data == "ver_departamentos":
+    if data == "listar_departamentos":
         db = get_boe_db()
         hoy = datetime.today().strftime("%Y%m%d")
         
@@ -317,11 +321,81 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         
         db.close()
         
-        mensaje = "🏛️ *Top Departamentos Hoy*\n\n"
-        for dep in deps:
-            mensaje += f"• {dep['departamento']}: *{dep['total']}* oposiciones\n"
+        if not deps:
+            await query.edit_message_text("❌ No hay departamentos con oposiciones hoy.")
+            return
         
-        await query.edit_message_text(mensaje, parse_mode='Markdown')
+        mensaje = "🏛️ *Selecciona un Departamento*\n\n"
+        
+        # Crear botones para cada departamento
+        keyboard = []
+        for i, dep in enumerate(deps):
+            nombre = dep['departamento']
+            total = dep['total']
+            # Acortar nombre para el botón
+            nombre_boton = nombre[:35] + "..." if len(nombre) > 35 else nombre
+            # Usar índice como callback_data
+            keyboard.append([InlineKeyboardButton(
+                f"{nombre_boton} ({total})",
+                callback_data=f"dept_{i}"
+            )])
+        
+        # Guardar los departamentos en context para poder recuperarlos
+        context.user_data['departamentos_lista'] = [dep['departamento'] for dep in deps]
+        context.user_data['fecha_busqueda'] = hoy
+        
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        await query.edit_message_text(mensaje, parse_mode='Markdown', reply_markup=reply_markup)
+    
+    elif data.startswith("dept_"):
+        # Extraer el índice del departamento
+        idx = int(data.split("_")[1])
+        
+        # Recuperar el nombre del departamento
+        departamentos = context.user_data.get('departamentos_lista', [])
+        fecha = context.user_data.get('fecha_busqueda', datetime.today().strftime("%Y%m%d"))
+        
+        if idx >= len(departamentos):
+            await query.edit_message_text("❌ Error: Departamento no encontrado.")
+            return
+        
+        departamento = departamentos[idx]
+        
+        # Buscar oposiciones del departamento
+        db = get_boe_db()
+        oposiciones = db.execute(
+            """SELECT * FROM oposiciones 
+               WHERE fecha = ? AND departamento = ?
+               ORDER BY titulo
+               LIMIT 20""",
+            (fecha, departamento)
+        ).fetchall()
+        db.close()
+        
+        if not oposiciones:
+            await query.edit_message_text(f"❌ No hay oposiciones para {departamento}")
+            return
+        
+        # Mostrar oposiciones con enlaces
+        nombre_corto = departamento[:50] + "..." if len(departamento) > 50 else departamento
+        mensaje = f"🏛️ *{nombre_corto}*\n"
+        mensaje += f"_Total: {len(oposiciones)} oposiciones_\n\n"
+        
+        for i, op in enumerate(oposiciones[:15], 1):  # Mostrar máximo 15
+            titulo = op['titulo'][:70] + "..." if len(op['titulo']) > 70 else op['titulo']
+            if op['url_html']:
+                mensaje += f"{i}. [{titulo}]({op['url_html']})\n"
+            else:
+                mensaje += f"{i}. {titulo}\n"
+        
+        if len(oposiciones) > 15:
+            mensaje += f"\n_... y {len(oposiciones) - 15} más_\n"
+        
+        # Botón para volver
+        keyboard = [[InlineKeyboardButton("⬅️ Volver a Departamentos", callback_data="listar_departamentos")]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        
+        await query.edit_message_text(mensaje, parse_mode='Markdown', reply_markup=reply_markup, disable_web_page_preview=True)
     
 
 
