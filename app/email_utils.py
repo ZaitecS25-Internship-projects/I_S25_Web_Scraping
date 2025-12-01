@@ -1,5 +1,5 @@
 from flask_mail import Message
-from flask import url_for
+from flask import url_for, render_template
 from . import mail
 from .db import get_users_db
 from itsdangerous import URLSafeTimedSerializer
@@ -13,7 +13,7 @@ def generate_reset_token(email):
 
 
 def verify_reset_token(token, expiration=3600):
-    """Verifica el token y devuelve el email si es válido (expira en 1 hora por defecto)"""
+    """Verifica el token y devuelve el email si es válido"""
     serializer = URLSafeTimedSerializer(os.environ.get('SECRET_KEY', 'dev-secret-key'))
     try:
         email = serializer.loads(token, salt='password-reset-salt', max_age=expiration)
@@ -56,36 +56,23 @@ def send_password_reset_email(email, token):
     mail.send(msg)
 
 
+# 🔴 AQUÍ ESTÁ EL CAMBIO IMPORTANTE
 def send_new_oposiciones_email(recipients, oposiciones):
     if not recipients or not oposiciones:
         return
 
-    filas = []
-    for o in oposiciones:
-        titulo = o.get("titulo") or "(Sin título)"
-        fecha = o.get("fecha") or ""
-        url_html = o.get("url_html") or "#"
-        url_pdf = o.get("url_pdf")
-        dept = o.get("departamento") or ""
-        pdf_html = f' | <a href="{url_pdf}">PDF</a>' if url_pdf else ""
-        dept_html = f" — {dept}" if dept else ""
-        filas.append(
-            f'<li><strong>{titulo}</strong> — {fecha} — '
-            f'<a href="{url_html}">HTML</a>{pdf_html}{dept_html}</li>'
-        )
+    # Usamos la plantilla HTML en lugar de escribir el código aquí
+    html_content = render_template('emails/nuevas_oposiciones.html', oposiciones=oposiciones)
 
-    lista_html = "".join(filas)
-    html = (
-        "<h3>Nuevas oposiciones publicadas</h3>"
-        f"<p>Se han detectado {len(oposiciones)} nuevas oposiciones:</p>"
-        f"<ul>{lista_html}</ul>"
-        '<p style="font-size:12px;color:#666">'
-        "Este es un mensaje automático, por favor no responda."
-        "</p>"
+    subject = f"📢 {len(oposiciones)} nuevas oposiciones encontradas"
+    
+    # Enviamos el mensaje (charset utf-8 importante para tildes)
+    msg = Message(
+        subject=subject, 
+        recipients=recipients, 
+        html=html_content,
+        charset='utf-8'
     )
-
-    subject = f"{len(oposiciones)} nuevas oposiciones publicadas"
-    msg = Message(subject=subject, recipients=recipients, html=html)
     mail.send(msg)
 
 
