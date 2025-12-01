@@ -12,7 +12,7 @@ Funcionalidades:
 import os
 import sqlite3
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, time
 from dotenv import load_dotenv
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
@@ -421,11 +421,19 @@ async def enviar_resumen_diario(context: ContextTypes.DEFAULT_TYPE):
     db_boe = get_boe_db()
     hoy = datetime.today().strftime("%Y%m%d")
     
-    oposiciones = db_boe.execute(
+    oposiciones_count = db_boe.execute(
         "SELECT COUNT(*) as total FROM oposiciones WHERE fecha = ?",
         (hoy,)
     ).fetchone()
     
+    total = oposiciones_count['total']
+    
+    if total == 0:
+        logger.info("No hay oposiciones nuevas hoy")
+        db_boe.close()
+        return
+    
+    # Obtener top departamentos con oposiciones
     departamentos = db_boe.execute(
         """SELECT departamento, COUNT(*) as total 
            FROM oposiciones 
@@ -436,33 +444,53 @@ async def enviar_resumen_diario(context: ContextTypes.DEFAULT_TYPE):
         (hoy,)
     ).fetchall()
     
+    # Obtener algunas oposiciones destacadas
+    oposiciones_destacadas = db_boe.execute(
+        """SELECT titulo, url_html, departamento
+           FROM oposiciones 
+           WHERE fecha = ? AND url_html IS NOT NULL
+           ORDER BY RANDOM()
+           LIMIT 5""",
+        (hoy,)
+    ).fetchall()
+    
     db_boe.close()
     
-    total = oposiciones['total']
-    
-    if total == 0:
-        logger.info("No hay oposiciones nuevas hoy")
-        return
-    
+    # Construir mensaje
     mensaje = f"🔔 *Resumen Diario - {datetime.today().strftime('%d/%m/%Y')}*\n\n"
     mensaje += f"📊 Total de oposiciones publicadas: *{total}*\n\n"
     mensaje += "🏛️ *Top Departamentos:*\n"
     
     for dep in departamentos:
-        mensaje += f"• {dep['departamento']}: {dep['total']}\n"
+        nombre_corto = dep['departamento'][:50] + "..." if len(dep['departamento']) > 50 else dep['departamento']
+        mensaje += f"• {nombre_corto}: *{dep['total']}*\n"
     
-    mensaje += "\n_Usa /nuevas para ver todas las oposiciones_"
+    if oposiciones_destacadas:
+        mensaje += "\n📄 *Oposiciones Destacadas:*\n"
+        for i, op in enumerate(oposiciones_destacadas, 1):
+            titulo = op['titulo'][:60] + "..." if len(op['titulo']) > 60 else op['titulo']
+            mensaje += f"{i}. [{titulo}]({op['url_html']})\n"
+    
+    mensaje += "\n💡 _Usa /nuevas para ver todas las oposiciones_"
+    mensaje += "\n🔍 _Usa /buscar <texto> para buscar específicamente_"
     
     # Enviar a todos los suscriptores
+    enviados = 0
+    errores = 0
     for suscriptor in suscriptores:
         try:
             await context.bot.send_message(
                 chat_id=suscriptor['chat_id'],
                 text=mensaje,
-                parse_mode='Markdown'
+                parse_mode='Markdown',
+                disable_web_page_preview=True
             )
+            enviados += 1
         except Exception as e:
+            errores += 1
             logger.error(f"Error enviando mensaje a {suscriptor['chat_id']}: {e}")
+    
+    logger.info(f"Resumen diario enviado: {enviados} exitosos, {errores} errores")
 
 
 def main():
@@ -485,15 +513,17 @@ def main():
     # Registrar callback de botones
     application.add_handler(CallbackQueryHandler(button_callback))
     
-    # Programar envío diario a las 9:00 AM
-    # application.job_queue.run_daily(
-    #     enviar_resumen_diario,
-    #     time=datetime.strptime("09:00", "%H:%M").time(),
-    #     days=(0, 1, 2, 3, 4, 5, 6)  # Todos los días
-    # )
+    # Programar envío diario a las 8:00 AM
+    application.job_queue.run_daily(
+        enviar_resumen_diario,
+        time=time(hour=8, minute=0),  # 8:00 AM
+        days=(0, 1, 2, 3, 4, 5, 6)  # Todos los días
+    )
     
     logger.info("Bot iniciado correctamente")
+    logger.info("📅 Notificaciones diarias programadas para las 8:00 AM")
     print("🤖 Bot de Telegram en funcionamiento...")
+    print("📅 Notificaciones diarias activadas a las 8:00 AM")
     print("Presiona Ctrl+C para detener")
     
     # Iniciar bot
