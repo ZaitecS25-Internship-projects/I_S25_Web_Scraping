@@ -421,11 +421,7 @@ html[data-theme="dark"] .navbar .dropdown-menu .dropdown-item:hover {
     transition: all 0.3s ease;
     background: #fff;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.card:hover {
-    transform: translateY(-10px) scale(1.02);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    max-width: 100%;
 }
 
 .card-img-top {
@@ -433,10 +429,6 @@ html[data-theme="dark"] .navbar .dropdown-menu .dropdown-item:hover {
     height: auto;
     object-fit: cover;
     transition: transform 0.3s ease;
-}
-
-.card:hover .card-img-top {
-    transform: scale(1.05);
 }
 
 .card-body {
@@ -451,8 +443,19 @@ html[data-theme="dark"] .navbar .dropdown-menu .dropdown-item:hover {
     transition: color 0.3s;
 }
 
-.card:hover .card-title {
-    color: #004aad;
+@media (min-width: 992px) {
+    .card:hover {
+        transform: translateY(-10px) scale(1.02);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    }
+
+    .card:hover .card-img-top {
+        transform: scale(1.05);
+    }
+
+    .card:hover .card-title {
+        color: #004aad;
+    }
 }
 
 /* Espacio entre últimas tarjetas y footer */
