@@ -53,21 +53,18 @@ Define la estructura general de la aplicación:
               <ul class="user-dropdown" role="menu" aria-labelledby="userMenuDropdown">
                 <li>
                   <a class="user-dropdown-item" href="{{ url_for('user.oposiciones_vigentes') }}">
-                    📚 Oposiciones vigentes <span class="badge bg-warning text-dark" style="font-size: 0.65rem;">💎 Premium</span>
+                    📚 Oposiciones vigentes
                   </a>
                 </li>
                 <li>
                   <a class="user-dropdown-item" href="{{ url_for('user.oposiciones_favoritas') }}">
-                    ⭐ Mis Favoritas <span class="badge bg-warning text-dark" style="font-size: 0.65rem;">💎 Premium</span>
+                    ⭐ Mis Favoritas
                   </a>
                 </li>
                 <li>
                   <a class="user-dropdown-item" href="{{ url_for('user.newsletter_prefs') }}">
-                    🔔 Alertas por correo <span class="badge bg-warning text-dark" style="font-size: 0.65rem;">💎 Premium</span>
+                    🔔 Alertas por correo
                   </a>
-                </li>
-                <li>
-                  <a class="user-dropdown-item" href="{{ url_for('subscription.centro_suscripciones') }}">💎 Centro de suscripciones</a>
                 </li>
                 <li class="dropdown-sep"></li>
                 <li>
@@ -302,17 +299,7 @@ Define la estructura general de la aplicación:
               'Content-Type': 'application/json'
             },
           })
-            .then(response => {
-              if (response.status === 403) {
-                return response.json().then(data => {
-                  // Usuario no tiene premium
-                  alert('⚠️ ' + data.message);
-                  window.location.href = '/suscripciones';
-                  throw new Error('premium_required');
-                });
-              }
-              return response.json();
-            })
+            .then(response => response.json())
             .then(data => {
               if (data.ok) {
                 // Cambiar clase del icono según estado
@@ -328,9 +315,7 @@ Define la estructura general de la aplicación:
               }
             })
             .catch(error => {
-              if (error.message !== 'premium_required') {
-                console.error('Error conexión:', error);
-              }
+              console.error('Error conexión:', error);
             });
         });
       });

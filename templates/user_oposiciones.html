@@ -9,8 +9,7 @@
   <div class="card mb-4 shadow-sm">
     <div class="card-body">
       <h5 class="card-title mb-3">
-        Filtros de búsqueda 
-        <span class="badge bg-warning text-dark">💎 Premium</span>
+        Filtros de búsqueda
       </h5>
 
       <form method="GET" action="{{ url_for('user.oposiciones_vigentes') }}">
@@ -18,7 +17,6 @@
           <div class="col-md-8">
             <label for="busqueda" class="form-label">
               Buscar por palabras clave:
-              <span class="badge bg-warning text-dark">💎 Premium</span>
             </label>
             <input type="text" class="form-control" id="busqueda" name="busqueda" value="{{ busqueda or '' }}"
               placeholder="Buscar por identificador, título, control...">
@@ -26,7 +24,6 @@
           <div class="col-md-4">
             <label for="provincia" class="form-label">
               Filtrar por provincia:
-              <span class="badge bg-warning text-dark">💎 Premium</span>
             </label>
             <select class="form-select" id="provincia" name="provincia">
               <option value="">Todas las provincias</option>
@@ -43,14 +40,12 @@
           <div class="col-md-3">
             <label for="fecha_desde" class="form-label">
               Desde:
-              <span class="badge bg-warning text-dark">💎 Premium</span>
             </label>
             <input type="date" class="form-control" id="fecha_desde" name="fecha_desde" value="{{ fecha_desde or '' }}">
           </div>
           <div class="col-md-3">
             <label for="fecha_hasta" class="form-label">
               Hasta:
-              <span class="badge bg-warning text-dark">💎 Premium</span>
             </label>
             <input type="date" class="form-control" id="fecha_hasta" name="fecha_hasta" value="{{ fecha_hasta or '' }}">
           </div>
@@ -58,7 +53,6 @@
           <div class="col-md-6">
             <label class="form-label">
               Departamentos:
-              <span class="badge bg-warning text-dark">💎 Premium</span>
             </label>
             <div class="dropup">
               <button class="btn btn-tertiary  dropdown-toggle w-100 text-start" type="button"

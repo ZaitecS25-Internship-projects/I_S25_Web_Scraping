@@ -148,18 +148,9 @@ def create_app():
     from .routes.main import main_bp
     from .routes.auth import auth_bp
     from .routes.user import user_bp
-    from .routes.subscription import subscription_bp
-    from .routes.test_premium import test_premium_bp
 
     app.register_blueprint(main_bp)
     app.register_blueprint(auth_bp)
     app.register_blueprint(user_bp)
-    app.register_blueprint(subscription_bp)
-    app.register_blueprint(test_premium_bp)
-    
-    # Inicializar tabla de suscripciones
-    from .routes.subscription import init_subscription_db
-    with app.app_context():
-        init_subscription_db()
 
     return app
