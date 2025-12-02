@@ -1287,3 +1287,22 @@ html[data-theme="dark"] .config-page .btn-primary:hover {
     transform: translateY(-2px);
     box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
 }
+
+/* Botones de navegación Perfil/Seguridad en modo oscuro */
+html[data-theme="dark"] .config-page .list-group-item-action {
+    background-color: #1e293b !important;
+    color: #e5e7eb !important;
+    border-color: #3b3f54 !important;
+}
+
+html[data-theme="dark"] .config-page .list-group-item-action:hover {
+    background-color: #334155 !important;
+    color: #ffffff !important;
+}
+
+html[data-theme="dark"] .config-page .list-group-item-action.active {
+    background: linear-gradient(135deg, #1e40af, #3b82f6) !important;
+    border-color: #3b82f6 !important;
+    color: #ffffff !important;
+    font-weight: 600;
+}
