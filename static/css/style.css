@@ -422,11 +422,7 @@ html[data-theme="dark"] .navbar .dropdown-menu .dropdown-item:hover {
     transition: all 0.3s ease;
     background: #fff;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.card:hover {
-    transform: translateY(-10px) scale(1.02);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    max-width: 100%;
 }
 
 .card-img-top {
@@ -434,10 +430,6 @@ html[data-theme="dark"] .navbar .dropdown-menu .dropdown-item:hover {
     height: auto;
     object-fit: cover;
     transition: transform 0.3s ease;
-}
-
-.card:hover .card-img-top {
-    transform: scale(1.05);
 }
 
 .card-body {
@@ -452,8 +444,19 @@ html[data-theme="dark"] .navbar .dropdown-menu .dropdown-item:hover {
     transition: color 0.3s;
 }
 
-.card:hover .card-title {
-    color: #004aad;
+@media (min-width: 992px) {
+    .card:hover {
+        transform: translateY(-10px) scale(1.02);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    }
+
+    .card:hover .card-img-top {
+        transform: scale(1.05);
+    }
+
+    .card:hover .card-title {
+        color: #004aad;
+    }
 }
 
 /* Espacio entre últimas tarjetas y footer */
@@ -1272,3 +1275,35 @@ html[data-theme="dark"] .form-select {
 html[data-theme="dark"] .dropdown-menu,
 html[data-theme="dark"] .dropdown-menu[style] { background:#2c2f47 !important; color:#e5e7eb !important; border-color:#3b3f54 !important; }
 html[data-theme="dark"] .dropdown-menu .form-check-input { accent-color:#60a5fa !important; background:transparent !important; border-color:#4b5166 !important; }
+
+/* Botones página configuración modo oscuro */
+html[data-theme="dark"] .config-page .btn-primary {
+    background: linear-gradient(135deg, #1e40af, #3b82f6) !important;
+    border: none !important;
+    color: #fff !important;
+}
+
+html[data-theme="dark"] .config-page .btn-primary:hover {
+    background: linear-gradient(135deg, #2563eb, #60a5fa) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+}
+
+/* Botones de navegación Perfil/Seguridad en modo oscuro */
+html[data-theme="dark"] .config-page .list-group-item-action {
+    background-color: #1e293b !important;
+    color: #e5e7eb !important;
+    border-color: #3b3f54 !important;
+}
+
+html[data-theme="dark"] .config-page .list-group-item-action:hover {
+    background-color: #334155 !important;
+    color: #ffffff !important;
+}
+
+html[data-theme="dark"] .config-page .list-group-item-action.active {
+    background: linear-gradient(135deg, #1e40af, #3b82f6) !important;
+    border-color: #3b82f6 !important;
+    color: #ffffff !important;
+    font-weight: 600;
+}

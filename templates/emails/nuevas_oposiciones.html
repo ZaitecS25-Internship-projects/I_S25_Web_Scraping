@@ -1,16 +1,66 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
-  <body>
-    <p>Hay {{ oposiciones|length }} nuevas oposiciones publicadas:</p>
-    <ul>
-      {% for o in oposiciones %}
-        <li>
-          <strong>{{ o.titulo }}</strong> — {{ o.fecha|format_date }}
-          — <a href="{{ o.url_html }}">HTML</a>
-          {% if o.url_pdf %} | <a href="{{ o.url_pdf }}">PDF</a>{% endif %}
-          {% if o.departamento %} — {{ o.departamento }}{% endif %}
-        </li>
-      {% endfor %}
-    </ul>
-  </body>
+<head>
+    <meta charset="UTF-8">
+    <title>Nuevas Oposiciones</title>
+</head>
+<body style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 20px;">
+
+    <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+        
+        <div style="background-color: #002b5b; padding: 20px; text-align: center; color: #ffffff;">
+            <h1 style="margin: 0; font-size: 24px;">📜 Oposiciones BOE</h1>
+            <p style="margin: 5px 0 0; opacity: 0.9;">Resumen de novedades</p>
+        </div>
+
+        <div style="padding: 20px;">
+            <p style="font-size: 16px; color: #333;">¡Hola!</p>
+            <p style="font-size: 16px; color: #333; margin-bottom: 20px;">
+                Hemos encontrado <strong>{{ oposiciones|length }}</strong> nuevas convocatorias que coinciden con tus preferencias:
+            </p>
+
+            {% for o in oposiciones %}
+            <div style="border: 1px solid #e0e0e0; border-radius: 6px; padding: 15px; margin-bottom: 15px; background-color: #fafafa;">
+                
+                <div style="font-size: 12px; color: #666; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px;">
+                    {{ o.departamento if o.departamento else 'Varios' }}
+                </div>
+                
+                <h3 style="margin: 0 0 10px 0; font-size: 18px; color: #004aad;">
+                    <a href="{{ o.url_html }}" style="text-decoration: none; color: #004aad;">
+                        {{ o.titulo }}
+                    </a>
+                </h3>
+                
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+                    <span style="font-size: 14px; color: #555; margin-right:20px;">📅 {{ o.fecha|format_date }}</span>
+                    
+                    <div>
+                        {% if o.url_pdf %}
+                        <a href="{{ o.url_pdf }}" style="background-color: #dc3545; color: white; text-decoration: none; padding: 6px 12px; border-radius: 4px; font-size: 14px; font-weight: bold;">
+                            Ver PDF
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+
+            <div style="text-align: center; margin-top: 30px;">
+                <a href="https://oposicionesboe.pythonanywhere.com/user_oposiciones" 
+                   style="background-color: #002b5b; color: white; text-decoration: none; padding: 12px 25px; border-radius: 5px; font-size: 16px; display: inline-block;">
+                    Ver todas en la web
+                </a>
+            </div>
+        </div>
+
+        <div style="background-color: #eeeeee; padding: 15px; text-align: center; font-size: 12px; color: #777;">
+            <p style="margin: 0;">Estás recibiendo este correo porque te suscribiste a las alertas de Oposiciones BOE.</p>
+            <p style="margin: 5px 0 0;">
+                <a href="https://oposicionesboe.pythonanywhere.com/user_alertas" style="color: #004aad;">Gestionar mis alertas</a>
+            </p>
+        </div>
+    </div>
+
+</body>
 </html>

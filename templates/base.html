@@ -52,14 +52,19 @@ Define la estructura general de la aplicación:
               </a>
               <ul class="user-dropdown" role="menu" aria-labelledby="userMenuDropdown">
                 <li>
-                  <a class="user-dropdown-item" href="{{ url_for('user.oposiciones_vigentes') }}">📚 Oposiciones
-                    vigentes</a>
+                  <a class="user-dropdown-item" href="{{ url_for('user.oposiciones_vigentes') }}">
+                    📚 Oposiciones vigentes
+                  </a>
                 </li>
                 <li>
-                  <a class="user-dropdown-item" href="{{ url_for('user.oposiciones_favoritas') }}">⭐ Mis Favoritas</a>
+                  <a class="user-dropdown-item" href="{{ url_for('user.oposiciones_favoritas') }}">
+                    ⭐ Mis Favoritas
+                  </a>
                 </li>
                 <li>
-                  <a class="user-dropdown-item" href="{{ url_for('user.newsletter_prefs') }}">🔔 Alertas por correo</a>
+                  <a class="user-dropdown-item" href="{{ url_for('user.newsletter_prefs') }}">
+                    🔔 Alertas por correo
+                  </a>
                 </li>
                 <li class="dropdown-sep"></li>
                 <li>
@@ -309,7 +314,9 @@ Define la estructura general de la aplicación:
                 console.warn("Error al actualizar favoritos en servidor.");
               }
             })
-            .catch(error => console.error('Error conexión:', error));
+            .catch(error => {
+              console.error('Error conexión:', error);
+            });
         });
       });
 

@@ -12,6 +12,7 @@ from flask import (
     current_app,
 )
 from flask_login import login_required, current_user
+from werkzeug.utils import secure_filename
 
 from app.scraping.boe_scraper import scrape_boe_ultimos_dias, sync_boe_hasta_hoy
 from ..db import get_users_db, get_boe_db
@@ -20,6 +21,7 @@ from ..email_utils import send_new_oposiciones_email
 user_bp = Blueprint("user", __name__)
 
 
+# --- FUNCIONES AUXILIARES ---
 def registrar_visita(user_id, oposicion_id):
     db = get_users_db()
     fecha = datetime.utcnow().isoformat()
@@ -57,6 +59,8 @@ def toggle_favorito(user_id, oposicion_id):
         return False
 
 
+# --- RUTAS ---
+
 @user_bp.route("/user", methods=["GET", "POST"])
 @login_required
 def user_home():
@@ -66,7 +70,6 @@ def user_home():
 @user_bp.route("/user_oposiciones")
 @login_required
 def oposiciones_vigentes():
-
     boe_db = get_boe_db()
     users_db = get_users_db()
     user = current_user
@@ -76,7 +79,6 @@ def oposiciones_vigentes():
     por_pagina = 10
     offset = (page - 1) * por_pagina
 
-    # 🔴 CAMBIO: Obtener lista de departamentos filtrando vacíos
     raw_departamentos = request.args.getlist("departamentos")
     selected_departamentos = [d for d in raw_departamentos if d.strip()]
 
@@ -116,17 +118,12 @@ def oposiciones_vigentes():
     total = boe_db.execute(total_query, params).fetchone()[0]
     total_pages = (total + por_pagina - 1) // por_pagina
 
-    # Determinar dirección de ordenamiento
     if orden == "fecha_asc":
         order_direction = "ASC"
-    elif orden == "fecha_desc":
-        order_direction = "DESC"
     else:
-        order_direction = "DESC"  # Por defecto
+        order_direction = "DESC"
 
-    data_query = (
-        f"SELECT * {sql_part} ORDER BY fecha {order_direction} LIMIT ? OFFSET ?"
-    )
+    data_query = f"SELECT * {sql_part} ORDER BY fecha {order_direction} LIMIT ? OFFSET ?"
     data_params = params + [por_pagina, offset]
     oposiciones = boe_db.execute(data_query, data_params).fetchall()
 
@@ -177,7 +174,7 @@ def oposiciones_vigentes():
         favoritas=favoritas,
         hoy=datetime.today().strftime("%Y%m%d"),
         titulo_pagina=f"📢 Oposiciones Vigentes de {user.name} {user.apellidos}",
-        total=total,
+        total=total
     )
 
 
@@ -190,30 +187,29 @@ def newsletter_prefs():
 
     if request.method == "POST":
         alerta_diaria = 1 if request.form.get("alerta_diaria") else 0
-        alerta_favoritos = 1 if request.form.get("alerta_favoritos") else 0
-        
-        # 🟢 CAPTURAR LISTA MÚLTIPLE DEL FORMULARIO
+        # 🔴 ELIMINADO: ya no capturamos alerta_favoritos del formulario
+
+        # Capturar lista múltiple de departamentos
         seleccionados = request.form.getlist("departamentos")
         
-        # Lógica: Si marca "Todos" o no marca nada -> "Todos"
         if "Todos" in seleccionados or not seleccionados:
             dept_string = "Todos"
         else:
-            # Guardamos limpio: "Sanidad,Justicia,Hacienda"
             dept_string = ",".join(seleccionados)
 
+        # 🔴 ACTUALIZADO: La SQL ya no guarda alerta_favoritos explícitamente
+        # (Se usará el valor por defecto de la tabla, que es 0)
         users_db.execute(
             """
-            INSERT OR REPLACE INTO suscripciones (user_id, alerta_diaria, alerta_favoritos, departamento_filtro)
-            VALUES (?, ?, ?, ?)
+            INSERT OR REPLACE INTO suscripciones (user_id, alerta_diaria, departamento_filtro)
+            VALUES (?, ?, ?)
         """,
-            (user_id, alerta_diaria, alerta_favoritos, dept_string),
+            (user_id, alerta_diaria, dept_string),
         )
         users_db.commit()
         flash("¡Preferencias de alertas actualizadas!", "success")
         return redirect(url_for("user.newsletter_prefs"))
 
-    # Cargar preferencias actuales
     prefs = users_db.execute(
         "SELECT * FROM suscripciones WHERE user_id = ?", (user_id,)
     ).fetchone()
@@ -221,11 +217,9 @@ def newsletter_prefs():
     if not prefs:
         prefs = {
             "alerta_diaria": 0,
-            "alerta_favoritos": 0,
             "departamento_filtro": "Todos",
         }
 
-    # Cargar lista de departamentos para el HTML
     dept_rows = boe_db.execute(
         "SELECT DISTINCT departamento FROM oposiciones WHERE departamento IS NOT NULL ORDER BY departamento"
     ).fetchall()
@@ -254,17 +248,44 @@ def update_profile():
     name = request.form.get("name", "").strip()
     apellidos = request.form.get("apellidos", "").strip()
     telefono = request.form.get("telefono", "").strip()
+    genero = request.form.get("genero", "").strip()
+
+    dni = request.form.get("dni", "").strip()
+    fecha_nacimiento = request.form.get("fecha_nacimiento", "").strip()
+    nacionalidad = request.form.get("nacionalidad", "").strip()
+    direccion = request.form.get("direccion", "").strip()
+    codigo_postal = request.form.get("codigo_postal", "").strip()
+    ciudad = request.form.get("ciudad", "").strip()
+    provincia = request.form.get("provincia", "").strip()
     nivel_estudios = request.form.get("nivel_estudios", "").strip()
     titulacion = request.form.get("titulacion", "").strip()
+    situacion_laboral = request.form.get("situacion_laboral", "").strip()
+
+    idiomas_seleccionados = request.form.getlist("idiomas")
+    otros_idiomas = request.form.get("otros_idiomas", "").strip()
+    if otros_idiomas:
+        idiomas_seleccionados.append(otros_idiomas)
+    idiomas = ", ".join(idiomas_seleccionados) if idiomas_seleccionados else ""
+
+    discapacidad = 1 if request.form.get("discapacidad") == "si" else 0
+    porcentaje_discapacidad = int(
+        request.form.get("porcentaje_discapacidad", 0) or 0
+    )
+
+    if genero == "Otro":
+        otro_genero = request.form.get("otro_genero", "").strip()
+        if otro_genero:
+            genero = otro_genero
+
     foto_perfil = user.foto_perfil
+    
     if "foto_perfil" in request.files:
         file = request.files["foto_perfil"]
         if file and file.filename:
             allowed_extensions = {"png", "jpg", "jpeg", "gif", "webp"}
             filename = file.filename.lower()
             if "." in filename and filename.rsplit(".", 1)[1] in allowed_extensions:
-                from werkzeug.utils import secure_filename
-
+                
                 filename = secure_filename(
                     f"user_{user.id}_{int(datetime.now().timestamp())}."
                     f"{filename.rsplit('.', 1)[1]}"
@@ -278,17 +299,17 @@ def update_profile():
     db.execute(
         """
         UPDATE users 
-        SET name = ?, apellidos = ?, telefono = ?, foto_perfil = ?,
-            nivel_estudios = ?, titulacion =?
+        SET name = ?, apellidos = ?, telefono = ?, foto_perfil = ?, genero = ?,
+            dni = ?, fecha_nacimiento = ?, nacionalidad = ?, direccion = ?, codigo_postal = ?,
+            ciudad = ?, provincia = ?, nivel_estudios = ?, titulacion = ?, situacion_laboral = ?,
+            idiomas = ?, discapacidad = ?, porcentaje_discapacidad = ?
         WHERE id = ?
     """,
         (
-            name,
-            apellidos,
-            telefono,
-            foto_perfil,
-            nivel_estudios,
-            titulacion,
+            name, apellidos, telefono, foto_perfil, genero,
+            dni, fecha_nacimiento, nacionalidad, direccion, codigo_postal,
+            ciudad, provincia, nivel_estudios, titulacion, situacion_laboral,
+            idiomas, discapacidad, porcentaje_discapacidad,
             user.id,
         ),
     )
@@ -303,9 +324,6 @@ def update_profile():
 def marcar_visitada(oposicion_id):
     user_id = current_user.id
     registrar_visita(user_id, oposicion_id)
-    print(
-        f"🟢 Registro de visita recibido: user={user_id}, oposicion_id={oposicion_id}"
-    )
     return jsonify({"ok": True})
 
 
@@ -324,27 +342,15 @@ def oposiciones_favoritas():
     users_db = get_users_db()
     user = current_user
 
-    # 🟢 CORRECCIÓN: Obtener datos para los filtros también en Favoritas
+    # Filtros para la vista de favoritas
     desde = (datetime.today() - timedelta(days=30)).strftime("%Y%m%d")
-
-    # Departamentos
     departamentos = boe_db.execute(
-        """
-        SELECT DISTINCT departamento 
-        FROM oposiciones 
-        WHERE fecha >= ? AND departamento IS NOT NULL 
-        ORDER BY departamento
-        """,
+        "SELECT DISTINCT departamento FROM oposiciones WHERE fecha >= ? AND departamento IS NOT NULL ORDER BY departamento",
         (desde,),
     ).fetchall()
-
-    # Provincias
     provincias = boe_db.execute(
-        "SELECT DISTINCT provincia FROM oposiciones "
-        "WHERE provincia IS NOT NULL ORDER BY provincia"
+        "SELECT DISTINCT provincia FROM oposiciones WHERE provincia IS NOT NULL ORDER BY provincia"
     ).fetchall()
-
-    # --- Fin datos filtros ---
 
     fav_rows = users_db.execute(
         "SELECT oposicion_id, fecha_favorito FROM favoritas WHERE user_id = ?",
@@ -355,9 +361,9 @@ def oposiciones_favoritas():
         return render_template(
             "user_oposiciones.html",
             oposiciones=[],
-            departamentos=departamentos,  # 🟢 Pasamos departamentos
+            departamentos=departamentos,
             selected_departamentos=[],
-            provincias=provincias,  # 🟢 Pasamos provincias
+            provincias=provincias,
             busqueda="",
             provincia_filtro="",
             fecha_desde="",
@@ -399,9 +405,9 @@ def oposiciones_favoritas():
     return render_template(
         "user_oposiciones.html",
         oposiciones=oposiciones_ordenadas,
-        departamentos=departamentos,  # 🟢 Pasamos departamentos
+        departamentos=departamentos,
         selected_departamentos=[],
-        provincias=provincias,  # 🟢 Pasamos provincias
+        provincias=provincias,
         busqueda="",
         provincia_filtro="",
         fecha_desde="",
@@ -434,17 +440,14 @@ def enviar_resumen_ahora():
         else "Todos"
     )
 
-    # Buscamos en los últimos 7 días para asegurar resultados en la prueba
-    fecha_limite = (datetime.now() - timedelta(days=7)).strftime("%Y%m%d")
-
+    fecha_busqueda = datetime.now().strftime("%Y%m%d")
+    
     sql = "SELECT * FROM oposiciones WHERE fecha >= ?"
-    params = [fecha_limite]
+    params = [fecha_busqueda]
 
-    # 🟢 LÓGICA ROBUSTA DE LIMPIEZA Y BÚSQUEDA
+    # Lógica de limpieza y múltiples departamentos
     if dept_filter_str and dept_filter_str != "Todos":
-        # 1. Limpiar caracteres sucios ([], ', ")
         clean_str = dept_filter_str.replace("[", "").replace("]", "").replace("'", "").replace('"', "")
-        # 2. Separar por comas
         lista_depts = [d.strip() for d in clean_str.split(',') if d.strip()]
         
         if lista_depts:
@@ -452,7 +455,6 @@ def enviar_resumen_ahora():
             sql += f" AND departamento IN ({placeholders})"
             params.extend(lista_depts)
 
-    # Límite ampliado a 200 para que quepan varios ministerios
     sql += " ORDER BY fecha DESC LIMIT 200"
     rows = boe_db.execute(sql, params).fetchall()
 
@@ -470,6 +472,6 @@ def enviar_resumen_ahora():
             traceback.print_exc()
             flash(f"❌ Error al enviar email: {e}", "danger")
     else:
-        flash(f"⚠️ No se encontraron oposiciones recientes para: {dept_filter_str}. Intenta marcar 'Todos' para probar.", "warning")
+        flash(f"⚠️ No se encontraron oposiciones publicadas hoy para: {dept_filter_str}", "warning")
 
     return redirect(url_for("user.newsletter_prefs"))

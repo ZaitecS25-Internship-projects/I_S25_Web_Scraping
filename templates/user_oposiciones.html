@@ -8,17 +8,23 @@
 
   <div class="card mb-4 shadow-sm">
     <div class="card-body">
-      <h5 class="card-title mb-3">Filtros de búsqueda</h5>
+      <h5 class="card-title mb-3">
+        Filtros de búsqueda
+      </h5>
 
       <form method="GET" action="{{ url_for('user.oposiciones_vigentes') }}">
         <div class="row g-3 mb-3">
           <div class="col-md-8">
-            <label for="busqueda" class="form-label">Buscar por palabras clave:</label>
+            <label for="busqueda" class="form-label">
+              Buscar por palabras clave:
+            </label>
             <input type="text" class="form-control" id="busqueda" name="busqueda" value="{{ busqueda or '' }}"
               placeholder="Buscar por identificador, título, control...">
           </div>
           <div class="col-md-4">
-            <label for="provincia" class="form-label">Filtrar por provincia:</label>
+            <label for="provincia" class="form-label">
+              Filtrar por provincia:
+            </label>
             <select class="form-select" id="provincia" name="provincia">
               <option value="">Todas las provincias</option>
               {% for prov in provincias %}
@@ -32,16 +38,22 @@
 
         <div class="row g-3">
           <div class="col-md-3">
-            <label for="fecha_desde" class="form-label">Desde:</label>
+            <label for="fecha_desde" class="form-label">
+              Desde:
+            </label>
             <input type="date" class="form-control" id="fecha_desde" name="fecha_desde" value="{{ fecha_desde or '' }}">
           </div>
           <div class="col-md-3">
-            <label for="fecha_hasta" class="form-label">Hasta:</label>
+            <label for="fecha_hasta" class="form-label">
+              Hasta:
+            </label>
             <input type="date" class="form-control" id="fecha_hasta" name="fecha_hasta" value="{{ fecha_hasta or '' }}">
           </div>
           <!-- Filtro por departamentos -->
           <div class="col-md-6">
-            <label class="form-label">Departamentos:</label>
+            <label class="form-label">
+              Departamentos:
+            </label>
             <div class="dropup">
               <button class="btn btn-tertiary  dropdown-toggle w-100 text-start" type="button"
                 id="departamentosFiltroBtn" data-bs-toggle="dropdown" aria-expanded="false">
